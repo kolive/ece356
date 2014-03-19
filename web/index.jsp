@@ -15,10 +15,10 @@
     <body>
         <div class="fullcenter rectangle1 rounded">
             <p class="title"> Hospital MIS Portal Login </p>
-            <form class="login center">
+            <form class="login center" method="post" action="UserLoginServlet">
             <div class="padding">
-                id: <input type="text" name="firstname"><br>
-                password: <input type="text" name="lastname"><br>
+                id: <input type="text" name="username"><br>
+                password: <input type="password" name="password"><br>
                 <input type="radio" name="type" value="employee">Employee
                 <input type="radio" name="type" value="patient">Patient <br>
                 <br>
