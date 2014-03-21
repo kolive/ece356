@@ -5,7 +5,8 @@
  */
 
 package models;
-
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 /**
  *
  * @author Kyle
@@ -14,19 +15,19 @@ public class User {
     
     public enum UserType{ PATIENT, DOCTOR, STAFF, FAUDITOR, LAUDITOR };
     
-    String userId;
-    String fname;
-    String lname;
+    JSONObject info;
     UserType userType;
     
     
-    public User(String userId, String fname, String lname, UserType userType){
-        this.userId = userId;
-        this.fname = fname;
-        this.lname = lname;
+    public User(JSONObject info, UserType userType){
+        this.info = info;
         this.userType = userType;
+        System.out.println(info.keySet());
     }
     
+    public String getStringParam(String name){
+        return info.get(name).toString();
+    }
     public UserType getUserType(){
         return userType;
     }

@@ -21,7 +21,6 @@ public class Database {
     public static final String url ="jdbc:mysql://198.50.229.147:3306/";
     public static final String user = "ece356";
     public static final String pass = "database";
-    public static final String db = "ece356.";
     
     private static Connection connection;
     
@@ -56,131 +55,52 @@ public class Database {
         }
     }
     
-    //Tested as working with login 1, password test
-    public static boolean verifyUserLogin(String table, String id, String pw){
-        boolean status = true;
-        String idtype = (table.equals( "patient" )) ? "pid":"eid";
-        if(connection == null){
-            status = openConnection();
-        }
-        
-        if(status){
-            Statement s;
-            ResultSet rs;
-            try{
-                s = connection.createStatement();
-                rs = s.executeQuery("SELECT * FROM " + db + table + " WHERE " + 
-                    idtype+"=" + id + " AND " + "password='" + pw + "'");
-               
-                if(!rs.next()){
-                    return false; //no such user or password combo
-                }else{
-                    return true; //user logged in
-                }
-            }catch(SQLException e){
-                e.printStackTrace();
-                return false;
-            }
-            
-        }
-        
-        closeConnection();
-        return false; //something wrong with the connection        
-    }
     
     /**
      * 
      * @param id
      * @param pw
-     * @return A String[] with the following info: 
-     * { id, fname, lname, st n., street, city, postcode, sin, num_visits, c_health }
+     * @return A JSONArray with the columns of the row from the appropriate user type
      */
-    public static String[] patientLogin(String id, String pw){
+    public static JSONObject userLogin(String id, String pw, boolean patient){
         
         boolean status = true;
         if(connection == null){
             status = openConnection();
         }
         
+        JSONObject user = new JSONObject();
+        
+        PreparedStatement ps;
         if(status){
+            
             Statement s;
             ResultSet rs;
             try{
-                s = connection.createStatement();
-                rs = s.executeQuery("SELECT * FROM " + db + "patient" + " WHERE " + 
-                    "pid=" + id + " AND " + "password='" + pw + "' and is_enabled=1");
-               
-                if(!rs.next()){
-                    return new String[0]; //no such user or password combo
+                 if(patient){
+                    ps = connection.prepareStatement("SELECT * FROM ece356.patient WHERE pid=? AND password=? AND is_enabled=1");
                 }else{
-                    return new String[]{
-                        id,
-                        rs.getString("fname"),
-                        rs.getString("lname"),
-                        Integer.toString(rs.getInt("street_number")),
-                        rs.getString("street"),
-                        rs.getString("city"),
-                        rs.getString("post_code"),
-                        Integer.toString(rs.getInt("sin")),
-                        Integer.toString(rs.getInt("num_visits")),
-                        rs.getString("current_health")
-                    };
+                    ps = connection.prepareStatement("SELECT * FROM ece356.patient WHERE eid=? AND password=? AND is_enabled=1");
                 }
+                
+                ps.setInt(1, Integer.parseInt(id));
+                ps.setString(2, pw);
+                
+                rs = ps.executeQuery();
+               
+                user = convertRowToJson(rs);
+                
             }catch(SQLException e){
                 e.printStackTrace();
-                return new String[0];
+                return user;
             }
             
         }
         
-        closeConnection();
-        return new String[0]; //something wrong with the connection    
+        return user;
         
     }
     
-    /**
-     * 
-     * @param id
-     * @param pw
-     * @return A String[] with the following info: 
-     * { id, fname, lname, dept }
-     */
-    public static String[] employeeLogin(String id, String pw){
-        
-        boolean status = true;
-        if(connection == null){
-            status = openConnection();
-        }
-        
-        if(status){
-            Statement s;
-            ResultSet rs;
-            try{
-                s = connection.createStatement();
-                rs = s.executeQuery("SELECT * FROM " + db + "employee" + " WHERE " + 
-                    "eid=" + id + " AND " + "password='" + pw + "' and is_enabled=1");
-               
-                if(!rs.next()){
-                    return new String[0]; //no such user or password combo
-                }else{
-                    return new String[]{
-                        id,
-                        rs.getString("fname"),
-                        rs.getString("lname"),
-                        rs.getString("dept")
-                    };
-                }
-            }catch(SQLException e){
-                e.printStackTrace();
-                return new String[0];
-            }
-            
-        }
-        
-        closeConnection();
-        return new String[0]; //something wrong with the connection    
-        
-    }
     
     //Dynamically converts all results into a JSONArray of rows (JSONObjects)
     //all column names returned by the query becomes keys in the JSONObjects
@@ -265,10 +185,9 @@ public class Database {
             Statement s;
             ResultSet rs;
             try{
-                ps = connection.prepareStatement("SELECT * FROM ?patient-of WHERE doctor_id=?");
+                ps = connection.prepareStatement("SELECT * FROM ece356.patient-of WHERE doctor_id=?");
                 
-                ps.setString(1, db);
-                ps.setInt(2, doctorId);
+                ps.setInt(1, doctorId);
                 
                 rs = ps.executeQuery();
                
@@ -317,10 +236,9 @@ public class Database {
             Statement s;
             ResultSet rs;
             try{
-                ps = connection.prepareStatement("SELECT * FROM ?patient WHERE pid=? AND is_enabled=1");
+                ps = connection.prepareStatement("SELECT * FROM ece356.patient WHERE pid=? AND is_enabled=1");
                 
-                ps.setString(1, db);
-                ps.setInt(2, patientId);
+                ps.setInt(1, patientId);
                 
                 rs = ps.executeQuery();
                
