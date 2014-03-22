@@ -45,14 +45,14 @@ public class Database {
     public static void closeConnection(){
         if (connection != null)
         {
-            try
+         /*   try
             {
                 connection.close();
             }
             catch(SQLException e){
                 e.printStackTrace();
             }
-        }
+*/        }
     }
     
     
@@ -97,6 +97,7 @@ public class Database {
             
         }
         
+        closeConnection();
         return user;
         
     }
@@ -250,8 +251,122 @@ public class Database {
             }
             
         }
-        
+        closeConnection();
         return patient;
         
     }
+    
+    //if next == false gets the previous visit, otherwise gets the next sequential appt
+    public static JSONObject getSeqPatientVisit(int patientId, boolean next){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONObject visit = new JSONObject();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                if(next){
+                    ps = connection.prepareStatement(
+                        "SELECT visit_id, last_updated, min(visit_date), visit_start_time, visit_end_time, pid, eid FROM"
+                        + "(SELECT * FROM ece356.visit WHERE pid=? AND is_valid=1 AND visit_date > NOW()) as future_visits");
+                }else{
+                    ps = connection.prepareStatement(
+                        "SELECT visit_id, last_updated, max(visit_date), visit_start_time, visit_end_time, pid, eid FROM"
+                        + "(SELECT * FROM ece356.visit WHERE pid=? AND is_valid=1 AND visit_date <= NOW())as past_visits");
+                }
+                ps.setInt(1, patientId);
+                
+                rs = ps.executeQuery();
+               
+                visit = convertRowToJson(rs);
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return visit;
+            }
+            
+        }
+        closeConnection();
+        return visit;
+    }
+    
+    public static JSONArray getVisits(int patientId){
+                boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray visits = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                ps = connection.prepareStatement("SELECT * from ece356.visit WHERE pid=? AND is_valid=true");
+                ps.setInt(1, patientId);
+                
+                rs = ps.executeQuery();
+               
+                visits.add(convertRowToJson(rs));
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return visits;
+            }
+            
+        }
+        closeConnection();
+        return visits;
+    }
+
+    public static JSONArray getPrescriptions(int patientId, boolean onlyValid){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray prescriptions = new JSONArray();
+        JSONArray visits = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                if(onlyValid){
+                    ps = connection.prepareStatement("SELECT * FROM ece356.prescription WHERE visit_id=? AND expires > NOW()");
+                }else{
+                    ps = connection.prepareStatement("SELECT * FROM ece356.prescription WHERE visit_id=?");
+                }
+                
+                visits = getVisits(patientId);
+                if(!visits.isEmpty()){
+                    for(int i = 0; i < visits.size(); i++){
+                        ps.setInt(1, Integer.parseInt(((JSONObject)visits.get(i)).get("visit_id").toString()));
+                        rs = ps.executeQuery();
+                        prescriptions.add(convertToJson(rs));
+                    }
+                }
+                
+              return prescriptions;
+            }catch(SQLException e){
+                e.printStackTrace();
+                closeConnection();
+                return prescriptions;
+            }
+            
+        }
+        
+        closeConnection();
+        return prescriptions;
+        
+    }
+    
 }

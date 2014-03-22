@@ -23,17 +23,14 @@
         |_______________________|
         
         -->
-        <jsp:useBean id="user" type="models.User" scope="session" />
+               
+        <jsp:useBean id="patientVM" type="models.PatientViewModel" scope="session" />
+
+    
         <div class="view-container">
             <div class="status">
-                <!-- Outlines active perscriptions & diagnoses, next appt -->
-                <p> Welcome, <%= user.getStringParam("fname") %>  </p>
-                <p> Listed below is a summary of your current medical status, active perscriptions, and your next scheduled appointment. </p>
-                <div class="summary">
-                    Status: <%= user.getStringParam("current_health") %>
-                </div>
-                
-                
+                <!-- Outlines active prescriptions & diagnoses, next appt -->
+                <%= patientVM.formatSummary() %>    
             </div>
             <div class="personal">
                 <!-- outlines personal info, links to change it -->
