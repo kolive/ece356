@@ -87,7 +87,7 @@ public class Database {
                  if(patient){
                     ps = connection.prepareStatement("SELECT * FROM ece356.patient WHERE pid=? AND password=? AND is_enabled=1");
                 }else{
-                    ps = connection.prepareStatement("SELECT * FROM ece356.patient WHERE eid=? AND password=? AND is_enabled=1");
+                    ps = connection.prepareStatement("SELECT * FROM ece356.employee WHERE eid=? AND password=? AND is_enabled=1");
                 }
                 
                 ps.setInt(1, Integer.parseInt(id));
@@ -412,7 +412,64 @@ public class Database {
         }
         return visits;
     }
+    
+    /**
+     * Queries for a list of all visitation records for a particular patient
+     * Only gets most up-to-date records
+     * @param patientId
+     * @return a JSONArray describing all patient visits
+     */
+    public static JSONArray getVisitsForDoctor(int patientId, int doctorId){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray visits = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //selects each visit with the biggest "last updated" time
+                //and that isn't a cancelled visit
+                
+                //TODO: Verify this is valid, basically getting a list of all visits
+                // Where the visit was performed by the doctor or the doctor is advising the visit
+                String preparedStatement = "SELECT * " +
+                        "FROM ece356.visit v " +
+                        "INNER JOIN(" +
+                        "SELECT visit_id, MAX(last_updated) last_updated " +
+                        "FROM ece356.visit mv " +
+                        "LEFT JOIN (" +
+                        "SELECT docotr_id, visit_id, last_updated " +
+                        "FROM ece356.advises WHERE doctor_id=? " +
+                        ") a ON a.visit_id=mv.visit_id " +
+                        "WHERE mv.is_invalid=1 AND mv.pid=? AND ( mv.eid=? OR a.doctor_id=? )" +
+                        ") ON mv.visit_id=v.visit_id AND mv.last_updated=v.last_updated";
+                
+               
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, doctorId);
+                ps.setInt(2, patientId);
+                ps.setInt(3, doctorId);
+                ps.setInt(4, doctorId);
+                
+                rs = ps.executeQuery();
+               
+                visits = convertToJson(rs);
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return visits;
+            }
+            
+        }
+        return visits;
+    }
 
+    
     /**
      * Gets all prescriptions for a given patient (only looking at most up-to-date records)
      * if onlyValid is true, only gets prescriptions that haven't expired

@@ -7,20 +7,18 @@
 package servlets;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import models.*;
-import control.Database;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import models.DoctorViewModel;
+import models.User;
+
 /**
  *
- * @author Kyle
+ * @author Herbert
  */
-public class UserLoginServlet extends HttpServlet {
+public class DoctorServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -33,49 +31,20 @@ public class UserLoginServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
         response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
+    
+        // TODO: Type check before casting?
+        User user = (User) request.getSession().getAttribute("user");
         
-        
-        if(request.getSession().getAttribute("user") != null){
-            //redirect to logout confirmation before allowing to login
-            //for now i'll just delete the current user attribute
-            request.getSession().setAttribute("user", null);
+        if(user != null && user.getUserType() == User.UserType.DOCTOR){
+            DoctorViewModel doctorVM = new DoctorViewModel(user);
+
+            request.getSession().setAttribute("doctorVM", doctorVM);
+            response.sendRedirect("/ece356/doctor.jsp");
         }
-
-        //Two cases, want to login as a patient or employee
-
-        if(request.getParameter("type") != null 
-                && request.getParameter("type").equals("patient")){
-
-            JSONObject userInfo = Database.userLogin(request.getParameter("username"), request.getParameter("password"), true);
-            if(!userInfo.isEmpty()){
-                User p = new User(userInfo, User.UserType.PATIENT);
-                request.getSession().setAttribute("user", p);
-                response.sendRedirect("PatientServlet");
-            }else{
-                //redirect to failed login page
-            }
-
-
-        }else if(request.getParameter("type") != null){
-            //employee login
-            JSONObject userInfo = Database.userLogin(request.getParameter("username"), request.getParameter("password"), false);
-            if(!userInfo.isEmpty()){
-                //User p = new User(userInfo, User.UserType.STAFF);
-                // TODO: Need some check user type from userinfo
-                User p = new User(userInfo, User.UserType.DOCTOR);
-                request.getSession().setAttribute("user", p);
-                response.sendRedirect("DoctorServlet");
-                //response.sendRedirect("/ece356/patient.jsp");
-            }else{
-                //redirect to failed login page
-            }
+        else{
+            // Error page
         }
-            
-            
-        
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
