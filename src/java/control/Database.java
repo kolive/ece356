@@ -351,7 +351,17 @@ public class Database {
             Statement s;
             ResultSet rs;
             try{
-                ps = connection.prepareStatement("SELECT * from ece356.visit WHERE pid=? AND is_valid=true");
+                //selects each visit with the biggest "last updated" time
+                //and that isn't a cancelled visit
+                String preparedStatement = "select * " +
+                    "from ece356.visit v " +
+                    "inner join( " +
+                    "select visit_id, max(last_updated) last_updated " +
+                    "from ece356.visit where pid=? and is_valid=1 " +
+                    "group by visit_id" +
+                    " ) mv on mv.visit_id = v.visit_id and mv.last_updated = v.last_updated;";
+               
+                ps = connection.prepareStatement(preparedStatement);
                 ps.setInt(1, patientId);
                 
                 rs = ps.executeQuery();
@@ -367,7 +377,7 @@ public class Database {
         return visits;
     }
 
-    public static JSONArray getPrescriptions(int patientId, boolean onlyValid){
+    public static JSONArray getPrescriptionsByPatient(int patientId, boolean onlyValid){
         
         boolean status = true;
         if(connection == null){
@@ -382,11 +392,29 @@ public class Database {
             Statement s;
             ResultSet rs;
             try{
+                String preparedStatement = "";
                 if(onlyValid){
-                    ps = connection.prepareStatement("SELECT * FROM ece356.prescription WHERE visit_id=? AND expires > NOW()");
+                    //selects the prescription with the biggest last_updated time
+                    //and that hasn't yet expired
+                    preparedStatement = "select * " +
+                    "from ece356.prescription p " +
+                    "inner join( " +
+                    "select visit_id,drug_name, max(last_updated) last_updated " +
+                    "from ece356.prescription where visit_id=? and expires > NOW() " +
+                    "group by visit_id, drug_name" +
+                    " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.drug_name = p.drug_name;";
+
                 }else{
-                    ps = connection.prepareStatement("SELECT * FROM ece356.prescription WHERE visit_id=?");
+                    //selects the prescription with the biggest last_updated time
+                     preparedStatement = "select * " +
+                    "from ece356.prescription p " +
+                    "inner join( " +
+                    "select visit_id,drug_name, max(last_updated) last_updated " +
+                    "from ece356.prescription where visit_id=? " +
+                    "group by visit_id, drug_name" +
+                    " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.drug_name = p.drug_name;";
                 }
+                ps = connection.prepareStatement(preparedStatement);
                 
                 visits = getVisits(patientId);
                 if(!visits.isEmpty()){
@@ -408,5 +436,88 @@ public class Database {
         return prescriptions;
         
     }
+    
+    
+    
+    public static JSONArray getPrescriptionsByVisit(int visitId){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray prescriptions = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "select * " +
+                "from ece356.prescription p " +
+                "inner join( " +
+                "select visit_id, drug_name, max(last_updated) last_updated " +
+                "from ece356.prescription where visit_id=? " +
+                "group by visit_id, drug_name" +
+                " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.drug_name = p.drug_name;";
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, visitId);
+                
+                rs = ps.executeQuery();
+                prescriptions = convertToJson(rs);
+                
+                
+              return prescriptions;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return prescriptions;
+            }
+            
+        }
+        
+        return prescriptions;
+        
+    }
+    
+    public static JSONArray getProcedureByVisit(int visitId){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray procedures = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "select * " +
+                "from ece356.procedure p " +
+                "inner join( " +
+                "select visit_id, procedure_name, max(last_updated) last_updated " +
+                "from ece356.procedure where visit_id=? " +
+                "group by visit_id, procedure_name" +
+                " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.procedure_name = p.procedure_name;";
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, visitId);
+                
+                rs = ps.executeQuery();
+                procedures = convertToJson(rs);
+                
+                
+              return procedures;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return procedures;
+            }
+            
+        }
+        
+        return procedures;
+        
+    }
+    
     
 }

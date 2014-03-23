@@ -67,7 +67,7 @@ public class PatientViewModel {
     }
     
     public String formatPrescriptionTable(boolean onlyValid){
-        JSONArray pl = Database.getPrescriptions(Integer.parseInt(patient.getStringParam("pid")), onlyValid);
+        JSONArray pl = Database.getPrescriptionsByPatient(Integer.parseInt(patient.getStringParam("pid")), onlyValid);
         String formattedList = "<table><thead><tr> <th> Prescription </th> <th> Expires </th></td></tr></thead>";
         String tmp;
         for(int i = 0; i < pl.size();i++){
@@ -90,7 +90,7 @@ public class PatientViewModel {
         String formattedList = "<table id='visits' class='footable table-bordered toggle-circle toggle-small'>" 
                 +"<thead><tr><th data-toggle='true'> Visit #</th> <th> Appointment Date </th> <th> Assigned Physician </th> "
                 +"<th data-hide='all' > Start Time </th><th data-hide='all' > End Time </th>"
-                +"<th data-hide='all' > Procedure Performed </th><th data-hide='all' > Diagnosis </th><th data-hide='all' > Prescription Perscribed </th></tr></thead>";
+                +"<th data-hide='all' > Procedure Performed </th><th data-hide='all' > Diagnosis </th><th data-hide='all' > Prescriptions Perscribed </th></tr></thead>";
         String tmp;
         for(int i = 0; i < vl.size();i++){
             JSONObject p = (JSONObject)vl.get(i);
@@ -104,9 +104,9 @@ public class PatientViewModel {
             
             //formats the details data
             tmp ="<td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td></tr>";
-            String prescriptionSummary = "TODO";
+            String prescriptionSummary = formatPrescriptions(p.get("visit_id").toString());
             String diagnosisSummary = "TODO";
-            String procedureSummary = "TODO";
+            String procedureSummary = formatProcedures(p.get("visit_id").toString());
             formattedList += String.format(tmp,
                     p.get("visit_start_time"),
                     p.get("visit_end_time"),
@@ -117,6 +117,34 @@ public class PatientViewModel {
         }
         formattedList += "</table>";
         return formattedList;        
+    }
+    
+    public String formatPrescriptions(String visitId){
+        String prescriptions = "<ul class='prescriptions'>";
+        String tmp = "";
+        JSONArray ps = Database.getPrescriptionsByVisit(Integer.parseInt(visitId));
+        for(int i = 0; i < ps.size();i++){
+            JSONObject p = (JSONObject)ps.get(i);
+            tmp = "<li> Drug: %s, Expires: %s </li>";
+            prescriptions += String.format(tmp, p.get("drug_name").toString(), p.get("expires").toString());
+        }
+        if(prescriptions.equals("<ul class='prescriptions'>")) prescriptions = "<p>No prescriptions prescribed during this visit.</p>";
+        else prescriptions += "</ul>";
+        return prescriptions;
+    }
+    
+    public String formatProcedures(String visitId){
+        String procedures = "<div class='procedures'>";
+        String tmp = "";
+        JSONArray ps = Database.getProcedureByVisit(Integer.parseInt(visitId));
+        for(int i = 0; i < ps.size();i++){
+            JSONObject p = (JSONObject)ps.get(i);
+            tmp = "<p> %s : %s </p>";
+            procedures += String.format(tmp, p.get("procedure_name").toString(), p.get("description").toString());
+        }
+        if(procedures.equals("<div class='procedures'>")) procedures = "<p>No procedure performed during this visit. </p>";
+        else procedures += "</div>";
+        return procedures;
     }
     
     
