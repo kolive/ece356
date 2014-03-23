@@ -22,6 +22,10 @@ public class PatientViewModel {
         this.patient = patient;
     }
     
+    /**
+     * Formats information about the patient info a helpful summary
+     * @return summary, an HTML formatted string
+     */
     public String formatSummary(){
         /**
             
@@ -31,7 +35,7 @@ public class PatientViewModel {
                 p Last Visit: {lastVisitDate} /p
                 p Next Appointment: {nextVisitDate} /p
                 p Your Current Health: {currentHealth} /p
-                div class=prescriptions
+                div class=prescriptionlist
                   p Active Prescriptions: /p 
                      {prescription list}
                 
@@ -43,6 +47,7 @@ public class PatientViewModel {
          summary += String.format(tmp, patient.getStringParam("fname"));
          summary += " <h2> Your summary: </h2> <div class='patient_summary'>";
          
+         //Gets the next scheduled appointment, if it exists
          tmp = "<p> Next Appointment: %s </p>";
          JSONObject appt =  Database.getSeqPatientVisit(Integer.parseInt(patient.getStringParam("pid")), true);
          if(appt.get("min(visit_date)") != null)
@@ -50,6 +55,7 @@ public class PatientViewModel {
          else
             summary += String.format(tmp, "No scheduled appointments");
          
+         //Gets the last scheduled appointment, if it exists
          tmp = "<p> Last Visit: %s </p>";
          appt =  Database.getSeqPatientVisit(Integer.parseInt(patient.getStringParam("pid")), false);
          if(appt.get("max(visit_date)") != null)
@@ -66,10 +72,19 @@ public class PatientViewModel {
          return summary;
     }
     
+    /**
+     * Generates a table of prescriptions for this patient
+     * @param onlyValid , if true, will only include non-expired prescriptions
+     * @return formattedList, a table of prescriptions and dates that they expire
+     */
     public String formatPrescriptionTable(boolean onlyValid){
+        //gets an array of all prescriptions for a given patient
+        //if onlyValid == true, this list only contains non-expired prescriptions
         JSONArray pl = Database.getPrescriptionsByPatient(Integer.parseInt(patient.getStringParam("pid")), onlyValid);
         String formattedList = "<table><thead><tr> <th> Prescription </th> <th> Expires </th></td></tr></thead>";
         String tmp;
+        
+        //iterates over all prescriptions and adds rows for each one
         for(int i = 0; i < pl.size();i++){
             JSONArray p = (JSONArray)pl.get(i);
             for(int n = 0; n < p.size(); n++){
@@ -83,15 +98,26 @@ public class PatientViewModel {
         return formattedList;
     }
     
+    /**
+     * Generates a table of past and future visits to be listed on the patient homepage
+     * Tables contain all information, javascript on client side should handle hiding details
+     * @return formattedList, a table of all visits and details
+     */
     public String formatVisitHistoryTable(){
         //TODO: Using the eid, get the actual doctor's name
         
+        //get the most up-to-date records for all the visits of a particular patient
         JSONArray vl = Database.getVisits(Integer.parseInt(patient.getStringParam("pid")));
+        
+        //init table, as per FooTable plugin with expandable rows
+        //details about a visit are hidden unless the row is expanded
         String formattedList = "<table id='visits' class='footable table-bordered toggle-circle toggle-small'>" 
                 +"<thead><tr><th data-toggle='true'> Visit #</th> <th> Appointment Date </th> <th> Assigned Physician </th> "
                 +"<th data-hide='all' > Start Time </th><th data-hide='all' > End Time </th>"
                 +"<th data-hide='all' > Procedure Performed </th><th data-hide='all' > Diagnosis </th><th data-hide='all' > Prescriptions Perscribed </th></tr></thead>";
         String tmp;
+        
+        //iterate over all visits and output rows
         for(int i = 0; i < vl.size();i++){
             JSONObject p = (JSONObject)vl.get(i);
             
@@ -119,6 +145,11 @@ public class PatientViewModel {
         return formattedList;        
     }
     
+    /**
+     * Gets any prescriptions prescribed in a given visit and outputs a list of them 
+     * @param visitId
+     * @return prescriptions, an HTML formatted unordered list
+     */
     public String formatPrescriptions(String visitId){
         String prescriptions = "<ul class='prescriptions'>";
         String tmp = "";
@@ -133,6 +164,11 @@ public class PatientViewModel {
         return prescriptions;
     }
     
+    /**
+     * Gets the procedure(s) preformed during a visit and outputs a list of them
+     * @param visitId
+     * @return procedures, an HTML formatted paragraph
+     */
     public String formatProcedures(String visitId){
         String procedures = "<div class='procedures'>";
         String tmp = "";
@@ -147,6 +183,11 @@ public class PatientViewModel {
         return procedures;
     }
     
+    /**
+     * Gets the diagnosis(es) given during a visit and outputs a list of them
+     * @param visitId
+     * @return diagnoses, an HTML formatted paragraph
+     */
     public String formatDiagnoses(String visitId){
         String procedures = "<div class='diagnoses'>";
         String tmp = "";
@@ -161,7 +202,10 @@ public class PatientViewModel {
         return procedures;
     }
     
-    
+    /**
+     * Formats the personal details of a patient and outputs them
+     * @return personal, an HTML formatted summary of personal information
+     */
     public String formatPersonalDetails(){
          String tmp;
          String personal = "";
@@ -188,12 +232,16 @@ public class PatientViewModel {
          return personal;
     }
     
-    public String updatePatientInfo(){
-        
-            //refresh user
-            JSONObject userInfo = Database.userLogin(patient.getStringParam("pid"), patient.getStringParam("password"), true);
-            patient.info = userInfo;
-            return "";
+    /**
+     * Updates the patient info, in case the info has been updated after the session started
+     * (for example, if the patient changes their account details)
+     * @return null string, to satisfy JSP's complaining
+     */
+    public String updatePatientInfo(){     
+        //refresh user
+        JSONObject userInfo = Database.userLogin(patient.getStringParam("pid"), patient.getStringParam("password"), true);
+        patient.info = userInfo;
+        return "";
     }
     
     
