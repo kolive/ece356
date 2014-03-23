@@ -45,14 +45,14 @@ public class Database {
     public static void closeConnection(){
         if (connection != null)
         {
-         /*   try
+            try
             {
                 connection.close();
             }
             catch(SQLException e){
                 e.printStackTrace();
             }
-*/        }
+        }
     }
     
     
@@ -97,7 +97,6 @@ public class Database {
             
         }
         
-        closeConnection();
         return user;
         
     }
@@ -206,13 +205,11 @@ public class Database {
                 }
             }catch(SQLException e){
                 e.printStackTrace();
-                closeConnection();
                 return patients;
             }
             
         }
         
-        closeConnection();
         return patients;
         
     }
@@ -251,7 +248,6 @@ public class Database {
             }
             
         }
-        closeConnection();
         return patient;
         
     }
@@ -291,12 +287,11 @@ public class Database {
             }
             
         }
-        closeConnection();
         return visit;
     }
     
     public static JSONArray getVisits(int patientId){
-                boolean status = true;
+        boolean status = true;
         if(connection == null){
             status = openConnection();
         }
@@ -313,7 +308,7 @@ public class Database {
                 
                 rs = ps.executeQuery();
                
-                visits.add(convertRowToJson(rs));
+                visits = convertToJson(rs);
                 
             }catch(SQLException e){
                 e.printStackTrace();
@@ -321,7 +316,6 @@ public class Database {
             }
             
         }
-        closeConnection();
         return visits;
     }
 
@@ -358,13 +352,11 @@ public class Database {
               return prescriptions;
             }catch(SQLException e){
                 e.printStackTrace();
-                closeConnection();
                 return prescriptions;
             }
             
         }
         
-        closeConnection();
         return prescriptions;
         
     }

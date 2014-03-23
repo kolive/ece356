@@ -58,16 +58,15 @@ public class PatientViewModel {
          tmp = "<p> Your current health: %s </p>";
          summary += String.format(tmp, patient.getStringParam("current_health"));
          
-         summary += "<div class='prescriptionlist'> <p> Active prescriptions: </p> ";
-         summary += formatPrescriptionTable(true);
-         summary += "</div></div>";
+         tmp = "<div class='prescriptionlist'> <p> Active prescriptions: </p> %s </div>";
+         summary += String.format(tmp, formatPrescriptionTable(true));
+         summary += "</div>";
          return summary;
     }
     
     public String formatPrescriptionTable(boolean onlyValid){
         JSONArray pl = Database.getPrescriptions(Integer.parseInt(patient.getStringParam("pid")), onlyValid);
-        System.out.println(pl.toString());
-        String formattedList = "<table><tr> <th> Prescription </th> <th> Expires </th></td>";
+        String formattedList = "<table><thead><tr> <th> Prescription </th> <th> Expires </th></td></tr></thead>";
         String tmp;
         for(int i = 0; i < pl.size();i++){
             JSONArray p = (JSONArray)pl.get(i);
@@ -83,15 +82,67 @@ public class PatientViewModel {
     }
     
     public String formatVisitHistoryTable(){
-        return "";        
+        //TODO: Using the eid, get the actual doctor's name
+        
+        JSONArray vl = Database.getVisits(Integer.parseInt(patient.getStringParam("pid")));
+        String formattedList = "<table id='visits' class='footable table-bordered toggle-circle toggle-small'>" 
+                +"<thead><tr><th data-toggle='true'> Visit #</th> <th> Appointment Date </th> <th> Assigned Physician </th> "
+                +"<th data-hide='all' > Start Time </th><th data-hide='all' > End Time </th>"
+                +"<th data-hide='all' > Procedure Performed </th><th data-hide='all' > Diagnosis </th><th data-hide='all' > Prescription Perscribed </th></tr></thead>";
+        String tmp;
+        System.out.println(vl);
+        for(int i = 0; i < vl.size();i++){
+            JSONObject p = (JSONObject)vl.get(i);
+            
+            //formats the non-details data
+            tmp = "<tr><td class='visit_id'>%s</td> <td> %s </td> <td> %s </td>";
+            formattedList += String.format(tmp, 
+                    p.get("visit_id"),
+                    p.get("visit_date"), 
+                    p.get("eid"));
+            
+            //formats the details data
+            tmp ="<td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td></tr>";
+            String prescriptionSummary = "TODO";
+            String diagnosisSummary = "TODO";
+            String procedureSummary = "TODO";
+            formattedList += String.format(tmp,
+                    p.get("visit_start_time"),
+                    p.get("visit_end_time"),
+                    procedureSummary,
+                    diagnosisSummary,
+                    prescriptionSummary);
+
+        }
+        formattedList += "</table>";
+        return formattedList;        
     }
     
-    public String formatVisitDetails(){
-         return ""; 
-    }
     
     public String formatPersonalDetails(){
-         return ""; 
+         String tmp;
+         String personal = "";
+         
+         tmp = "<h2> Personal Details: </h2> <p> Your name: %s %s, </p>";
+         personal += String.format(tmp, patient.getStringParam("fname"), patient.getStringParam("lname"));
+         
+         tmp = "<p> SIN: %s </p>";
+         personal += String.format(tmp, patient.getStringParam("sin"));
+         
+         tmp = "<p> ID Number: %s </p>";
+         personal += String.format(tmp, patient.getStringParam("pid"));
+         
+         tmp = "<p>  </p>";
+         tmp += "<table class='address'><thead><tr> <th> Address: </th></tr> </thead><tr><td> %s  %s </td></tr> ";
+         tmp += "<tr><td> %s </td></tr> ";
+         tmp += "<tr><td> %s </td></tr></table>";
+         
+         personal += String.format(tmp,
+                 patient.getStringParam("street_number"),
+                 patient.getStringParam("street"),
+                 patient.getStringParam("city"),
+                 patient.getStringParam("post_code"));
+         return personal;
     }
     
     
