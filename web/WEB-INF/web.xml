@@ -8,6 +8,10 @@
         <servlet-name>PatientServlet</servlet-name>
         <servlet-class>servlets.PatientServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>UpdatePatientServlet</servlet-name>
+        <servlet-class>servlets.UpdatePatientServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserLoginServlet</servlet-name>
         <url-pattern>/UserLoginServlet</url-pattern>
@@ -15,6 +19,10 @@
     <servlet-mapping>
         <servlet-name>PatientServlet</servlet-name>
         <url-pattern>/PatientServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UpdatePatientServlet</servlet-name>
+        <url-pattern>/UpdatePatientServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

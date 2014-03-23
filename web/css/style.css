@@ -111,3 +111,10 @@ body,html{
 .personal{
 }
 
+.update{
+    margin: 50px;
+    padding:30px;
+    width:500px;
+    min-height:300px;
+}
+

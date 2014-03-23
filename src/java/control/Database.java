@@ -11,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-
+import java.util.Set;
 /**
  *
  * @author Kyle
@@ -164,6 +164,55 @@ public class Database {
         return obj;
     }
     
+    public static boolean updatePatient(int patientId, String password, JSONObject params){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+         if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "UPDATE ece356.patient SET ";
+                Set keys = params.keySet();
+                for(int i = 0; i < params.size(); i++){
+                    if((keys.toArray()[i]).toString().equals("sin") || (keys.toArray()[i]).toString().equals("street_number")){
+                        preparedStatement += (keys.toArray()[i]).toString() + "=" + params.get((keys.toArray()[i]).toString()).toString();
+                    }else{
+                        preparedStatement += (keys.toArray()[i]).toString() + "='" + params.get((keys.toArray()[i]).toString()).toString() + "'";
+                    }
+                    
+                    if(i != params.size()-1){
+                        preparedStatement += ",";
+                    }
+                }
+                preparedStatement += " WHERE pid=? AND password=? AND is_enabled=1";
+                ps = connection.prepareStatement(preparedStatement);
+                
+                ps.setInt(1, patientId);
+                ps.setString(2, password);
+                if(ps.executeUpdate() == 1 ){
+                    //success
+                    return true;
+                }else if(ps.executeUpdate() > 1){
+                    //something went terribly wrong
+                }else{
+                    return false;
+                }
+               
+                
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return false;
+            }
+            
+        }
+        return false;
+    }
+    
     /**
      * 
      * @param doctorId
@@ -276,7 +325,6 @@ public class Database {
                         + "(SELECT * FROM ece356.visit WHERE pid=? AND is_valid=1 AND visit_date <= NOW())as past_visits");
                 }
                 ps.setInt(1, patientId);
-                
                 rs = ps.executeQuery();
                
                 visit = convertRowToJson(rs);

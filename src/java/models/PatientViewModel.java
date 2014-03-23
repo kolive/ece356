@@ -44,16 +44,18 @@ public class PatientViewModel {
          summary += " <h2> Your summary: </h2> <div class='patient_summary'>";
          
          tmp = "<p> Next Appointment: %s </p>";
-         summary += String.format(tmp, 
-                 Database.getSeqPatientVisit(Integer.parseInt(patient.getStringParam("pid")), true)
-                         .get("min(visit_date)").toString()
-         );
+         JSONObject appt =  Database.getSeqPatientVisit(Integer.parseInt(patient.getStringParam("pid")), true);
+         if(appt.get("min(visit_date)") != null)
+            summary += String.format(tmp, appt.get("min(visit_date)").toString());
+         else
+            summary += String.format(tmp, "No scheduled appointments");
          
          tmp = "<p> Last Visit: %s </p>";
-         summary += String.format(tmp, 
-                 Database.getSeqPatientVisit(Integer.parseInt(patient.getStringParam("pid")), false)
-                         .get("max(visit_date)").toString()
-         );
+         appt =  Database.getSeqPatientVisit(Integer.parseInt(patient.getStringParam("pid")), false);
+         if(appt.get("max(visit_date)") != null)
+            summary += String.format(tmp, appt.get("max(visit_date)").toString());
+         else
+            summary += String.format(tmp, "No past appointments");
          
          tmp = "<p> Your current health: %s </p>";
          summary += String.format(tmp, patient.getStringParam("current_health"));
@@ -90,7 +92,6 @@ public class PatientViewModel {
                 +"<th data-hide='all' > Start Time </th><th data-hide='all' > End Time </th>"
                 +"<th data-hide='all' > Procedure Performed </th><th data-hide='all' > Diagnosis </th><th data-hide='all' > Prescription Perscribed </th></tr></thead>";
         String tmp;
-        System.out.println(vl);
         for(int i = 0; i < vl.size();i++){
             JSONObject p = (JSONObject)vl.get(i);
             
@@ -143,6 +144,14 @@ public class PatientViewModel {
                  patient.getStringParam("city"),
                  patient.getStringParam("post_code"));
          return personal;
+    }
+    
+    public String updatePatientInfo(){
+        
+            //refresh user
+            JSONObject userInfo = Database.userLogin(patient.getStringParam("pid"), patient.getStringParam("password"), true);
+            patient.info = userInfo;
+            return "";
     }
     
     
