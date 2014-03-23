@@ -35,6 +35,10 @@ public class UpdatePatientServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         try {
+            /**
+             * Depending on the GET parameter, will generate a password change form or user update form
+             * Form will contain defaults from the user model stored in the HTTP session
+             */
             String formType =  request.getParameter("password").equals("false") ? "Account Change" : "Password Change";
             
             out.println("<!DOCTYPE html>");
@@ -126,6 +130,12 @@ public class UpdatePatientServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        /**
+         * POST request is the submission of one of the above generated forms.
+         * Calls the correct Database function with the correct parameters
+         * Generates a success or failure page. 
+         */
+        
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         try {
