@@ -105,7 +105,7 @@ public class PatientViewModel {
             //formats the details data
             tmp ="<td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td></tr>";
             String prescriptionSummary = formatPrescriptions(p.get("visit_id").toString());
-            String diagnosisSummary = "TODO";
+            String diagnosisSummary = formatDiagnoses(p.get("visit_id").toString());
             String procedureSummary = formatProcedures(p.get("visit_id").toString());
             formattedList += String.format(tmp,
                     p.get("visit_start_time"),
@@ -143,6 +143,20 @@ public class PatientViewModel {
             procedures += String.format(tmp, p.get("procedure_name").toString(), p.get("description").toString());
         }
         if(procedures.equals("<div class='procedures'>")) procedures = "<p>No procedure performed during this visit. </p>";
+        else procedures += "</div>";
+        return procedures;
+    }
+    
+    public String formatDiagnoses(String visitId){
+        String procedures = "<div class='diagnoses'>";
+        String tmp = "";
+        JSONArray ps = Database.getDiagnosisByVisit(Integer.parseInt(visitId));
+        for(int i = 0; i < ps.size();i++){
+            JSONObject p = (JSONObject)ps.get(i);
+            tmp = "<p> %s </p>";
+            procedures += String.format(tmp, p.get("severity").toString());
+        }
+        if(procedures.equals("<div class='diagnoses'>")) procedures = "<p>No diagnosis given during this visit. </p>";
         else procedures += "</div>";
         return procedures;
     }

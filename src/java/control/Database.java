@@ -519,5 +519,45 @@ public class Database {
         
     }
     
+    public static JSONArray getDiagnosisByVisit(int visitId){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray diagnoses = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "select * " +
+                "from ece356.diagnosis d " +
+                "inner join( " +
+                "select visit_id, max(last_updated) last_updated " +
+                "from ece356.diagnosis where visit_id=? " +
+                "group by visit_id, last_updated" +
+                " ) dd on dd.visit_id = d.visit_id and dd.last_updated = d.last_updated;";
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, visitId);
+                
+                rs = ps.executeQuery();
+                diagnoses = convertToJson(rs);
+                
+                
+              return diagnoses;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return diagnoses;
+            }
+            
+        }
+        
+        return diagnoses;
+        
+    }
+    
     
 }
