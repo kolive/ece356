@@ -7,6 +7,7 @@
 package models;
 
 import control.Database;
+import models.Helpers.FormatHelper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -150,18 +151,8 @@ public class PatientViewModel {
      * @param visitId
      * @return prescriptions, an HTML formatted unordered list
      */
-    public String formatPrescriptions(String visitId){
-        String prescriptions = "<ul class='prescriptions'>";
-        String tmp = "";
-        JSONArray ps = Database.getPrescriptionsByVisit(Integer.parseInt(visitId));
-        for(int i = 0; i < ps.size();i++){
-            JSONObject p = (JSONObject)ps.get(i);
-            tmp = "<li> Drug: %s, Expires: %s </li>";
-            prescriptions += String.format(tmp, p.get("drug_name").toString(), p.get("expires").toString());
-        }
-        if(prescriptions.equals("<ul class='prescriptions'>")) prescriptions = "<p>No prescriptions prescribed during this visit.</p>";
-        else prescriptions += "</ul>";
-        return prescriptions;
+    public String formatPrescriptions(String visitId){        
+        return FormatHelper.formatPrescriptions(Integer.parseInt(visitId));
     }
     
     /**
@@ -170,17 +161,7 @@ public class PatientViewModel {
      * @return procedures, an HTML formatted paragraph
      */
     public String formatProcedures(String visitId){
-        String procedures = "<div class='procedures'>";
-        String tmp = "";
-        JSONArray ps = Database.getProcedureByVisit(Integer.parseInt(visitId));
-        for(int i = 0; i < ps.size();i++){
-            JSONObject p = (JSONObject)ps.get(i);
-            tmp = "<p> %s : %s </p>";
-            procedures += String.format(tmp, p.get("procedure_name").toString(), p.get("description").toString());
-        }
-        if(procedures.equals("<div class='procedures'>")) procedures = "<p>No procedure performed during this visit. </p>";
-        else procedures += "</div>";
-        return procedures;
+        return FormatHelper.formatProcedures(Integer.parseInt(visitId));
     }
     
     /**
@@ -189,17 +170,7 @@ public class PatientViewModel {
      * @return diagnoses, an HTML formatted paragraph
      */
     public String formatDiagnoses(String visitId){
-        String procedures = "<div class='diagnoses'>";
-        String tmp = "";
-        JSONArray ps = Database.getDiagnosisByVisit(Integer.parseInt(visitId));
-        for(int i = 0; i < ps.size();i++){
-            JSONObject p = (JSONObject)ps.get(i);
-            tmp = "<p> %s </p>";
-            procedures += String.format(tmp, p.get("severity").toString());
-        }
-        if(procedures.equals("<div class='diagnoses'>")) procedures = "<p>No diagnosis given during this visit. </p>";
-        else procedures += "</div>";
-        return procedures;
+        return FormatHelper.formatDiagnoses(Integer.parseInt(visitId));
     }
     
     /**
