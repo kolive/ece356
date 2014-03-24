@@ -235,6 +235,82 @@ public class Database {
         return false;
     }
     
+    public static JSONArray getPatientsAndAvisees(int doctorId){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray rows = new JSONArray();
+        JSONArray patients = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                // Get a list of all patients and advisees for a doctor
+                //Resultset has the following schema:
+                /**
+                 * _______________________________________________________
+                 * | pid (Patient Id) | relation ('Patient' or 'Advisee') |
+                 * -------------------------------------------------------
+                 */
+                
+                ps = connection.prepareStatement(
+                        "( " +
+                            "SELECT DISTINCT pid, 'Patient' as relation FROM ece356.patient-of " +
+                            "WHERE doctor_id=? " +
+                        ") " +
+                        "UNION " + 
+                        "( " +
+                            "SELECT DISTINCT v.pid, " +
+                            "CASE (" +
+                                "WHEN a.relation IS NULL " +
+                                "THEN 'Patient' " +
+                                "ELSE a.relation " +
+                            ") AS relation " +
+                            "FROM visit v " +
+                            "LEFT JOIN ( " +
+                                "SELECT visit_id, doctor_id, 'Advisee' as relation " +
+                                "FROM ece356.advises " +
+                                "WHERE doctor_id=? " +
+                            ") ON a.visit_id=v.visit_id " +
+                            "WHERE v.is_valid='1' AND (v.eid=? OR a.doctor_id=?) " +
+                        ")"
+                );
+                
+                ps.setInt(1, doctorId);
+                ps.setInt(2, doctorId);
+                ps.setInt(3, doctorId);
+                
+                rs = ps.executeQuery();
+                rows = convertToJson(rs);
+                
+                if (!rows.isEmpty())
+                {
+                    //found patient to doctor mappings
+                    //get patient information
+                    for (int i = 0; i < rows.size(); i++)
+                    {
+                        JSONObject patient = getPatient(Integer.parseInt(((JSONObject)rows.get(i)).get("pid").toString()));
+                        patient.put("relation", ((JSONObject)rows.get(i)).get("relation").toString());
+                        
+                        patients.add(patient);
+                    }
+                    
+                }
+            }catch(SQLException e){
+                e.printStackTrace();
+                closeConnection();
+                return patients;
+            }
+        }
+        
+        closeConnection();
+        return patients;
+    }
+    
     /**
      * Gets all the patient records for patients of a given doctor
      * @param doctorId
