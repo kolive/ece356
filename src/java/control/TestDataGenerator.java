@@ -92,9 +92,30 @@ public class TestDataGenerator {
     }
     
     public static void generateVisits(){
-        //each patient has had 1 to 5 visits
-        for(int i = 0; i < 150; i++){
-            //required information for each visit
+        //each patient with a doctor has had 1 to 5 visits
+        for(int i = 0; i < 128; i++){
+            //num visits to generate
+            int numVisits = (int)(Math.random()*3)+1;
+            for(int n = 0; n < numVisits; n++){  
+                //required information for each visit  
+                String date;
+                String startTime;
+                String endTime;
+                String doctorId;
+                String lastUpdated;
+                
+                //generate visit
+                
+                //generate procedure
+                
+                //generate diagnosis
+                
+                //generate prescriptions, 0-4 per visit
+                int numPrescriptions = (int)(Math.random()*4);
+                for(int p = 0; p < numPrescriptions; p++){
+                    
+                }
+            }
         }
     }
     
