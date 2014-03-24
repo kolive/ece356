@@ -60,6 +60,7 @@ public class TestDataGenerator {
         openConnection();
         try{
             connection.prepareStatement("delete from ece356_test.patient").executeUpdate();
+             connection.prepareStatement("ALTER TABLE ece356_test.patient AUTO_INCREMENT = 1").executeUpdate();
         }catch(SQLException e){
             closeConnection();
         }
@@ -279,19 +280,24 @@ public class TestDataGenerator {
             PreparedStatement ps = connection.prepareStatement(preparedStatement);
             int sin = 199289999;
             for(int i = 0; i < 150; i++){
+                ps = connection.prepareStatement(preparedStatement);
                 ps.setString(1, password);
                 ps.setString(2, fnames[(int)(Math.random()*fnames.length)]);
                 ps.setString(3, lnames[(int)(Math.random()*lnames.length)]);
-                ps.setInt(4, (int)Math.random()*100);
+                ps.setInt(4, (int)(Math.random()*100));
                 ps.setString(5, streets[(int)(Math.random()*streets.length)]);
                 ps.setString(6, cities[(int)(Math.random()*cities.length)]);
                 ps.setString(7, postcode[(int)(Math.random()*postcode.length)]);
                 ps.setInt(8, sin);
-                ps.setString(10, chealth[(int)(Math.random()*chealth.length)]);
+                ps.setString(9, chealth[(int)(Math.random()*chealth.length)]);
+                sin++;
                 System.out.println(ps);
+                ps.execute();
             }
+            //ps.executeBatch();
         }catch(SQLException e){
             //do something
+            e.printStackTrace();
             closeConnection();
         }
         
