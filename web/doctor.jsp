@@ -37,12 +37,12 @@
                     </div>
                 </div>
                 <div class="patient-details">
-                    <%= doctorVM.formatPatientDetails(1) %>
+                    <%= doctorVM.formatPatientDetails() %>
                 </div>
             </div>
             <div class="patient-visits-container">
                 <div class="patient-visits-table">
-                    <%= doctorVM.formatPatientVisitsTable(1) %>
+                    <%= doctorVM.formatPatientVisitsTable() %>
                 </div>
             </div>
         </div>

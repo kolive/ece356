@@ -18,6 +18,8 @@ import org.json.simple.JSONObject;
 public class DoctorViewModel {    
     User m_doctor;
     
+    JSONObject m_currentPatient;
+    
     JSONArray m_patients;
     JSONArray m_advisees;
     
@@ -26,14 +28,27 @@ public class DoctorViewModel {
         
         m_patients = Database.getPatients(getDoctorId());
         m_advisees = Database.getAdvisees(getDoctorId());
+        
+        m_currentPatient = new JSONObject();
     }
     
     private int getDoctorId(){
         return Integer.parseInt(m_doctor.getStringParam("eid"));
     }
     
-    public String formatPatientsListFilter(){
-        return "";
+    public JSONObject getCurrentPatient(){
+        return m_currentPatient;
+    }
+    
+    public void setCurrentPatient(int patientId, boolean isAdvisee){
+        JSONObject currentPatient = Database.getPatient(patientId);
+        currentPatient.put("isAdvisee", isAdvisee);
+        
+        m_currentPatient = currentPatient;
+    }
+    
+    public boolean currentPatientIsAdvisee(){
+        return Boolean.parseBoolean(m_currentPatient.get("isAdvisee").toString());
     }
     
     // TODO: bool param to switch on patients/advisees?
@@ -81,18 +96,28 @@ public class DoctorViewModel {
     }
     
     // TODO: bool param to switch on patients/advisees?
-    public String formatPatientDetails(int patientId){
-        String details = "";
+    public String formatPatientDetails(){
+        if(m_currentPatient.isEmpty()){
+            return "";
+        }
         
-        JSONObject patient = Database.getPatient(patientId);
+        String details = "<h2>Patient Details:</h2>)";
         
-        details += String.format("<h2>Patient Details:</h2><p>Name: %s %s</p>",
-                        patient.get("fname"),
-                        patient.get("lname"));
+        if(this.currentPatientIsAdvisee()){
+            details = "<h2>Advisee Details:</h2>";
+        }
         
-        details += String.format("<p>SIN: %s</p><p>ID Number: %s</p>",
-                        patient.get("sin"),
-                        patient.get("pid"));
+        details = String.format(
+                        "<p>Name: %s %s</p>",
+                        m_currentPatient.get("fname"),
+                        m_currentPatient.get("lname")
+                    );
+        
+        details += String.format(
+                        "<p>SIN: %s</p><p>ID Number: %s</p>",
+                        m_currentPatient.get("sin"),
+                        m_currentPatient.get("pid")
+                    );
         
         // TODO: Number of visits?
      
@@ -101,8 +126,21 @@ public class DoctorViewModel {
     }
     
     // TODO: bool param to switch on patients/advisees?
-    public String formatPatientVisitsTable(int patientId){
-        JSONArray visits = Database.getPatientVisitsForDoctor(patientId, getDoctorId());
+    public String formatPatientVisitsTable(){
+        if(m_currentPatient.isEmpty()){
+            return "";
+        }
+        
+        int patientId = Integer.parseInt(m_currentPatient.get("pid").toString());
+                
+        JSONArray visits = new JSONArray();
+        
+        if(!currentPatientIsAdvisee()){
+            visits = Database.getPatientVisitsForDoctor(patientId, getDoctorId());
+        }
+        else{
+            visits = Database.getAdviseeVisitsForDoctor(patientId, getDoctorId());
+        }
         
         //TODO: Comments section
         
