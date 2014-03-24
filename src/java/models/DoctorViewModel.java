@@ -7,6 +7,7 @@
 package models;
 
 import control.Database;
+import models.Helpers.FormatHelper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -101,14 +102,47 @@ public class DoctorViewModel {
     
     // TODO: bool param to switch on patients/advisees?
     public String formatPatientVisitsTable(int patientId){
-        JSONArray patientVisits = Database.getPatientVisitsForDoctor(patientId, getDoctorId());
+        JSONArray visits = Database.getPatientVisitsForDoctor(patientId, getDoctorId());
         
-        String formattedTable = "";
+        //TODO: Comments section
         
-        for(int i = 0; i < patientVisits.size(); i++){
+        String formatted = 
+                "<table id='visits' class='footable table-bordered toggle-circle toggle-small'>" +
+                "<thead><tr>" +
+                "<th data-toggle='true'>Visit #</th>" +
+                "<th>Appointment Date</th>" +
+                "<th>Assigned Physician<th>" +
+                "<th data-hide='all'>Start Time</th>" +
+                "<th data-hide='all'>End Time</th>" +
+                "<th data-hide='all'>Procedure Performed</th>" +
+                "<th data-hide='all'>Diagnosis</th>" +
+                "<th data-hide='all'>Prescriptions Perscribed</th>" +
+                "</tr></thead>"; 
+        
+        for(int i = 0; i < visits.size(); i++){
+            JSONObject visit = (JSONObject) visits.get(i);
             
+            int visitId = Integer.parseInt(visit.get("visit_id").toString());
+            
+            formatted += String.format(
+                                "<tr><td class='visit_id'>%s</td><td>%s</td><td>%s</td>",
+                                visit.get("visit_id"),
+                                visit.get("visit_date"),
+                                visit.get("eid")
+                            );
+            
+            formatted += String.format(
+                                "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td></td></tr>",
+                                visit.get("visit_start_time"),
+                                visit.get("visit_end_time"),
+                                FormatHelper.formatProcedures(visitId),
+                                FormatHelper.formatDiagnoses(visitId),
+                                FormatHelper.formatPrescriptions(visitId)
+                            );
         }
         
-        return formattedTable;
+        formatted += "</table>";
+        
+        return formatted;
     }
 }
