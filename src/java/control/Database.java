@@ -252,19 +252,20 @@ public class Database {
                 // Get a list of all patients and advisees for a doctor
                 //Resultset has the following schema:
                 /**
-                 * _______________________________________________________
-                 * | pid (Patient Id) | relation ('Patient' or 'Advisee') |
-                 * -------------------------------------------------------
+                 * ____________________________________________________________________
+                 * | pid (Patient Id) | last_visit | relation ('Patient' or 'Advisee') |
+                 * --------------------------------------------------------------------
                  */
                 
                 ps = connection.prepareStatement(
                         "( " +
-                            "SELECT DISTINCT pid, 'Patient' as relation FROM ece356.patient-of " +
-                            "WHERE doctor_id=? " +
+                            "SELECT pid, MAX(visit_date) last_visit, 'Patient' as relation " +
+                            "FROM ece356.patient-of " +
+                            "WHERE doctor_id=? AND eid=? " +
                         ") " +
                         "UNION " + 
                         "( " +
-                            "SELECT DISTINCT v.pid, " +
+                            "SELECT v.pid, max(visit_date) last_visit" +
                             "CASE (" +
                                 "WHEN a.relation IS NULL " +
                                 "THEN 'Patient' " +
@@ -277,6 +278,7 @@ public class Database {
                                 "WHERE doctor_id=? " +
                             ") ON a.visit_id=v.visit_id " +
                             "WHERE v.is_valid='1' AND (v.eid=? OR a.doctor_id=?) " +
+                            "GROUP BY v.pid " +
                         ")"
                 );
                 
@@ -295,6 +297,7 @@ public class Database {
                     {
                         JSONObject patient = getPatient(Integer.parseInt(((JSONObject)rows.get(i)).get("pid").toString()));
                         patient.put("relation", ((JSONObject)rows.get(i)).get("relation").toString());
+                        patient.put("last_visit", ((JSONObject)rows.get(i)).get("last_visit").toString());
                         
                         patients.add(patient);
                     }

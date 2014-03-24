@@ -28,16 +28,19 @@ public class DoctorViewModel {
     public String formatPatientsList(){
         JSONArray patients = Database.getPatients(Integer.parseInt(m_doctor.getStringParam("eid")));
         
-        String formattedList = "<table><thead><tr><th>First Name</th><th>Last Name</th><th>Current Health</th><thead>";
+        String formattedList = "<table><thead><tr><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Relation</th><thead>";
         
         for(int i = 0; i < patients.size(); i++){
             JSONObject p = (JSONObject) patients.get(i);
             
             
             formattedList += String.format("<tr><td>%s</td><td>%s</td><td>%s</td><tr>",
+                                p.get("pid"),
                                 p.get("fname"),
                                 p.get("lname"),
-                                p.get("current_health"));
+                                p.get("current_health"),
+                                p.get("last_visit"),
+                                p.get("relation"));
         }
         
         formattedList += "</table>";
