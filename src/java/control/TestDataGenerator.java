@@ -54,16 +54,188 @@ public class TestDataGenerator {
     public static void run(){
         deleteAll();
         generatePatients();
+        generateEmployees();
     }
     
     public static void deleteAll(){
         openConnection();
         try{
             connection.prepareStatement("delete from ece356_test.patient").executeUpdate();
-             connection.prepareStatement("ALTER TABLE ece356_test.patient AUTO_INCREMENT = 1").executeUpdate();
+            connection.prepareStatement("ALTER TABLE ece356_test.patient AUTO_INCREMENT = 1").executeUpdate();
+            connection.prepareStatement("delete from ece356_test.employee").executeUpdate();
+            connection.prepareStatement("ALTER TABLE ece356_test.employee AUTO_INCREMENT = 1").executeUpdate();
+        
         }catch(SQLException e){
             closeConnection();
         }
+        closeConnection();
+    }
+    
+        public static void generateEmployees(){
+        /*
+           `eid` INT NOT NULL AUTO_INCREMENT,
+            `password` VARCHAR(32) NULL,
+            `fname` VARCHAR(45) NULL,
+            `lname` VARCHAR(45) NULL,
+            `is_enabled` TINYINT(1) NULL,
+            `dept` VARCHAR(45) NULL,
+
+        */
+        
+        openConnection();
+        
+        String password = "default";
+        String[] fnames = new String[]{
+            // <editor-fold desc="fname list">
+
+            "Shaun",
+            "Laurel",
+            "Giuseppe",
+            "Kaitlin",
+            "Dannette",
+            "Emery",
+            "Twanda",
+            "Jenell",
+            "Marge",
+            "Kathrine",
+            "Buford",
+            "Cathryn",
+            "Elisha",
+            "Jin",
+            "Genoveva",
+            "Martine",
+            "Kala",
+            "Barbra",
+            "Solange",
+            "Bruce",
+            "Terresa",
+            "Eladia",
+            "Lucretia",
+            "Isabella",
+            "Hedwig",
+            "Katharina",
+            "Lakita",
+            "Trena",
+            "Josef",
+            "Adelina",
+            "Amos",
+            "Dorethea",
+            "Giovanni",
+            "Eva",
+            "Bart",
+            "Veta",
+            "Arie",
+            "Selina",
+            "Veronika",
+            "Willard",
+            "Lakeesha",
+            "Alicia",
+            "Rochelle",
+            "Deborah",
+            "Filiberto",
+            "Tomika",
+            "Parker",
+            "Isobel",
+            "Shelton",
+            "Candida"
+                
+            //</editor-fold>
+        };
+        
+        String[] lnames = new String[]{
+            //<editor-fold desc="lname list">
+            "Tome",
+            "Buber",
+            "Morduch",
+            "Buerle",
+            "Demirjian",
+            "Nanna",
+            "Bussini",
+            "Koh",
+            "Biagioli",
+            "Boyajian",
+            "Ball",
+            "Siesto",
+            "Valli",
+            "Bartlett",
+            "Rennolls",
+            "Ives",
+            "Lettvin",
+            "Train",
+            "Vannelli",
+            "Gall",
+            "Schachter",
+            "Kang",
+            "D'aristotle",
+            "Dial",
+            "Hawkes",
+            "Krol",
+            "Bommarito",
+            "Reza",
+            "Disalvo",
+            "Jerome",
+            "Marple",
+            "Jacobs",
+            "Burg",
+            "Esty",
+            "Huang",
+            "Glanzman",
+            "Dart",
+            "Serino",
+            "Meister",
+            "Yatsko",
+            "Warner",
+            "Fuhring",
+            "Feinerman",
+            "Mayne",
+            "Woerne",
+            "Piediscalzi",
+            "Duesenberry",
+            "Wadzinski",
+            "Clow",
+            "Ledford",
+            "Pater",
+            "Donaghey",
+            "Honner-white"
+            //</editor-fold>
+        };
+        
+        String preparedStatement = "INSERT INTO ece356_test.employee (password, fname, lname, dept, is_enabled) " +   
+                " VALUES (?, ?, ?, ?, 1);";
+        //every doctor has one staff member, so there should be one staff member per doctor
+        //for every 4 doctors, have one legal auditor and one finance auditor
+        // i%10 = 0,2,4,6 doctor, i%10 = 1,3,5,7 staff, i%10 = 8,9 auditors
+        try{
+            PreparedStatement ps = connection.prepareStatement(preparedStatement);
+            String type ="";
+            for(int i = 0; i < 150; i++){
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setString(1, password);
+                ps.setString(2, fnames[(int)(Math.random()*fnames.length)]);
+                ps.setString(3, lnames[(int)(Math.random()*lnames.length)]);
+                if( i%10 != 8 && (i%10)%2 == 0){
+                    //doctor
+                    type = "DOCTOR";
+                }else if(i%10 != 9 && (i%10)%2 == 1){
+                    //staff
+                    type = "STAFF";
+                }else if(i%10 == 9){
+                    //legal
+                    type = "LEGAL";
+                }else{
+                    //finance
+                    type = "FINANCE";
+                }
+                ps.setString(4, type);
+                ps.execute();
+            }
+            //ps.executeBatch();
+        }catch(SQLException e){
+            //do something
+            e.printStackTrace();
+            closeConnection();
+        }
+        
         closeConnection();
     }
     
@@ -291,7 +463,6 @@ public class TestDataGenerator {
                 ps.setInt(8, sin);
                 ps.setString(9, chealth[(int)(Math.random()*chealth.length)]);
                 sin++;
-                System.out.println(ps);
                 ps.execute();
             }
             //ps.executeBatch();
