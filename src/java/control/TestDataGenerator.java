@@ -55,6 +55,8 @@ public class TestDataGenerator {
         deleteAll();
         generatePatients();
         generateEmployees();
+        generateDrugs();
+        generateManagedBy();
     }
     
     public static void deleteAll(){
@@ -62,16 +64,118 @@ public class TestDataGenerator {
         try{
             connection.prepareStatement("delete from ece356_test.patient").executeUpdate();
             connection.prepareStatement("ALTER TABLE ece356_test.patient AUTO_INCREMENT = 1").executeUpdate();
+            
             connection.prepareStatement("delete from ece356_test.employee").executeUpdate();
             connection.prepareStatement("ALTER TABLE ece356_test.employee AUTO_INCREMENT = 1").executeUpdate();
-        
+            
+            connection.prepareStatement("delete from ece356_test.`managed-by`").executeUpdate();
+            
+            connection.prepareStatement("delete from ece356_test.drug").executeUpdate();
+            
         }catch(SQLException e){
             closeConnection();
         }
         closeConnection();
     }
     
-        public static void generateEmployees(){
+    public static void generateDrugs(){
+        /*
+            `drug_name` VARCHAR(100) NOT NULL,
+            `manufacturer` VARCHAR(100) NULL,
+
+
+        */
+        
+        openConnection();
+        
+        String[] drug = new String[]{
+            // <editor-fold desc="drug list">
+            "Advil",
+            "Sickbegone",
+            "GoodFeelz",
+            "Hypophorestus",
+            "Male Enlargement Pills",
+            "Female Enlargement Pills",
+            "The One Pill To Rule Them All",
+            "Cialis",
+            "Insulin",
+            "Morphine",
+            "Oxytocin",
+            "Vicodin",
+            "Nitrite",
+            "Anti-cancer Pills",
+            "DoNotDie",
+            "Sideeffectz",
+            "Mooduplift",
+            "Diagopropinate",
+            "Digestion Cookies",
+            "Exlax",
+            "Penicillin",
+            "Wart-b-gone",
+            "NoMoCrabs",
+            "Cure For The Common Cold"
+            //</editor-fold>
+        };
+        
+        String[] mfg = new String[]{
+            //<editor-fold desc="lname list">
+            "DrugCo",
+            "BigPharma",
+            "LittlePharma",
+            "Heisenberg",
+            "Los Pollos Hermanos"
+            //</editor-fold>
+        };
+        
+        String preparedStatement = "INSERT INTO ece356_test.drug" +   
+                " VALUES (?, ?);";
+        //every doctor has one staff member, so there should be one staff member per doctor
+        //for every 4 doctors, have one legal auditor and one finance auditor
+        // i%10 = 0,2,4,6 doctor, i%10 = 1,3,5,7 staff, i%10 = 8,9 auditors
+        try{
+            PreparedStatement ps = connection.prepareStatement(preparedStatement);
+            String type ="";
+            for(int i = 0; i < drug.length; i++){
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setString(1, drug[i]);
+                ps.setString(2, mfg[(int)(Math.random()*mfg.length)]);
+                
+                ps.execute();
+            }
+            //ps.executeBatch();
+        }catch(SQLException e){
+            //do something
+            e.printStackTrace();
+            closeConnection();
+        }
+        
+        closeConnection();
+    }
+    
+    public static void generateManagedBy(){
+        openConnection();
+        String preparedStatementManaged = "INSERT INTO ece356_test.`managed-by` VALUES (?, ?)";
+        
+        try{
+            PreparedStatement managed = connection.prepareStatement(preparedStatementManaged);
+
+            for(int i = 0; i < 150; i++){
+                if(i%10 != 8 && (i%10)%2 == 0){     
+                    managed = connection.prepareStatement(preparedStatementManaged);
+                    //set managed-by relation
+                    managed.setInt(1, i+2);
+                    managed.setInt(2, i+1);
+                    managed.execute();
+                }
+            }
+        }catch(SQLException e){
+            e.printStackTrace();
+            closeConnection();
+        }
+        closeConnection();
+    }
+    
+    public static void generateEmployees(){
         /*
            `eid` INT NOT NULL AUTO_INCREMENT,
             `password` VARCHAR(32) NULL,
@@ -202,6 +306,7 @@ public class TestDataGenerator {
         
         String preparedStatement = "INSERT INTO ece356_test.employee (password, fname, lname, dept, is_enabled) " +   
                 " VALUES (?, ?, ?, ?, 1);";
+       
         //every doctor has one staff member, so there should be one staff member per doctor
         //for every 4 doctors, have one legal auditor and one finance auditor
         // i%10 = 0,2,4,6 doctor, i%10 = 1,3,5,7 staff, i%10 = 8,9 auditors
@@ -219,6 +324,7 @@ public class TestDataGenerator {
                 }else if(i%10 != 9 && (i%10)%2 == 1){
                     //staff
                     type = "STAFF";
+
                 }else if(i%10 == 9){
                     //legal
                     type = "LEGAL";
@@ -226,8 +332,11 @@ public class TestDataGenerator {
                     //finance
                     type = "FINANCE";
                 }
+               
+                                
                 ps.setString(4, type);
                 ps.execute();
+
             }
             //ps.executeBatch();
         }catch(SQLException e){
