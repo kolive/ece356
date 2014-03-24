@@ -54,25 +54,81 @@ public class TestDataGenerator {
     public static void run(){
         deleteAll();
         generatePatients();
-        generateEmployees();
-        generateDrugs();
+        generateEmployees();        
         generateManagedBy();
+        generatePatientOf();
+        generateDrugs();
+        
     }
     
     public static void deleteAll(){
         openConnection();
         try{
-            connection.prepareStatement("delete from ece356_test.patient").executeUpdate();
-            connection.prepareStatement("ALTER TABLE ece356_test.patient AUTO_INCREMENT = 1").executeUpdate();
+            Statement s = connection.createStatement();
             
-            connection.prepareStatement("delete from ece356_test.employee").executeUpdate();
-            connection.prepareStatement("ALTER TABLE ece356_test.employee AUTO_INCREMENT = 1").executeUpdate();
+            System.out.println("deleting managed-by");
+            s.addBatch("delete from ece356_test.`managed-by`");
             
-            connection.prepareStatement("delete from ece356_test.`managed-by`").executeUpdate();
+            System.out.println("deleting patient-of");
+            s.addBatch("delete from ece356_test.`patient-of`");
             
-            connection.prepareStatement("delete from ece356_test.drug").executeUpdate();
+            System.out.println("deleting patients");
+            s.addBatch("delete from ece356_test.patient"); 
+            s.addBatch("ALTER TABLE ece356_test.patient AUTO_INCREMENT = 1");
             
+            System.out.println("deleting staff");
+            s.addBatch("delete from ece356_test.employee");
+            s.addBatch("ALTER TABLE ece356_test.employee AUTO_INCREMENT = 1");
+               
+            System.out.println("deleting drugs");
+            s.addBatch("delete from ece356_test.drug");
+            
+            s.executeBatch();
         }catch(SQLException e){
+            e.printStackTrace();
+            closeConnection();
+        }
+        closeConnection();
+    }
+    
+    public static void generateVisits(){
+        //each patient has had 1 to 5 visits
+        for(int i = 0; i < 150; i++){
+            //required information for each visit
+        }
+    }
+    
+    public static void generatePatientOf(){
+        /*
+         `doctor_id` INT NOT NULL,
+         `patient_id` INT NOT NULL,
+
+        */
+        openConnection();
+        String preparedStatement = "INSERT INTO ece356_test.`patient-of` VALUES (?, ?)";
+        try{
+            PreparedStatement ps = connection.prepareStatement(preparedStatement);
+            //each doctor gets 2 patients
+            int patientId = 1;
+            for(int i = 0; i < 160; i++){
+                //for each doctor
+                if( i%10 != 8 && (i%10)%2 == 0){
+                    //assign two patients
+                    ps = connection.prepareStatement(preparedStatement);
+                    ps.setInt(1, i+1); //set doctor id
+                    ps.setInt(2, patientId); //patient id
+                    ps.executeUpdate();
+                    patientId++;
+                    ps = connection.prepareStatement(preparedStatement);
+                    ps.setInt(1, i+1); //set doctor id
+                    ps.setInt(2, patientId); //patient id
+                    ps.executeUpdate();
+                    patientId++;
+                }
+
+            }
+        }catch(SQLException e){
+            e.printStackTrace();
             closeConnection();
         }
         closeConnection();
@@ -313,7 +369,7 @@ public class TestDataGenerator {
         try{
             PreparedStatement ps = connection.prepareStatement(preparedStatement);
             String type ="";
-            for(int i = 0; i < 150; i++){
+            for(int i = 0; i < 160; i++){
                 ps = connection.prepareStatement(preparedStatement);
                 ps.setString(1, password);
                 ps.setString(2, fnames[(int)(Math.random()*fnames.length)]);
