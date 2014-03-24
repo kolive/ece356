@@ -16,6 +16,7 @@ import models.*;
 import control.Database;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import control.TestDataGenerator;
 /**
  *
  * @author Kyle
@@ -37,6 +38,7 @@ public class UserLoginServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         
+        TestDataGenerator.run();
         
         if(request.getSession().getAttribute("user") != null){
             //redirect to logout confirmation before allowing to login

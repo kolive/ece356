@@ -255,16 +255,4 @@ public class Database {
         
     }
 
-    /**
-     * Populates mysql database with test data as per schemas defined in design doc
-     *
-     *
-    **/
-    public static void testDataGeneration(){
-    
-      //TODO: generate test data
-      //TODO: maybe put this in it's own class.
-      
-
-    }
 }
