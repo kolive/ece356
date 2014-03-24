@@ -17,18 +17,29 @@ import org.json.simple.JSONObject;
 public class DoctorViewModel {    
     User m_doctor;
     
+    JSONArray m_patients;
+    JSONArray m_advisees;
+    
     public DoctorViewModel(User doctor){  
         m_doctor = doctor;
+        
+        m_patients = Database.getPatients(getDoctorId());
+        m_advisees = Database.getAdvisees(getDoctorId());
+    }
+    
+    private int getDoctorId(){
+        return Integer.parseInt(m_doctor.getStringParam("eid"));
     }
     
     public String formatPatientsListFilter(){
         return "";
     }
     
+    // TODO: bool param to switch on patients/advisees?
     public String formatPatientsList(){
-        JSONArray patients = Database.getPatients(Integer.parseInt(m_doctor.getStringParam("eid")));
+        JSONArray patients = m_patients;
         
-        String formattedList = "<table><thead><tr><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Relation</th><thead>";
+        String formattedList = "<table><thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Last Visit</th><thead>";
         
         for(int i = 0; i < patients.size(); i++){
             JSONObject p = (JSONObject) patients.get(i);
@@ -39,8 +50,7 @@ public class DoctorViewModel {
                                 p.get("fname"),
                                 p.get("lname"),
                                 p.get("current_health"),
-                                p.get("last_visit"),
-                                p.get("relation"));
+                                p.get("last_visit"));
         }
         
         formattedList += "</table>";
@@ -48,6 +58,28 @@ public class DoctorViewModel {
         return formattedList;
     }
     
+    public String formatAdviseesList(){
+        JSONArray advisees = m_advisees;
+        
+        String formattedList = "<table><thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Last Visit</th><thead>";
+        
+        for(int i = 0; i < advisees.size(); i++){
+            JSONObject p = (JSONObject) advisees.get(i);
+            
+            formattedList += String.format("<tr><td>%s</td><td>%s</td><td>%s</td><tr>",
+                                p.get("pid"),
+                                p.get("fname"),
+                                p.get("lname"),
+                                p.get("current_health"),
+                                p.get("last_visit"));
+        }
+        
+        formattedList += "</table>";
+        
+        return formattedList;
+    }
+    
+    // TODO: bool param to switch on patients/advisees?
     public String formatPatientDetails(int patientId){
         String details = "";
         
@@ -67,7 +99,16 @@ public class DoctorViewModel {
         return details;
     }
     
-    public String formatPatientVisitsTable(int patientId, int visitId){       
-       return "";
+    // TODO: bool param to switch on patients/advisees?
+    public String formatPatientVisitsTable(int patientId){
+        JSONArray patientVisits = Database.getPatientVisitsForDoctor(patientId, getDoctorId());
+        
+        String formattedTable = "";
+        
+        for(int i = 0; i < patientVisits.size(); i++){
+            
+        }
+        
+        return formattedTable;
     }
 }
