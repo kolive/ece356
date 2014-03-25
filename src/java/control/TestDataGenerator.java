@@ -53,11 +53,20 @@ public class TestDataGenerator {
     
     public static void run(){
         deleteAll();
+        System.out.println("Generating patients");
         generatePatients();
+        System.out.println("Generating employees");
         generateEmployees();        
+        System.out.println("Generating managed-by relation");
         generateManagedBy();
+        System.out.println("Generating patient-of relation");
         generatePatientOf();
+        System.out.println("Generating drugs");
         generateDrugs();
+        System.out.println("Generating visits and related entities");
+        generateVisits();
+        System.out.println("Generating advises relation");
+        generateAdvises();
         
     }
     
@@ -83,6 +92,26 @@ public class TestDataGenerator {
             System.out.println("deleting drugs");
             s.addBatch("delete from ece356_test.drug");
             
+            System.out.println("deleting comments");
+            s.addBatch("delete from ece356_test.comment");
+            
+            System.out.println("deleting prescriptions");
+            s.addBatch("delete from ece356_test.prescription");
+            
+            System.out.println("deleting diagnoses");
+            s.addBatch("delete from ece356_test.diagnosis");
+            
+            System.out.println("deleting procedures");
+            s.addBatch("delete from ece356_test.procedure");
+            
+            System.out.println("deleting advises");
+            s.addBatch("delete from ece356_test.advises");
+            
+            System.out.println("deleting visits");
+            s.addBatch("delete from ece356_test.visit");
+            
+
+            
             s.executeBatch();
         }catch(SQLException e){
             e.printStackTrace();
@@ -91,32 +120,232 @@ public class TestDataGenerator {
         closeConnection();
     }
     
+    public static java.sql.Date getTodaysDateOffset(int daysOffset){
+        long msPerDay = 86400000;
+        java.util.Date today = new java.util.Date();
+        java.sql.Date sqld = new java.sql.Date(today.getTime());
+        sqld.setTime(today.getTime() + daysOffset*msPerDay );
+        return sqld;
+    }
+    
+    public static java.sql.Date getRandomTimeAfterDate(java.sql.Date date){
+        long offset = (long)((Math.random()*10)*86400000);
+        return new java.sql.Date(date.getTime() + offset);
+    }
+    
+    public static java.sql.Timestamp getNowAsTimestamp(){
+        java.util.Date today = new java.util.Date();
+        java.sql.Timestamp sqlts = new java.sql.Timestamp(today.getTime());
+        return sqlts;
+    }
+    
+    public static void generateAdvises(){
+        /*
+             `doctor_id` INT NOT NULL,
+            `visit_id` INT NOT NULL,
+            `last_updated` TIMESTAMP NOT NULL,
+        */
+        openConnection();
+        try{
+             PreparedStatement getDoctorIds = connection.prepareStatement("SELECT eid FROM ece356_test.employee WHERE dept='DOCTOR'");
+             ResultSet docids = getDoctorIds.executeQuery();
+             
+             PreparedStatement getVisitIds = connection.prepareStatement("SELECT visit_id, last_updated FROM ece356_test.visit");
+             ResultSet visitids = getVisitIds.executeQuery();
+             
+             //loop through a bunch of docids, we only want to give some doctors as advisors
+             for(int i = 0; i < 32; i++){
+                 docids.next();
+             }
+             
+             
+             while(docids.next() && visitids.next()){
+                 //have each doctor advise on one of the visits in the list of visits
+                 PreparedStatement insertAdvise = connection.prepareStatement("INSERT INTO ece356_test.advises (doctor_id, visit_id, last_updated) VALUES (?, ? ,?) ");
+                 insertAdvise.setInt(1, docids.getInt("eid"));
+                 insertAdvise.setInt(2, visitids.getInt("visit_id"));
+                 insertAdvise.setTimestamp(3, visitids.getTimestamp("last_updated"));
+                 insertAdvise.execute();
+                 
+                 
+             }
+        }catch(SQLException e){
+            e.printStackTrace();
+            closeConnection();
+        }
+        closeConnection();
+    }
+    
     public static void generateVisits(){
-        //each patient with a doctor has had 1 to 5 visits
-        for(int i = 0; i < 128; i++){
-            //num visits to generate
-            int numVisits = (int)(Math.random()*3)+1;
-            for(int n = 0; n < numVisits; n++){  
-                //required information for each visit  
-                String date;
-                String startTime;
-                String endTime;
-                String doctorId;
-                String lastUpdated;
+        openConnection();
+        try{
+             PreparedStatement getDoctorIds = connection.prepareStatement("SELECT * FROM ece356_test.`patient-of`");
+             ResultSet docids = getDoctorIds.executeQuery();
+             int visitId = 0;
+             while(docids.next()){
+             //each patient with a doctor has had 1 to 5 visits
+                //num visits to generate
+                int numVisits = (int)(Math.random()*3)+1;
+                int dId = docids.getInt("doctor_id");
+                int pId = docids.getInt("patient_id");
                 
-                //generate visit
-                
-                //generate procedure
-                
-                //generate diagnosis
-                
-                //generate prescriptions, 0-4 per visit
-                int numPrescriptions = (int)(Math.random()*4);
-                for(int p = 0; p < numPrescriptions; p++){
+                for(int n = 0; n < numVisits; n++){  
+                    visitId++;
+                    //required information for each visit 
+
+                    //visit date
+                    int numberOfDaysOffset = (int)((Math.random()*-10)+(Math.random()*10));
+                    java.sql.Date date = getTodaysDateOffset(numberOfDaysOffset);
+
+                    //visit start and end time
+                    int startHour = (int)(Math.random()*12);
+                    java.sql.Time startTime = new java.sql.Time(startHour, (int)(Math.random()*60), (int)(Math.random()*60));
+                    java.sql.Time endTime = new java.sql.Time((int)(startHour + (Math.random()*11)),0,0);
+
+                    //last updated timestamp
+                    java.sql.Timestamp lastUpdated = getNowAsTimestamp();
+
+                    //generate visit
+                    String newVisit = "INSERT INTO ece356_test.visit"+
+                            " (visit_id, last_updated, visit_date, visit_start_time, visit_end_time, pid, eid, is_valid)"+
+                            " VALUES (?, ?, ?, ?, ?, ?, ?, 1)";
+                    PreparedStatement insertVisit = connection.prepareStatement(newVisit);
+                    insertVisit.setInt(1, visitId);
+                    insertVisit.setTimestamp(2, lastUpdated);
+                    insertVisit.setDate(3, date);
+                    insertVisit.setTime(4, startTime);
+                    insertVisit.setTime(5, endTime);
+                    insertVisit.setInt(6, pId);
+                    insertVisit.setInt(7, dId);
+                    insertVisit.execute();
                     
+                    
+                    //generate procedure
+                    String[] procedures = new String[]{
+                        //<editor-fold desc="procedures"
+                        "Spleendectonomy",
+                        "Triple-bypass Bypass Surgery",
+                        "Amputation of the Limb",
+                        "Standard checkup",
+                        "Full body massage"
+                        //</editor-fold>
+                    };
+                    
+                    String[] descriptions = new String[]{
+                        //<editor-fold desc="procedures"
+                        "Removal of spleen(s) via invasive surgery.",
+                        "Bugfix for the heartvalves.",
+                        "That limb was giving us trouble, so we cut it off.",
+                        "Checked all the patient's vitals. They look ok.",
+                        "Oh, yeah, very relaxing."
+                        //</editor-fold>
+                    };
+                    int procedureType = (int)(Math.random()*procedures.length);
+                    String newProcedure = "INSERT INTO ece356_test.procedure"+
+                            " (visit_id, last_updated, procedure_name, description)"+
+                            " VALUES (?, ?, ?, ?)";
+                    PreparedStatement insertProcedure = connection.prepareStatement(newProcedure);
+                    insertProcedure.setInt(1, visitId);
+                    insertProcedure.setTimestamp(2, lastUpdated);
+                    insertProcedure.setString(3, procedures[procedureType]);
+                    insertProcedure.setString(4, descriptions[procedureType]);
+                    insertProcedure.execute();
+                    
+                    //generate diagnosis
+                    String[] diagnoses = new String[]{
+                        //<editor-fold desc="procedures"
+                        "Suffering from Life. Prognosis Grim. Will Die.",
+                        "Missing multiple bodyparts. 50/50 Chance of making it.",
+                        "My diagnosis is that the patient has cavities and should see their dentist.",
+                        "Patient suffering from various bugs. Patient should download hotfix 1.1",
+                        "Everything is A-OK"
+                        //</editor-fold>
+                    };
+                    String newDiagnosis = "INSERT INTO ece356_test.diagnosis"+
+                            " (visit_id, last_updated, severity)"+
+                            " VALUES (?, ?, ?)";
+                    PreparedStatement insertDiagnosis = connection.prepareStatement(newDiagnosis);
+                    insertDiagnosis.setInt(1, visitId);
+                    insertDiagnosis.setTimestamp(2, lastUpdated);
+                    insertDiagnosis.setString(3, diagnoses[(int)(Math.random()*diagnoses.length)]);
+                    insertDiagnosis.execute();
+                    
+                    //generate prescriptions, 0-4 per visit
+                    int numPrescriptions = (int)(Math.random()*4);
+                    String[] drug = new String[]{
+                                    // <editor-fold desc="drug list">
+                                    "Advil",
+                                    "Sickbegone",
+                                    "GoodFeelz",
+                                    "Hypophorestus",
+                                    "Male Enlargement Pills",
+                                    "Female Enlargement Pills",
+                                    "The One Pill To Rule Them All",
+                                    "Cialis",
+                                    "Insulin",
+                                    "Morphine",
+                                    "Oxytocin",
+                                    "Vicodin",
+                                    "Nitrite",
+                                    "Anti-cancer Pills",
+                                    "DoNotDie",
+                                    "Sideeffectz",
+                                    "Mooduplift",
+                                    "Diagopropinate",
+                                    "Digestion Cookies",
+                                    "Exlax",
+                                    "Penicillin",
+                                    "Wart-b-gone",
+                                    "NoMoCrabs",
+                                    "Cure For The Common Cold"
+                                    //</editor-fold>
+                                };
+                    boolean[] used = new boolean[drug.length];
+                    for(int p = 0; p < numPrescriptions; p++){
+                        int drugId = (int)(Math.random()*drug.length);
+                        while(used[drugId]){
+                           drugId = (int)(Math.random()*drug.length);
+                        }
+                        used[drugId] = true;
+                        String newPrescription = "INSERT INTO ece356_test.prescription"+
+                            " (visit_id, last_updated, drug_name, expires)"+
+                            " VALUES (?, ?, ?, ?)";
+                        PreparedStatement insertPrescription = connection.prepareStatement(newPrescription);
+                        insertPrescription.setInt(1, visitId);
+                        insertPrescription.setTimestamp(2, lastUpdated);
+                        insertPrescription.setString(3, drug[drugId]);
+                        insertPrescription.setDate(4, getRandomTimeAfterDate(date));
+                        insertPrescription.execute();
+                    }
+                    
+                    
+                    //TODO: possible problem, only one freeform comment allowed per visit? is that right?
+                    String[] comment = new String[]{
+                                // <editor-fold desc="drug list">
+                                "I'm not sure how to proceed.",
+                                "I've never seen these symptoms together before.",
+                                "I should have finished med school.",
+                                "We may have to amputate."
+                                //</editor-fold>
+                            };
+                    String newComment = "INSERT INTO ece356_test.comment"+
+                        " (visit_id, last_updated, eid, timestamp, content)"+
+                        " VALUES (?, ?, ?, ?, ?)";
+                    PreparedStatement insertComment = connection.prepareStatement(newComment);
+                    insertComment.setInt(1, visitId);
+                    insertComment.setTimestamp(2, lastUpdated);
+                    insertComment.setInt(3, dId);
+                    insertComment.setTimestamp(4, getNowAsTimestamp());
+                    insertComment.setString(5, comment[(int)(Math.random()*comment.length)]);
+                    insertComment.execute();
+                   
                 }
             }
+        }catch(SQLException e){
+            e.printStackTrace();
+            closeConnection();
         }
+        closeConnection();
     }
     
     public static void generatePatientOf(){
