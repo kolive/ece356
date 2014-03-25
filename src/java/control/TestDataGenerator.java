@@ -76,39 +76,39 @@ public class TestDataGenerator {
             Statement s = connection.createStatement();
             
             System.out.println("deleting managed-by");
-            s.addBatch("delete from ece356_test.`managed-by`");
+            s.addBatch("delete from ece356.`managed-by`");
             
             System.out.println("deleting patient-of");
-            s.addBatch("delete from ece356_test.`patient-of`");
+            s.addBatch("delete from ece356.`patient-of`");
             
             System.out.println("deleting patients");
-            s.addBatch("delete from ece356_test.patient"); 
-            s.addBatch("ALTER TABLE ece356_test.patient AUTO_INCREMENT = 1");
+            s.addBatch("delete from ece356.patient"); 
+            s.addBatch("ALTER TABLE ece356.patient AUTO_INCREMENT = 1");
             
             System.out.println("deleting staff");
-            s.addBatch("delete from ece356_test.employee");
-            s.addBatch("ALTER TABLE ece356_test.employee AUTO_INCREMENT = 1");
+            s.addBatch("delete from ece356.employee");
+            s.addBatch("ALTER TABLE ece356.employee AUTO_INCREMENT = 1");
                
             System.out.println("deleting drugs");
-            s.addBatch("delete from ece356_test.drug");
+            s.addBatch("delete from ece356.drug");
             
             System.out.println("deleting comments");
-            s.addBatch("delete from ece356_test.comment");
+            s.addBatch("delete from ece356.comment");
             
             System.out.println("deleting prescriptions");
-            s.addBatch("delete from ece356_test.prescription");
+            s.addBatch("delete from ece356.prescription");
             
             System.out.println("deleting diagnoses");
-            s.addBatch("delete from ece356_test.diagnosis");
+            s.addBatch("delete from ece356.diagnosis");
             
             System.out.println("deleting procedures");
-            s.addBatch("delete from ece356_test.procedure");
+            s.addBatch("delete from ece356.procedure");
             
             System.out.println("deleting advises");
-            s.addBatch("delete from ece356_test.advises");
+            s.addBatch("delete from ece356.advises");
             
             System.out.println("deleting visits");
-            s.addBatch("delete from ece356_test.visit");
+            s.addBatch("delete from ece356.visit");
             
 
             
@@ -147,10 +147,10 @@ public class TestDataGenerator {
         */
         openConnection();
         try{
-             PreparedStatement getDoctorIds = connection.prepareStatement("SELECT eid FROM ece356_test.employee WHERE dept='DOCTOR'");
+             PreparedStatement getDoctorIds = connection.prepareStatement("SELECT eid FROM ece356.employee WHERE dept='DOCTOR'");
              ResultSet docids = getDoctorIds.executeQuery();
              
-             PreparedStatement getVisitIds = connection.prepareStatement("SELECT visit_id, last_updated FROM ece356_test.visit");
+             PreparedStatement getVisitIds = connection.prepareStatement("SELECT visit_id, last_updated FROM ece356.visit");
              ResultSet visitids = getVisitIds.executeQuery();
              
              //loop through a bunch of docids, we only want to give some doctors as advisors
@@ -161,7 +161,7 @@ public class TestDataGenerator {
              
              while(docids.next() && visitids.next()){
                  //have each doctor advise on one of the visits in the list of visits
-                 PreparedStatement insertAdvise = connection.prepareStatement("INSERT INTO ece356_test.advises (doctor_id, visit_id, last_updated) VALUES (?, ? ,?) ");
+                 PreparedStatement insertAdvise = connection.prepareStatement("INSERT INTO ece356.advises (doctor_id, visit_id, last_updated) VALUES (?, ? ,?) ");
                  insertAdvise.setInt(1, docids.getInt("eid"));
                  insertAdvise.setInt(2, visitids.getInt("visit_id"));
                  insertAdvise.setTimestamp(3, visitids.getTimestamp("last_updated"));
@@ -179,7 +179,7 @@ public class TestDataGenerator {
     public static void generateVisits(){
         openConnection();
         try{
-             PreparedStatement getDoctorIds = connection.prepareStatement("SELECT * FROM ece356_test.`patient-of`");
+             PreparedStatement getDoctorIds = connection.prepareStatement("SELECT * FROM ece356.`patient-of`");
              ResultSet docids = getDoctorIds.executeQuery();
              int visitId = 0;
              while(docids.next()){
@@ -206,7 +206,7 @@ public class TestDataGenerator {
                     java.sql.Timestamp lastUpdated = getNowAsTimestamp();
 
                     //generate visit
-                    String newVisit = "INSERT INTO ece356_test.visit"+
+                    String newVisit = "INSERT INTO ece356.visit"+
                             " (visit_id, last_updated, visit_date, visit_start_time, visit_end_time, pid, eid, is_valid)"+
                             " VALUES (?, ?, ?, ?, ?, ?, ?, 1)";
                     PreparedStatement insertVisit = connection.prepareStatement(newVisit);
@@ -241,7 +241,7 @@ public class TestDataGenerator {
                         //</editor-fold>
                     };
                     int procedureType = (int)(Math.random()*procedures.length);
-                    String newProcedure = "INSERT INTO ece356_test.procedure"+
+                    String newProcedure = "INSERT INTO ece356.procedure"+
                             " (visit_id, last_updated, procedure_name, description)"+
                             " VALUES (?, ?, ?, ?)";
                     PreparedStatement insertProcedure = connection.prepareStatement(newProcedure);
@@ -261,7 +261,7 @@ public class TestDataGenerator {
                         "Everything is A-OK"
                         //</editor-fold>
                     };
-                    String newDiagnosis = "INSERT INTO ece356_test.diagnosis"+
+                    String newDiagnosis = "INSERT INTO ece356.diagnosis"+
                             " (visit_id, last_updated, severity)"+
                             " VALUES (?, ?, ?)";
                     PreparedStatement insertDiagnosis = connection.prepareStatement(newDiagnosis);
@@ -307,7 +307,7 @@ public class TestDataGenerator {
                            drugId = (int)(Math.random()*drug.length);
                         }
                         used[drugId] = true;
-                        String newPrescription = "INSERT INTO ece356_test.prescription"+
+                        String newPrescription = "INSERT INTO ece356.prescription"+
                             " (visit_id, last_updated, drug_name, expires)"+
                             " VALUES (?, ?, ?, ?)";
                         PreparedStatement insertPrescription = connection.prepareStatement(newPrescription);
@@ -328,7 +328,7 @@ public class TestDataGenerator {
                                 "We may have to amputate."
                                 //</editor-fold>
                             };
-                    String newComment = "INSERT INTO ece356_test.comment"+
+                    String newComment = "INSERT INTO ece356.comment"+
                         " (visit_id, last_updated, eid, timestamp, content)"+
                         " VALUES (?, ?, ?, ?, ?)";
                     PreparedStatement insertComment = connection.prepareStatement(newComment);
@@ -355,7 +355,7 @@ public class TestDataGenerator {
 
         */
         openConnection();
-        String preparedStatement = "INSERT INTO ece356_test.`patient-of` VALUES (?, ?)";
+        String preparedStatement = "INSERT INTO ece356.`patient-of` VALUES (?, ?)";
         try{
             PreparedStatement ps = connection.prepareStatement(preparedStatement);
             //each doctor gets 2 patients
@@ -433,7 +433,7 @@ public class TestDataGenerator {
             //</editor-fold>
         };
         
-        String preparedStatement = "INSERT INTO ece356_test.drug" +   
+        String preparedStatement = "INSERT INTO ece356.drug" +   
                 " VALUES (?, ?);";
         //every doctor has one staff member, so there should be one staff member per doctor
         //for every 4 doctors, have one legal auditor and one finance auditor
@@ -460,7 +460,7 @@ public class TestDataGenerator {
     
     public static void generateManagedBy(){
         openConnection();
-        String preparedStatementManaged = "INSERT INTO ece356_test.`managed-by` VALUES (?, ?)";
+        String preparedStatementManaged = "INSERT INTO ece356.`managed-by` VALUES (?, ?)";
         
         try{
             PreparedStatement managed = connection.prepareStatement(preparedStatementManaged);
@@ -610,7 +610,7 @@ public class TestDataGenerator {
             //</editor-fold>
         };
         
-        String preparedStatement = "INSERT INTO ece356_test.employee (password, fname, lname, dept, is_enabled) " +   
+        String preparedStatement = "INSERT INTO ece356.employee (password, fname, lname, dept, is_enabled) " +   
                 " VALUES (?, ?, ?, ?, 1);";
        
         //every doctor has one staff member, so there should be one staff member per doctor
@@ -857,7 +857,7 @@ public class TestDataGenerator {
         };
         
         String preparedStatement = 
-                "INSERT INTO ece356_test.patient" +
+                "INSERT INTO ece356.patient" +
                 " (password, fname, lname, is_enabled," +
                 " street_number, street, city, post_code," +
                 " sin, num_visits, current_health) VALUES "+
