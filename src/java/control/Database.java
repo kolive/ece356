@@ -102,8 +102,7 @@ public class Database {
             
         }
         
-        return user;
-        
+        return user;      
     }
     
     
@@ -254,7 +253,7 @@ public class Database {
             try{
                 ps = connection.prepareStatement(
                         "SELECT pid, max(visit_date) AS last_visit " +
-                        "FROM visit" +
+                        "FROM ece356.visit " +
                         "WHERE eid=? AND is_valid='1' " +
                         "GROUP BY pid"
                 );
@@ -278,13 +277,10 @@ public class Database {
                 }
             }catch(SQLException e){
                 e.printStackTrace();
-                closeConnection();
                 return patients;
-            }
-            
+            } 
         }
         
-        closeConnection();
         return patients;
     }
     
@@ -309,7 +305,7 @@ public class Database {
             try{
                 ps = connection.prepareStatement(
                         "SELECT pid, MAX(visit_date) as last_visit " +
-                            "FROM visit as V " +
+                            "FROM ece356.visit as V " +
                             "INNER JOIN ( " +
                                 "SELECT visit_id " +
                                 "FROM ece356.advises AS a " +

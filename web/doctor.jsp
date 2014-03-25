@@ -33,7 +33,14 @@
                     <div class="patients-list-filter">
                     </div>
                     <div class="patients-list">
-                        <%= doctorVM.formatPatientsList() %>
+                        <%= doctorVM.formatPatientsList(false) %>
+                    </div>
+                </div>
+                <div class="advisees-list-container">
+                    <div class="advisees-list-filter">
+                    </div>
+                    <div class="advisees-list">
+                        <%= doctorVM.formatPatientsList(true) %>
                     </div>
                 </div>
                 <div class="patient-details">
