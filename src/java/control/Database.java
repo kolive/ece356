@@ -87,7 +87,7 @@ public class Database {
                  if(patient){
                     ps = connection.prepareStatement("SELECT * FROM ece356.patient WHERE pid=? AND password=? AND is_enabled=1");
                 }else{
-                    ps = connection.prepareStatement("SELECT * FROM ece356.patient WHERE eid=? AND password=? AND is_enabled=1");
+                    ps = connection.prepareStatement("SELECT * FROM ece356.employee WHERE eid=? AND password=? AND is_enabled=1");
                 }
                 
                 ps.setInt(1, Integer.parseInt(id));

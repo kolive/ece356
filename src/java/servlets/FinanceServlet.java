@@ -12,15 +12,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import models.*;
-import control.Database;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import models.FinanceViewModel;
+import models.User;
+
 /**
  *
  * @author Kyle
  */
-public class UserLoginServlet extends HttpServlet {
+public class FinanceServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -33,47 +32,14 @@ public class UserLoginServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        
-        
-        if(request.getSession().getAttribute("user") != null){
-            //redirect to logout confirmation before allowing to login
-            //for now i'll just delete the current user attribute
-            request.getSession().setAttribute("user", null);
+        User fauditor = (User)request.getSession().getAttribute("user");
+        if(fauditor != null && fauditor.getUserType() == User.UserType.FAUDITOR){
+           FinanceViewModel financeVM = new FinanceViewModel();
+           request.getSession().setAttribute("financeVM", financeVM);
+           response.sendRedirect("/ece356/finance.jsp");
+        }else{
+            //redirect to error page
         }
-
-        //Two cases, want to login as a patient or employee
-
-        if(request.getParameter("type") != null 
-                && request.getParameter("type").equals("patient")){
-
-            JSONObject userInfo = Database.userLogin(request.getParameter("username"), request.getParameter("password"), true);
-            if(!userInfo.isEmpty()){
-                User p = new User(userInfo, User.UserType.PATIENT);
-                request.getSession().setAttribute("user", p);
-                response.sendRedirect("PatientServlet");
-            }else{
-                //redirect to failed login page
-            }
-
-
-        }else if(request.getParameter("type") != null){
-            //employee login
-            JSONObject userInfo = Database.userLogin(request.getParameter("username"), request.getParameter("password"), false);
-            if(!userInfo.isEmpty() && userInfo.get("dept").equals("FINANCE") ){
-                User p = new User(userInfo, User.UserType.FAUDITOR);
-                request.getSession().setAttribute("user", p);
-                response.sendRedirect("/ece356/FinanceServlet");
-            }else{
-                //redirect to failed login page
-                System.out.println(userInfo.get("dept"));
-            }
-        }
-            
-            
-        
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
