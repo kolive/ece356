@@ -32,6 +32,7 @@ public class FinanceServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        //TODO: add user check to make sure user is logged in and an FAUDITOR,
         User fauditor = (User)request.getSession().getAttribute("user");
         if(fauditor != null && fauditor.getUserType() == User.UserType.FAUDITOR){
            FinanceViewModel financeVM = new FinanceViewModel();
@@ -68,7 +69,26 @@ public class FinanceServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        try {
+            User user = (User)request.getSession().getAttribute("user");
+            if(user.getUserType() == User.UserType.FAUDITOR){
+                FinanceViewModel fvm = (FinanceViewModel) request.getSession().getAttribute("financeVM");
+                if(request.getParameter("type").equals("PatientRequest")){
+                    out.println(fvm.formatPatientList(Integer.parseInt(request.getParameter("dId").trim()), true));
+                }else if(request.getParameter("type").equals("VisitRequest")){
+                    out.println(fvm.formatVisitList(
+                            Integer.parseInt(request.getParameter("pId").trim()),
+                            Integer.parseInt(request.getParameter("dId").trim()),
+                            true));
+                }
+            }else{
+               out.println("User authentication error. Please log in.");
+            }
+        }finally{
+            out.close();
+        }
     }
 
     /**

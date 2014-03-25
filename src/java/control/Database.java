@@ -255,10 +255,11 @@ public class Database {
             Statement s;
             ResultSet rs;
             try{
-                ps = connection.prepareStatement("SELECT * FROM ece356.patient-of WHERE doctor_id=?");
+                //this should also have a join with visits where eid=dId and get all distinct pids
+                //doctors can have patients that aren't their primary patients (so wouldn't be in the patient-of relation)
+                ps = connection.prepareStatement("SELECT * FROM ece356.`patient-of` WHERE doctor_id=?");
                 
                 ps.setInt(1, doctorId);
-                
                 rs = ps.executeQuery();
                
                 rows = convertToJson(rs);
@@ -269,7 +270,7 @@ public class Database {
                     //get patient information
                     for (int i = 0; i < rows.size(); i++)
                     {
-                        patients.add(getPatient(Integer.parseInt(((JSONObject)rows.get(i)).get("pid").toString())));
+                        patients.add(getPatient(Integer.parseInt(((JSONObject)rows.get(i)).get("patient_id").toString())));
                     }
                     
                 }
@@ -368,14 +369,19 @@ public class Database {
         return visit;
     }
     
+    public static JSONArray getVisits(int patientId){
+        return getVisits(patientId, -1);
+    }
+    
     /**
      * Queries for a list of all visitation records for a particular patient
      * Only gets most up-to-date records
      * @param patientId
      * @return a JSONArray describing all patient visits
      */
-    public static JSONArray getVisits(int patientId){
+    public static JSONArray getVisits(int patientId, int doctorId){
         boolean status = true;
+        
         if(connection == null){
             status = openConnection();
         }
@@ -389,16 +395,30 @@ public class Database {
             try{
                 //selects each visit with the biggest "last updated" time
                 //and that isn't a cancelled visit
-                String preparedStatement = "select * " +
+                String preparedStatement;
+                if(doctorId == -1){
+                    preparedStatement = "select * " +
                     "from ece356.visit v " +
                     "inner join( " +
                     "select visit_id, max(last_updated) last_updated " +
                     "from ece356.visit where pid=? and is_valid=1 " +
                     "group by visit_id" +
                     " ) mv on mv.visit_id = v.visit_id and mv.last_updated = v.last_updated;";
-               
-                ps = connection.prepareStatement(preparedStatement);
-                ps.setInt(1, patientId);
+                    ps = connection.prepareStatement(preparedStatement);
+                    ps.setInt(1, patientId);
+                }else{
+                    preparedStatement = "select * " +
+                    "from ece356.visit v " +
+                    "inner join( " +
+                    "select visit_id, max(last_updated) last_updated " +
+                    "from ece356.visit where pid=? and eid=? and is_valid=1 " +
+                    "group by visit_id" +
+                    " ) mv on mv.visit_id = v.visit_id and mv.last_updated = v.last_updated;";
+                    ps = connection.prepareStatement(preparedStatement);
+                    ps.setInt(1, patientId);
+                    ps.setInt(2, doctorId);
+                }
+                
                 
                 rs = ps.executeQuery();
                
@@ -620,5 +640,42 @@ public class Database {
         
     }
     
+    /**
+     * Queries the database to return a JSONArray of all doctors 
+     * @param 
+     * @return a JSONArray describing doctor row(s)
+     */
+    public static JSONArray getDoctors(){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray doctors = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "select * from ece356.employee WHERE is_enabled=1 AND dept=\"DOCTOR\"";
+                ps = connection.prepareStatement(preparedStatement);
+                
+                rs = ps.executeQuery();
+                doctors = convertToJson(rs);
+                
+                
+              return doctors;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return doctors;
+            }
+            
+        }
+        
+        return doctors;
+        
+    }
     
 }
