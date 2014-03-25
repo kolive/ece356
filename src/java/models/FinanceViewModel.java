@@ -106,7 +106,7 @@ public class FinanceViewModel {
         String tmp;
         for(int i = 0; i < visits.size(); i++){
             JSONObject visit = (JSONObject)visits.get(i);
-            tmp = "<tr><td> %s </td><td> %s </td></tr>";
+            tmp = "<tr class='visitrow'><td> %s </td><td> %s </td></tr>";
             formattedList += String.format(tmp, 
                     visit.get("visit_id"),
                     visit.get("visit_date").toString());
@@ -126,7 +126,9 @@ public class FinanceViewModel {
      * @return HTML formatted summary block
      */
     public String formatDoctorSummary(int dId){
-        return "";
+        //TODO: make a statistics view or query for doctors in db which has:
+        // for each doctor has #primary patients, #patients, #visits
+        return "<p> Doctor Summary - TODO - EID: " + dId + "</p>";
     }
     
     /**
@@ -135,7 +137,9 @@ public class FinanceViewModel {
      * @return HTML formatted summary block
      */
     public String formatPatientSummary(int pId){
-        return "";
+        //TODO: make a statistics view or query for patients in db which has:
+        // for each patient has #visits, #prescriptions, #visits with primary doctor
+        return "<p> Patient Summary - TODO - PID: " + pId + "</p>";
     }
     
     /**
@@ -144,7 +148,7 @@ public class FinanceViewModel {
      * @return HTML formatted summary block
      */
     public String formatVisitSummary(int vId){
-        return "";
+        return "<p> Visit Summary - TODO - vId: " + vId + "</p>";
     }
     
 }

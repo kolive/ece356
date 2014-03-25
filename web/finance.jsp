@@ -39,6 +39,19 @@
                     //refresh events
                     $('.patientrow').click(pClickHandler);
                 });
+                
+                $.ajax({
+                        type : 'POST',
+                        url : '/ece356/FinanceServlet',
+                        data: { type: 'DoctorDetailRequest', dId : $(this).find('td:first').text() }
+                        
+                }).done(function(msg){
+                    $('.ddetails').html(msg);
+                    //clear visit and patient details
+                    $('.vdetails').html('');
+                    
+                    //refresh events
+                });
             };
             
             var pClickHandler = function() {
@@ -55,6 +68,17 @@
                     $('.vlist tbody').html(msg).trigger('footable_initialize');
                     $('.visitrow').click(vClickHandler);
                 });
+                $.ajax({
+                        type : 'POST',
+                        url : '/ece356/FinanceServlet',
+                        data: { type: 'PatientDetailRequest', 
+                                pId : $(this).find('td:first').text()
+                              }
+                        
+                }).done(function(msg){
+                    $('.pdetails').html(msg);
+                    $('.vdetails').html('');
+                });
             };
             
             var vClickHandler = function() {
@@ -68,6 +92,7 @@
                         
                 }).done(function(msg){
                     //TODO: should update the summary div
+                    $('.vdetails').html(msg);
                 });
             };
 
@@ -105,13 +130,13 @@
                     </div>
                 </div>
                 <div class="vhalf">
-                    <div class="third">
+                    <div class="third ddetails">
                         
                     </div>
-                    <div class="third">
+                    <div class="third pdetails">
                         
                     </div>
-                    <div class="third">
+                    <div class="third vdetails">
                         
                     </div>
                 </div>

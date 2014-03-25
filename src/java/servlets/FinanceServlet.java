@@ -82,6 +82,18 @@ public class FinanceServlet extends HttpServlet {
                             Integer.parseInt(request.getParameter("pId").trim()),
                             Integer.parseInt(request.getParameter("dId").trim()),
                             true));
+                }else if(request.getParameter("type").equals("DoctorDetailRequest")){
+                    out.println(fvm.formatDoctorSummary(
+                        Integer.parseInt(request.getParameter("dId").trim())
+                    ));
+                }else if(request.getParameter("type").equals("PatientDetailRequest")){
+                    out.println(fvm.formatPatientSummary(
+                        Integer.parseInt(request.getParameter("pId").trim())
+                    ));
+                }else if(request.getParameter("type").equals("VisitDetailRequest")){
+                    out.println(fvm.formatVisitSummary(
+                        Integer.parseInt(request.getParameter("vId").trim())
+                    ));
                 }
             }else{
                out.println("User authentication error. Please log in.");
