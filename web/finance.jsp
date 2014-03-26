@@ -11,17 +11,26 @@
          <jsp:useBean id="financeVM" type="models.FinanceViewModel" scope="session" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" type="text/javascript"></script>
+        <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
         <script src="js/footable.js" type="text/javascript"></script>
         <script src="js/footable.paginate.js" type="text/javascript"></script>
         <link href="css/footable.core.css" rel="stylesheet" type="text/css" />
         <link href="css/footable.metro.css" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" type="text/css" href="css/style.css">
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/start/jquery-ui.css">
+  
         <script type="text/javascript">
         $(function () {
 
             $( document ).ready(function() { 
                 $('table').footable();
                 $('.doctorrow').click(dClickHandler);
+                
+                $( '#date1' ).datepicker({dateFormat: 'yy-mm-dd', changeYear: true}).datepicker('setDate', new Date("January 1, 2000 00:00:00"));
+                $( '#date2' ).datepicker({dateFormat: 'yy-mm-dd', changeYear: true}).datepicker('setDate', new Date("January 1, 2100 00:00:00"));
+
+                //$( '#date2' ).datepicker( "option", "dateFormat", 'yy-mm-dd' );
+                //$( '#date1' ).datepicker( "option", "dateFormat", 'yy-mm-dd' );
             });
             
             var dClickHandler = function(){
@@ -30,7 +39,11 @@
                 $.ajax({
                         type : 'POST',
                         url : '/ece356/FinanceServlet',
-                        data: { type: 'PatientRequest', dId : $(this).find('td:first').text() }
+                        data: { type: 'PatientRequest', 
+                                dId : $(this).find('td:first').text(),
+                                date1 : $("#date1").val(),
+                                date2 : $("#date2").val()
+                               }
                         
                 }).done(function(msg){
                     $('.patlist tbody').html(msg).trigger('footable_initialize');
@@ -62,7 +75,9 @@
                         url : '/ece356/FinanceServlet',
                         data: { type: 'VisitRequest', 
                                 pId : $(this).find('td:first').text(), 
-                                dId : $('.dselected').find('td:first').text() }
+                                dId : $('.dselected').find('td:first').text(),
+                                date1 : $("#date1").val(),
+                                date2 : $("#date2").val() }
                         
                 }).done(function(msg){
                     $('.vlist tbody').html(msg).trigger('footable_initialize');
@@ -97,8 +112,6 @@
             };
 
         });
-        
-        
         </script>
         <title>Financial Officer Homepage</title>
     </head>
@@ -122,8 +135,14 @@
                     <div class="third ddetails">
                         <h2> Doctor Summary </h2>
                     </div>
-                    <div class="third pdetails">
-                        <h2> Patient Summary </h2>
+                    <div class="third">
+                        <div class='pdetails'>
+                            <h2> Patient Summary </h2>
+                        </div>
+                        <div style='vertical-align:bottom'> 
+                            Show only Patients with visits between dates: <br/> <input id="date1" type="text">
+                            and <input id="date2" type="text">
+                        </div>
                     </div>
                     <div class="third vdetails">
                         <h2> Visit Details </h2>
@@ -133,11 +152,11 @@
                     <div class="third">
                         <%= financeVM.formatDoctorList() %>
                     </div>
-                    <div class="third">
-                        <%= financeVM.formatPatientList(-1, false) %>
+                    <div class="third">                        
+                        <%= financeVM.formatPatientList(-1, false, "2000-01-01", "2100-01-01") %>
                     </div>
                     <div class="third">
-                        <%= financeVM.formatVisitList(-1,-1,false) %>
+                        <%= financeVM.formatVisitList(-1,-1,false, "2000-01-01", "2100-01-01" ) %>
                     </div>
                 </div>
                 

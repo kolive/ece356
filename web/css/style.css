@@ -138,3 +138,7 @@ div .third{
 .dselected, .pselected, .vselected{
     background-color: grey;
 }
+
+.pdetails{
+    height:400px;
+}

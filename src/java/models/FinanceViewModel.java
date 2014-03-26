@@ -54,12 +54,15 @@ public class FinanceViewModel {
      * @param dId
      * @return HTML table of patients
      */
-    public String formatPatientList(int dId, boolean onlyRows){ 
+    public String formatPatientList(int dId, boolean onlyRows, String date1, String date2){ 
         JSONArray patients;
         if(dId == -1){
             patients = new JSONArray();
         }else{
-            patients = Database.getPatients(dId);
+            patients = Database.getPatientsWithVisitsInRange(
+                    dId,
+                    java.sql.Date.valueOf(date1),
+                    java.sql.Date.valueOf(date2));
         }
         
         String formattedList = "";
@@ -91,12 +94,17 @@ public class FinanceViewModel {
      * @param dId
      * @return HTML for table of visits
      */
-    public String formatVisitList(int pId, int dId, boolean onlyRows){
+    public String formatVisitList(int pId, int dId, boolean onlyRows, String date1, String date2){
         JSONArray visits;
         if(dId == -1 || pId == -1){
             visits = new JSONArray();
         }else{
             visits = Database.getVisits(pId, dId);
+            visits = Database.getVisitsInRange(
+                    pId,
+                    dId,
+                    java.sql.Date.valueOf(date1),
+                    java.sql.Date.valueOf(date2));
         }
         
         String formattedList = "";

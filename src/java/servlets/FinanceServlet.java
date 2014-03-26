@@ -76,19 +76,25 @@ public class FinanceServlet extends HttpServlet {
             if(user.getUserType() == User.UserType.FAUDITOR){
                 FinanceViewModel fvm = (FinanceViewModel) request.getSession().getAttribute("financeVM");
                 if(request.getParameter("type").equals("PatientRequest")){
-                    out.println(fvm.formatPatientList(Integer.parseInt(request.getParameter("dId").trim()), true));
+                    out.println(fvm.formatPatientList(
+                            Integer.parseInt(request.getParameter("dId").trim()),
+                            true,
+                            request.getParameter("date1").trim(),
+                            request.getParameter("date2").trim()));
                 }else if(request.getParameter("type").equals("VisitRequest")){
                     out.println(fvm.formatVisitList(
                             Integer.parseInt(request.getParameter("pId").trim()),
                             Integer.parseInt(request.getParameter("dId").trim()),
-                            true));
+                            true,
+                            request.getParameter("date1"),
+                            request.getParameter("date2")));
                 }else if(request.getParameter("type").equals("DoctorDetailRequest")){
                     out.println(fvm.formatDoctorSummary(
                         Integer.parseInt(request.getParameter("dId").trim())
                     ));
                 }else if(request.getParameter("type").equals("PatientDetailRequest")){
                     out.println(fvm.formatPatientSummary(
-                        Integer.parseInt(request.getParameter("pId").trim())
+                        Integer.parseInt(request.getParameter("pId").trim())                       
                     ));
                 }else if(request.getParameter("type").equals("VisitDetailRequest")){
                     out.println(fvm.formatVisitSummary(

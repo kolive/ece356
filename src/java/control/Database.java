@@ -284,6 +284,55 @@ public class Database {
         return patients;
         
     }
+
+    
+    /**
+     * Gets all the patient records for patients of a given doctor
+     * @param doctorId
+     * @return A JSONArray with all the patient records
+     */
+    public static JSONArray getPatientsWithVisitsInRange(int doctorId, java.sql.Date date1, java.sql.Date date2){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray patients = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //this should also have a join with visits where eid=dId and get all distinct pids
+                //doctors can have patients that aren't their primary patients (so wouldn't be in the patient-of relation)
+                ps = connection.prepareStatement(
+                        "SELECT * FROM ece356.patient inner join"
+                                 + "(SELECT DISTINCT(pid) FROM ece356.`visit`"
+                                 + " WHERE eid=? AND visit_date >= ? AND visit_date <= ?) as p"
+                                 + " ON p.pid = ece356.patient.pid;"
+                );
+                
+                ps.setInt(1, doctorId);
+                ps.setDate(2, date1);
+                ps.setDate(3, date2);
+                System.out.println(ps);
+                rs = ps.executeQuery();
+               
+                patients = convertToJson(rs);
+                
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return patients;
+            }
+            
+        }
+        
+        return patients;
+        
+    }
     
     /**
      * Queries the database to get information about a patient
@@ -845,6 +894,70 @@ public class Database {
         
         return patientactivity;
         
+    }
+    
+    /**
+     * Queries for a list of all visitation records for a particular patient within a particular range of dates
+     * Only gets most up-to-date records
+     * @param patientId
+     * @return a JSONArray describing all patient visits
+     */
+    public static JSONArray getVisitsInRange(int patientId, int doctorId, java.sql.Date date1, java.sql.Date date2){
+        boolean status = true;
+        
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray visits = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //selects each visit with the biggest "last updated" time
+                //and that isn't a cancelled visit
+                String preparedStatement;
+                if(doctorId == -1){
+                    preparedStatement = "select * " +
+                    "from ece356.visit v " +
+                    "inner join( " +
+                    "select visit_id, max(last_updated) last_updated " +
+                    "from ece356.visit where pid=? and is_valid=1 and visit_date >= ? and visit_date <= ? " +
+                    "group by visit_id" +
+                    " ) mv on mv.visit_id = v.visit_id and mv.last_updated = v.last_updated;";
+                    ps = connection.prepareStatement(preparedStatement);
+                    ps.setInt(1, patientId);
+                    ps.setDate(2, date1);
+                    ps.setDate(3, date2);
+                }else{
+                    preparedStatement = "select * " +
+                    "from ece356.visit v " +
+                    "inner join( " +
+                    "select visit_id, max(last_updated) last_updated " +
+                    "from ece356.visit where pid=? and eid=? and is_valid=1 and visit_date >= ? and visit_date <= ?" +
+                    "group by visit_id" +
+                    " ) mv on mv.visit_id = v.visit_id and mv.last_updated = v.last_updated;";
+                    ps = connection.prepareStatement(preparedStatement);
+                    ps.setInt(1, patientId);
+                    ps.setInt(2, doctorId);
+                    ps.setDate(3, date1);
+                    ps.setDate(4, date2);
+                }
+                
+                
+                rs = ps.executeQuery();
+               
+                visits = convertToJson(rs);
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return visits;
+            }
+            
+        }
+        return visits;
     }
     
 }
