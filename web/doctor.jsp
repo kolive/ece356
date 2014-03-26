@@ -31,7 +31,19 @@
                        type: 'PatientRequest', patientId : $(this).find('td:first').text()
                    }
                 }).done(function(msg){
-                    
+                    $('.patientdetails').html(msg).trigger('footable_initialize');
+                });
+                
+                $.ajax({
+                    type: 'POST',
+                    url: '/ece356/DoctorServlet',
+                    data: {
+                        type: 'VisitRequest', 
+                        patientId: $(this).find('td:first').text(),
+                        isPatient: true
+                    }
+                }).done(function(msg){
+                    $('.vtable').html(msg).trigger('footable_initialize');
                 });
             }
 
@@ -43,7 +55,19 @@
                        type: 'PatientRequest', patientId : $(this).find('td:first').text()
                    }
                 }).done(function(msg){
-                    
+                    $('.patientdetails').html(msg).trigger('footable_initialize');
+                });
+                
+                $.ajax({
+                    type: 'POST',
+                    url: '/ece356/DoctorServlet',
+                    data: {
+                        type: 'VisitRequest', 
+                        patientId: $(this).find('td:first').text(),
+                        isPatient: false
+                    }
+                }).done(function(msg){
+                    $('.vtable').html(msg).trigger('footable_initialize');
                 });
             }
         });

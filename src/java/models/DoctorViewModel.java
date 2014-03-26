@@ -59,7 +59,8 @@ public class DoctorViewModel {
                 "<td><input type='text' id='patient-fname-filter'></td>" + 
                 "<td><input type='text' id='patient-lname-filter'></td>" +
                 "<td><input type='text' id='patient-curhlth-filter'></td>" +
-                "<td><input type='text' id='patient-lstvst-filter'></td>";
+                "<td><input type='text' id='patient-lstvst-filter'></td>" +
+                "</tr>";
         }    
         else{
             return 
@@ -68,7 +69,8 @@ public class DoctorViewModel {
                 "<td><input type='text' id='advisee-fname-filter'></td>" + 
                 "<td><input type='text' id='advisee-lname-filter'></td>" +
                 "<td><input type='text' id='advisee-curhlth-filter'></td>" +
-                "<td><input type='text' id='advisee-lstvst-filter'></td>";
+                "<td><input type='text' id='advisee-lstvst-filter'></td>" +
+                "</tr>";
         }                    
     }
     
@@ -109,7 +111,11 @@ public class DoctorViewModel {
         return formattedList;
     }
     
-    // TODO: bool param to switch on patients/advisees?
+    /**
+     * 
+     * @param patientId
+     * @return Patient's details formatted 
+     */
     public String formatPatientDetails(int patientId){
         
         JSONObject patient = new JSONObject();
@@ -125,7 +131,7 @@ public class DoctorViewModel {
             patient.put("pid", "");
         }
         
-        String details = "<h2>Patient Details:</h2>";
+        String details = "<div class='patientdetails'><h2>Patient Details:</h2>";
         
         details += String.format(
                         "<p>Name: %s %s</p>",
@@ -141,16 +147,26 @@ public class DoctorViewModel {
         
         // TODO: Number of visits?
      
+        details += "</div>";
         
         return details;
     }
     
+    private String formatPatientVisitsFilter(){
+        return 
+                "<tr id='visits-filter-row'>" +
+                "<td><input type='text' id='visits-visitNum-filter'></td>" +
+                "<td><input type='text' id='visits-date-filter'></td>" +
+                "<td><input type='text' id='visits-doctor-filter'></td>" +
+                "</tr>";
+    }
+    
     // TODO: bool param to switch on patients/advisees?
-    public String formatPatientVisitsTable(int patientId, boolean isAdvisee){                
+    public String formatPatientVisitsTable(int patientId, boolean isPatient){                
         JSONArray visits = new JSONArray();
         
         if(patientId != -1){
-            if(!currentPatientIsAdvisee()){
+            if(isPatient){
                 visits = Database.getPatientVisitsForDoctor(patientId, getDoctorId());
             }
             else{
@@ -172,6 +188,8 @@ public class DoctorViewModel {
                 "<th data-hide='all'>Diagnosis</th>" +
                 "<th data-hide='all'>Prescriptions Perscribed</th>" +
                 "</tr></thead>"; 
+        
+        //formatted += formatPatientVisitsFilter();
         
         for(int i = 0; i < visits.size(); i++){
             JSONObject visit = (JSONObject) visits.get(i);

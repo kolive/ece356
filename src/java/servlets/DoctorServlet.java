@@ -87,6 +87,13 @@ public class DoctorServlet extends HttpServlet {
                     
                     out.println(doctorVM.formatPatientDetails(patientId));
                 }
+                else if(request.getParameter("type").equals("VisitRequest")){
+                    int patientId = Integer.parseInt(request.getParameter("patientId").trim());
+                    
+                    boolean isPatient = Boolean.parseBoolean(request.getParameter("isPatient").trim());
+                        
+                    out.println(doctorVM.formatPatientVisitsTable(patientId, isPatient));
+                }
             }
             else{
                 out.println("User authentication error. Please log in.");
