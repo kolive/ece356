@@ -58,8 +58,8 @@ public class DoctorViewModel {
                 "<td><input type='text' id='patient-pid-filter'></td>" +
                 "<td><input type='text' id='patient-fname-filter'></td>" + 
                 "<td><input type='text' id='patient-lname-filter'></td>" +
-                "<td><input type='text' id='patient-curhlth-filter'></td>" +
-                "<td><input type='text' id='patient-lstvst-filter'></td>" +
+                "<td><input type='text' id='patient-currenthealth-filter'></td>" +
+                "<td>Between:</br><input type='text' id='patient-lastvisitstart-filter'></br>and:</br><input type='text' id='patient-lastvisitend-filter'></td>" +
                 "</tr>";
         }    
         else{
@@ -68,8 +68,8 @@ public class DoctorViewModel {
                 "<td><input type='text' id='advisee-pid-filter'></td>" +
                 "<td><input type='text' id='advisee-fname-filter'></td>" + 
                 "<td><input type='text' id='advisee-lname-filter'></td>" +
-                "<td><input type='text' id='advisee-curhlth-filter'></td>" +
-                "<td><input type='text' id='advisee-lstvst-filter'></td>" +
+                "<td><input type='text' id='advisee-currenthealth-filter'></td>" +
+                "<td>Between:</br><input type='text' id='advisee-lastvisitstart-filter'></br>and:</br><input type='text' id='advisee-lastvisitend-filter'></td>" +
                 "</tr>";
         }                    
     }
@@ -158,6 +158,11 @@ public class DoctorViewModel {
                 "<td><input type='text' id='visits-visitNum-filter'></td>" +
                 "<td><input type='text' id='visits-date-filter'></td>" +
                 "<td><input type='text' id='visits-doctor-filter'></td>" +
+                "<td>Between <input type='text' id='visits-starttimestart-filter'> and <input type='text' id='visits-starttimeend-filter'></td>" +
+                "<td>Between <input type='text' id='visits-endtimestart-filter'> and <input type='text' id='visits-endtimeend-filter'></td>" +
+                "<td><input type='text' id='visits-procedures-filter'></td>" +
+                "<td><input type='text' id='visits-diagnoses-filter'></td>" +
+                "<td><input type='text' id='visits-prescriptions-filter'></td>" +
                 "</tr>";
     }
     
@@ -181,30 +186,32 @@ public class DoctorViewModel {
                 "<thead><tr>" +
                 "<th data-toggle='true'>Visit #</th>" +
                 "<th>Appointment Date</th>" +
-                "<th>Assigned Physician<th>" +
+                "<th>Assigned Physician</th>" +
                 "<th data-hide='all'>Start Time</th>" +
                 "<th data-hide='all'>End Time</th>" +
                 "<th data-hide='all'>Procedure Performed</th>" +
                 "<th data-hide='all'>Diagnosis</th>" +
-                "<th data-hide='all'>Prescriptions Perscribed</th>" +
+                "<th data-hide='all'>Prescriptions Prescribed</th>" +
                 "</tr></thead>"; 
         
-        //formatted += formatPatientVisitsFilter();
+        formatted += formatPatientVisitsFilter();
         
         for(int i = 0; i < visits.size(); i++){
             JSONObject visit = (JSONObject) visits.get(i);
             
             int visitId = Integer.parseInt(visit.get("visit_id").toString());
             
+            formatted += "<tr>";
+            
             formatted += String.format(
-                                "<tr><td class='visit_id'>%s</td><td>%s</td><td>%s</td>",
+                                "<td class='visit_id'>%s</td><td>%s</td><td>%s</td>",
                                 visit.get("visit_id"),
                                 visit.get("visit_date"),
                                 visit.get("eid")
                             );
             
             formatted += String.format(
-                                "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td></td></tr>",
+                                "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
                                 visit.get("visit_start_time"),
                                 visit.get("visit_end_time"),
                                 FormatHelper.formatProcedures(visitId),
@@ -213,7 +220,7 @@ public class DoctorViewModel {
                             );
         }
         
-        formatted += "</table>";
+        formatted += "</tr></table>";
         
         return formatted;
     }
