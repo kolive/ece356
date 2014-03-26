@@ -18,41 +18,16 @@ import org.json.simple.JSONObject;
 public class DoctorViewModel {    
     User m_doctor;
     
-    JSONObject m_currentPatient;
-    
-    JSONArray m_patients;
-    JSONArray m_advisees;
-    
     public DoctorViewModel(User doctor){  
         m_doctor = doctor;
-        
-        m_patients = Database.getPatients(getDoctorId());
-        m_advisees = Database.getAdvisees(getDoctorId());
-        
-        m_currentPatient = new JSONObject();
     }
     
     private int getDoctorId(){
         return Integer.parseInt(m_doctor.getStringParam("eid"));
     }
     
-    public JSONObject getCurrentPatient(){
-        return m_currentPatient;
-    }
-    
-    public void setCurrentPatient(int patientId, boolean isAdvisee){
-        JSONObject currentPatient = Database.getPatient(patientId);
-        currentPatient.put("isAdvisee", isAdvisee);
-        
-        m_currentPatient = currentPatient;
-    }
-    
-    public boolean currentPatientIsAdvisee(){
-        return Boolean.parseBoolean(m_currentPatient.get("isAdvisee").toString());
-    }
-    
-    private String formatPatientsListFilters(boolean isAdviseesList){        
-        if(!isAdviseesList){
+    private String formatPatientsListFilters(boolean isPatientsList){        
+        if(isPatientsList){
             return 
                 "<tr id='patient-filter-row'>" +        
                 "<td><input type='text' id='patient-pid-filter'></td>" +
@@ -74,41 +49,65 @@ public class DoctorViewModel {
         }                    
     }
     
-    public String formatPatientsList(boolean isAdviseesList){
-        JSONArray patients = new JSONArray();
+    public String formatPatientsList(boolean isPatientsList){        
+        String formattedList = "";
         
-        if(isAdviseesList){
-            patients = Database.getAdvisees(getDoctorId());
+        if(isPatientsList){
+         formattedList += "<table id='patientslist'>";   
         }
         else{
-            patients = Database.getPatients(getDoctorId());
+            formattedList += "<table id='adviseeslist'>";
         }
         
-        String formattedList = "<table><thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Last Visit</th></thead>";
+        formattedList += "<thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Last Visit</th></thead>";
         
-        formattedList += this.formatPatientsListFilters(isAdviseesList);
+        formattedList += formatPatientsListFilters(isPatientsList);
+        
+        JSONArray rows = buildPatientsListRows(new JSONObject(), isPatientsList);
+        
+        for(int i = 0; i < rows.size(); i++){
+            formattedList += rows.get(i);
+        }
+        
+        formattedList += "</table>";
+        return formattedList;
+    }
+    
+    public JSONArray buildPatientsListRows(JSONObject filters, boolean isPatientsList){
+        JSONArray patients = new JSONArray();
+        
+        if(isPatientsList){
+            patients = Database.getPatients(getDoctorId(), filters);
+        }
+        else{
+            patients = Database.getAdvisees(getDoctorId(), filters);
+        }
+        
+        JSONArray formattedRows = new JSONArray();
         
         for(int i = 0; i < patients.size(); i++){
             JSONObject p = (JSONObject) patients.get(i); 
             
-            if(isAdviseesList){
-                formattedList += "<tr class='adviseerow'>";
+            String formattedRow = "";
+            
+            if(isPatientsList){
+                formattedRow += "<tr class='patientrow' style='display: tablerow;'>";
             }
             else{
-                formattedList += "<tr class='patientrow'>";
+                formattedRow += "<tr class='adviseerow' style='display: table-row;'>";
             }
             
-            formattedList += String.format("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><tr>",
+            formattedRow += String.format("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
                                 p.get("pid"),
                                 p.get("fname"),
                                 p.get("lname"),
                                 p.get("current_health"),
                                 p.get("last_visit"));
+                    
+            formattedRows.add(formattedRow);
         }
         
-        formattedList += "</table>";
-        
-        return formattedList;
+        return formattedRows;
     }
     
     /**

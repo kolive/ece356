@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import models.DoctorViewModel;
 import models.User;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 /**
  *
@@ -93,6 +95,24 @@ public class DoctorServlet extends HttpServlet {
                     boolean isPatient = Boolean.parseBoolean(request.getParameter("isPatient").trim());
                         
                     out.println(doctorVM.formatPatientVisitsTable(patientId, isPatient));
+                }
+                else if(request.getParameter("type").equals("PatientFilter")){
+                    JSONObject filters = new JSONObject();
+                    
+                    filters.put("pid", request.getParameter("pid"));
+                    filters.put("fname", request.getParameter("fname"));
+                    filters.put("lname", request.getParameter("lname"));
+                    filters.put("current_health", request.getParameter("current_health"));
+                    filters.put("last_visit_start", request.getParameter("last_visit_start"));
+                    filters.put("last_visit_end", request.getParameter("last_visit_end"));
+                    
+                    boolean isPatientsList = Boolean.parseBoolean(request.getParameter("isPatientsList").trim());
+                    
+                    JSONArray rows = doctorVM.buildPatientsListRows(filters, isPatientsList);
+                    
+                    for(int i = 0; i < rows.size(); i++){
+                        out.println(rows.get(i));
+                    }
                 }
             }
             else{

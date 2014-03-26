@@ -237,7 +237,7 @@ public class Database {
      * @param doctorId
      * @return A JSONArray with all the patient records
      */
-    public static JSONArray getPatients(int doctorId){
+    public static JSONArray getPatients(int doctorId, JSONObject filters){
         boolean status = true;
         if(connection == null){
             status = openConnection();
@@ -255,6 +255,7 @@ public class Database {
                         "SELECT pid, max(visit_date) AS last_visit " +
                         "FROM ece356.visit " +
                         "WHERE eid=? AND is_valid='1' " +
+                        buildPatientsFilters(filters) +
                         "GROUP BY pid"
                 );
                 
@@ -289,7 +290,7 @@ public class Database {
      * @param doctorId
      * @return A JSONArray with all the advisee records
      */
-    public static JSONArray getAdvisees(int doctorId){
+    public static JSONArray getAdvisees(int doctorId, JSONObject filters){
         boolean status = true;
         if(connection == null){
             status = openConnection();
@@ -312,6 +313,7 @@ public class Database {
                                 "WHERE doctor_id=? " +
                             ") ON a.visit_id=v.visit_id " +
                         "WHERE v.is_valid='1' " +
+                        buildPatientsFilters(filters) +
                         "GROUP BY v.pid"
                 );
                 
@@ -341,6 +343,36 @@ public class Database {
         return advisees;
     }
     
+    private static String buildPatientsFilters(JSONObject filters){
+        String filter = "";
+
+        if(filters.get("pid") != null && !filters.get("pid").toString().trim().equals("")){
+            String filterValue = filters.get("pid").toString().trim();
+
+            filter += String.format(" AND pid LIKE '%%%s%%'", filterValue);
+        }
+
+        if(filters.get("fname") != null && !filters.get("fname").toString().trim().equals("")){
+            String filterValue = filters.get("fname").toString().trim();
+            filter += String.format(" AND fname LIKE '%%%s%%'", filterValue);
+        }
+
+        if(filters.get("lname") != null && !filters.get("lname").toString().trim().equals("")){
+            String filterValue = filters.get("lname").toString().trim();
+            filter += String.format(" AND lname LIKE '%%%s%%'", filterValue);
+        }
+
+        if(filters.get("current_health") != null && !filters.get("current_health").toString().trim().equals("")){
+            String filterValue = filters.get("current_health").toString().trim();
+            filter += String.format(" AND current_health LIKE '%%%s%%'", filterValue);
+        }
+
+        /*if(filters.get("last_visit_start") != null){
+
+        }*/
+        
+        return filter;
+    }
     
     /**
      * Queries the database to get information about a patient
