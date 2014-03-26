@@ -17,18 +17,32 @@
         <link href="css/footable.core.css" rel="stylesheet" type="text/css" />
         <link href="css/footable.metro.css" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" type="text/css" href="css/style.css">
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/start/jquery-ui.css">
         <script type="text/javascript">
         $(function () {
             $( document ).ready(function() { 
                 $('table').footable();
                 $('.patientrow').click(pClickHandler); 
                 
+                $('#patient-lastvisitstart-filter').datepicker({dateFormat: 'yy/mm/dd', changeYear: true});
+                $('#patient-lastvisitend-filter').datepicker({dateFormat: 'yy/mm/dd', changeYear: true});
+                
                 $('#patient-pid-filter').change(patientsFilterChange);
                 $('#patient-fname-filter').change(patientsFilterChange);
                 $('#patient-lname-filter').change(patientsFilterChange);
                 $('#patient-currenthealth-filter').change(patientsFilterChange);
                 $('#patient-lastvisitstart-filter').change(patientsFilterChange);
-                $('#patient-lastvisitend-filter').change(patientsFilterChange);                
+                $('#patient-lastvisitend-filter').change(patientsFilterChange);     
+                
+                $('#advisee-lastvisitstart-filter').datepicker({dateFormat: 'yymm/dd', changeYear: true});
+                $('#advisee-lastvisitend-filter').datepicker({dateFormat: 'yy/mm/dd', changeYear: true});
+                
+                $('#advisee-pid-filter').change(patientsFilterChange);
+                $('#advisee-fname-filter').change(patientsFilterChange);
+                $('#advisee-lname-filter').change(patientsFilterChange);
+                $('#advisee-currenthealth-filter').change(patientsFilterChange);
+                $('#advisee-lastvisitstart-filter').change(patientsFilterChange);
+                $('#advisee-lastvisitend-filter').change(patientsFilterChange);  
             });
 
             var pClickHandler = function() {
@@ -42,7 +56,7 @@
                     $('.patientdetails').html(msg);
                 });
                 
-                $.ajax({
+                /*$.ajax({
                     type: 'POST',
                     url: '/ece356/DoctorServlet',
                     data: {
@@ -52,7 +66,7 @@
                     }
                 }).done(function(msg){
                     $('.vtable').html(msg).trigger('footable_initialize');
-                });
+                });*/
             };
 
             var aClickHandler = function() {
@@ -63,10 +77,10 @@
                        type: 'PatientRequest', patientId : $(this).find('td:first').text()
                    }
                 }).done(function(msg){
-                    $('.patientdetails').html(msg).trigger('footable_initialize');
+                    $('.patientdetails').html(msg);
                 });
                 
-                $.ajax({
+                /*$.ajax({
                     type: 'POST',
                     url: '/ece356/DoctorServlet',
                     data: {
@@ -76,7 +90,7 @@
                     }
                 }).done(function(msg){
                     $('.vtable').html(msg).trigger('footable_initialize');
-                });
+                });*/
             };
             
             var patientsFilterChange = function() {                

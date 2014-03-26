@@ -314,7 +314,7 @@ public class Database {
                             ") ON a.visit_id=v.visit_id " +
                         "WHERE v.is_valid='1' " +
                         buildPatientsFilters(filters) +
-                        "GROUP BY v.pid"
+                        " GROUP BY v.pid"
                 );
                 
                 ps.setInt(1, doctorId);
@@ -343,7 +343,7 @@ public class Database {
         return advisees;
     }
     
-    private static String buildPatientsFilters(JSONObject filters){
+    private static String buildPatientsFilters(JSONObject filters){             
         String filter = "";
 
         if(filters.get("pid") != null && !filters.get("pid").toString().trim().equals("")){
@@ -367,9 +367,23 @@ public class Database {
             filter += String.format(" AND current_health LIKE '%%%s%%'", filterValue);
         }
 
-        /*if(filters.get("last_visit_start") != null){
-
-        }*/
+        if(filters.get("last_visit_start") != null && !filters.get("last_visit_start").toString().trim().equals("") &&
+                filters.get("last_visit_end") != null && !filters.get("last_visit_end").toString().trim().equals("")){
+            String startDate = filters.get("last_visit_start").toString().trim();
+            String endDate = filters.get("last_visit_end").toString().trim();
+            
+            filter += String.format(" AND visit_date BETWEEN '%s' AND '%s'", startDate, endDate);
+        }
+        else if(filters.get("last_visit_start") != null && !filters.get("last_visit_start").toString().trim().equals("")){
+            String startDate = filters.get("last_visit_start").toString().trim();
+            filter += String.format(" AND visit_date='%s'", startDate);
+        }
+        else if(filters.get("last_visit_end") != null && !filters.get("last_visit_end").toString().trim().equals("")){
+            String endDate = filters.get("last_visit_end").toString().trim();
+            filter += String.format(" AND visit_date='%s'", endDate);
+        }
+        
+        filter += " ";
         
         return filter;
     }
