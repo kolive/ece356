@@ -73,20 +73,30 @@ public class DoctorViewModel {
     }
     
     public String formatPatientsList(boolean isAdviseesList){
-        JSONArray patients = m_patients;
+        JSONArray patients = new JSONArray();
         
         if(isAdviseesList){
-            patients = m_advisees;
+            patients = Database.getAdvisees(getDoctorId());
+        }
+        else{
+            patients = Database.getPatients(getDoctorId());
         }
         
-        String formattedList = "<table><thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Last Visit</th><thead>";
+        String formattedList = "<table><thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Last Visit</th></thead>";
         
         formattedList += this.formatPatientsListFilters(isAdviseesList);
         
         for(int i = 0; i < patients.size(); i++){
             JSONObject p = (JSONObject) patients.get(i); 
             
-            formattedList += String.format("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><tr>",
+            if(isAdviseesList){
+                formattedList += "<tr class='adviseerow'>";
+            }
+            else{
+                formattedList += "<tr class='patientrow'>";
+            }
+            
+            formattedList += String.format("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><tr>",
                                 p.get("pid"),
                                 p.get("fname"),
                                 p.get("lname"),
@@ -100,27 +110,33 @@ public class DoctorViewModel {
     }
     
     // TODO: bool param to switch on patients/advisees?
-    public String formatPatientDetails(){
-        if(m_currentPatient.isEmpty()){
-            return "";
+    public String formatPatientDetails(int patientId){
+        
+        JSONObject patient = new JSONObject();
+        
+        if(patientId != -1){
+            patient = Database.getPatient(patientId);
+        }
+        else{
+            // Fill details with empty strings if no patient selected
+            patient.put("fname", "");
+            patient.put("lname", "");
+            patient.put("sin", "");
+            patient.put("pid", "");
         }
         
-        String details = "<h2>Patient Details:</h2>)";
+        String details = "<h2>Patient Details:</h2>";
         
-        if(this.currentPatientIsAdvisee()){
-            details = "<h2>Advisee Details:</h2>";
-        }
-        
-        details = String.format(
+        details += String.format(
                         "<p>Name: %s %s</p>",
-                        m_currentPatient.get("fname"),
-                        m_currentPatient.get("lname")
+                        patient.get("fname"),
+                        patient.get("lname")
                     );
         
         details += String.format(
                         "<p>SIN: %s</p><p>ID Number: %s</p>",
-                        m_currentPatient.get("sin"),
-                        m_currentPatient.get("pid")
+                        patient.get("sin"),
+                        patient.get("pid")
                     );
         
         // TODO: Number of visits?
@@ -130,26 +146,22 @@ public class DoctorViewModel {
     }
     
     // TODO: bool param to switch on patients/advisees?
-    public String formatPatientVisitsTable(){
-        if(m_currentPatient.isEmpty()){
-            return "";
-        }
-        
-        int patientId = Integer.parseInt(m_currentPatient.get("pid").toString());
-                
+    public String formatPatientVisitsTable(int patientId, boolean isAdvisee){                
         JSONArray visits = new JSONArray();
         
-        if(!currentPatientIsAdvisee()){
-            visits = Database.getPatientVisitsForDoctor(patientId, getDoctorId());
-        }
-        else{
-            visits = Database.getAdviseeVisitsForDoctor(patientId, getDoctorId());
+        if(patientId != -1){
+            if(!currentPatientIsAdvisee()){
+                visits = Database.getPatientVisitsForDoctor(patientId, getDoctorId());
+            }
+            else{
+                visits = Database.getAdviseeVisitsForDoctor(patientId, getDoctorId());
+            }
         }
         
         //TODO: Comments section
         
         String formatted = 
-                "<table id='visits' class='footable table-bordered toggle-circle toggle-small'>" +
+                "<table class='vtable footable table-bordered toggle-circle toggle-small'>" +
                 "<thead><tr>" +
                 "<th data-toggle='true'>Visit #</th>" +
                 "<th>Appointment Date</th>" +

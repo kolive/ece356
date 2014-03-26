@@ -334,12 +334,10 @@ public class Database {
                 }
             }catch(SQLException e){
                 e.printStackTrace();
-                closeConnection();
                 return advisees;
             }
         }
         
-        closeConnection();
         return advisees;
     }
     
@@ -511,13 +509,11 @@ public class Database {
                 
             }catch(SQLException e){
                 e.printStackTrace();
-                closeConnection();
                 return visits;
             }
             
         }
         
-        closeConnection();
         return visits;
     }
 
@@ -564,13 +560,11 @@ public class Database {
                 
             }catch(SQLException e){
                 e.printStackTrace();
-                closeConnection();
                 return visits;
             }
             
         }
         
-        closeConnection();
         return visits;
     }
     

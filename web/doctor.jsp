@@ -12,16 +12,40 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" type="text/javascript"></script>
         <script src="js/footable.js" type="text/javascript"></script>
+        <script src="js/footable.paginate.js" type="text/javascript"></script>
         <link href="css/footable.core.css" rel="stylesheet" type="text/css" />
         <link href="css/footable.metro.css" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" type="text/css" href="css/style.css">
         <script type="text/javascript">
         $(function () {
-
             $( document ).ready(function() { 
-                $('table').footable() 
+                $('table').footable();
+                $('.patientrow').click(pClickHandler); 
             });
 
+            var pClickHandler = function() {
+                $.ajax({
+                   type: 'POST',
+                   url: '/ece356/DoctorServlet',
+                   data: {
+                       type: 'PatientRequest', patientId : $(this).find('td:first').text()
+                   }
+                }).done(function(msg){
+                    
+                });
+            }
+
+            var aClickHandler = function() {
+                $.ajax({
+                   type: 'POST',
+                   url: '/ece356/DoctorServlet',
+                   data: {
+                       type: 'PatientRequest', patientId : $(this).find('td:first').text()
+                   }
+                }).done(function(msg){
+                    
+                });
+            }
         });
         </script>
         <title>Doctor Homepage</title>
@@ -44,12 +68,12 @@
                     </div>
                 </div>
                 <div class="patient-details">
-                    <%= doctorVM.formatPatientDetails() %>
+                    <%= doctorVM.formatPatientDetails(-1) %>
                 </div>
             </div>
             <div class="patient-visits-container">
                 <div class="patient-visits-table">
-                    <%= doctorVM.formatPatientVisitsTable() %>
+                    <%= doctorVM.formatPatientVisitsTable(-1, false) %>
                 </div>
             </div>
         </div>
