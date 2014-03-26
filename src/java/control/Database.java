@@ -369,6 +369,36 @@ public class Database {
         return visit;
     }
     
+    public static JSONObject getVisit(int visitId){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONObject visit = new JSONObject();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                ps = connection.prepareStatement(
+                       "SELECT visit_id, max(last_updated) last_updated, visit_date, visit_start_time, visit_end_time, pid, eid, is_valid"+
+                       " FROM ece356.visit WHERE visit_id=? ");
+                ps.setInt(1, visitId);
+                rs = ps.executeQuery();
+               
+                visit = convertRowToJson(rs);
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return visit;
+            }
+            
+        }
+        return visit;
+    }
+    
     public static JSONArray getVisits(int patientId){
         return getVisits(patientId, -1);
     }
@@ -675,6 +705,145 @@ public class Database {
         }
         
         return doctors;
+        
+    }
+    
+    /**
+     * Queries the database to return a JSONArray of all doctors 
+     * @param dId, doctor id
+     * @return a JSONArray describing doctor row(s)
+     */
+    public static JSONObject getDoctorActivity(int dId){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONObject doctoractivity = new JSONObject();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = " SELECT" +
+                    " (SELECT COUNT(*) FROM ece356.`patient-of` WHERE doctor_id=?) as primary_patient_count," +
+                    " (SELECT COUNT(DISTINCT pid) from ece356.`visit` WHERE eid=?) as total_patient_count," +
+                    " (SELECT COUNT(DISTINCT visit_id) from ece356.`visit` WHERE eid=?) as total_visit_count;";
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, dId);
+                ps.setInt(2, dId);
+                ps.setInt(3, dId);
+                
+                rs = ps.executeQuery();
+                doctoractivity = convertRowToJson(rs);
+                
+                
+              return doctoractivity;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return doctoractivity;
+            }
+            
+        }
+        
+        return doctoractivity;
+        
+    }
+    
+    /**
+     * Queries the database to return a JSONArray of an employee 
+     * @param dId, doctor id
+     * @return a JSONArray describing doctor row(s)
+     */
+    public static JSONObject getEmployee(int eId){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONObject employee = new JSONObject();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "SELECT * from ece356.employee WHERE eid=?;";
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, eId);
+                
+                rs = ps.executeQuery();
+                employee = convertRowToJson(rs);
+                
+                
+              return employee;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return employee;
+            }
+            
+        }
+        
+        return employee;
+        
+    }
+    
+     /**
+     * Queries the database to return a JSONArray of a patient's activity summary 
+     * @param dId, doctor id
+     * @return a JSONArray describing doctor row(s)
+     */
+    public static JSONObject getPatientActivity(int pId){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONObject patientactivity = new JSONObject();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = " SELECT" +
+                "(SELECT COUNT(DISTINCT visit_id) " +
+                "    FROM ece356.`visit` INNER JOIN ece356.`patient-of` " +
+                "    ON ece356.`visit`.eid = ece356.`patient-of`.doctor_id" +
+                "    WHERE pid=?) as primary_visit_count," +
+                "(SELECT COUNT(*) from ece356.`visit` WHERE pid=? ) as total_visit_count," +
+                "(SELECT COUNT(*) " +
+                "    FROM ece356.prescription INNER JOIN ece356.visit" +
+                "    ON ece356.prescription.visit_id = ece356.visit.visit_id" +
+                "    WHERE ece356.visit.pid = ?) as total_prescription_count," +
+                "(SELECT COUNT(*) " +
+                "    FROM ece356.prescription INNER JOIN ece356.visit" +
+                "    ON ece356.prescription.visit_id = ece356.visit.visit_id" +
+                "    WHERE ece356.visit.pid = ? and ece356.prescription.expires >= NOW()) as active_prescription_count";
+                
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, pId);
+                ps.setInt(2, pId);
+                ps.setInt(3, pId);
+                ps.setInt(4, pId);
+                
+                rs = ps.executeQuery();
+                patientactivity = convertRowToJson(rs);
+                
+                
+              return patientactivity;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return patientactivity;
+            }
+            
+        }
+        
+        return patientactivity;
         
     }
     

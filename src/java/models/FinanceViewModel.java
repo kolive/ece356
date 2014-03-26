@@ -127,14 +127,30 @@ public class FinanceViewModel {
      */
     public String formatDoctorSummary(int dId){
         
-        /*
-            SELECT
-                (SELECT COUNT(*) FROM ece356.`patient-of` WHERE doctor_id=?) as primary_patient_count,
-                (SELECT COUNT(DISTINCT pid) from ece356.`visit` WHERE eid=?) as total_patient_count,
-                (SELECT COUNT(DISTINCT visit_id) from ece356.`visit` WHERE eid=?) as total_visit_count;
+        JSONObject activity = Database.getDoctorActivity(dId);
+        JSONObject doctor = Database.getEmployee(dId);
+        System.out.println(activity);
         
-        */
-        return "<p> Doctor Summary - TODO - EID: " + dId + "</p>";
+        String summary = "<h2> Doctor Summary </h2>";
+        
+        String tmp = "<p> Dr. %s %s, employee id: %s </p>";
+        summary += String.format(
+                        tmp,
+                        doctor.get("fname"),
+                        doctor.get("lname"),
+                        Integer.toString(dId)
+                    );
+        
+        tmp = "<p> Total Visits Presided Over: %s </p>";
+        summary += String.format(tmp, activity.get("total_visit_count"));
+        
+        tmp = "<p> for %s total patients, where %s are primary. </p>";
+        summary += String.format(
+                    tmp, 
+                    activity.get("total_patient_count"), 
+                    activity.get("primary_patient_count"));
+        
+        return summary;
     }
     
     /**
@@ -143,23 +159,26 @@ public class FinanceViewModel {
      * @return HTML formatted summary block
      */
     public String formatPatientSummary(int pId){
-        /*
-            SELECT
-                (SELECT COUNT(DISTINCT visit_id) 
-                    FROM ece356.`visit` INNER JOIN ece356.`patient-of` 
-                    ON ece356.`visit`.eid = ece356.`patient-of`.doctor_id
-                    WHERE pid=1) as primary_visit_count,
-                (SELECT COUNT(*) from ece356.`visit` WHERE pid=1 ) as total_visit_count,
-                (SELECT COUNT(*) 
-                    FROM ece356.prescription INNER JOIN ece356.visit
-                    ON ece356.prescription.visit_id = ece356.visit.visit_id
-                    WHERE ece356.visit.pid = 1) as total_prescription_count,
-                (SELECT COUNT(*) 
-                    FROM ece356.prescription INNER JOIN ece356.visit
-                    ON ece356.prescription.visit_id = ece356.visit.visit_id
-                    WHERE ece356.visit.pid = 1 and ece356.prescription.expires >= NOW()) as active_prescription_count
-        */
-        return "<p> Patient Summary - TODO - PID: " + pId + "</p>";
+        
+        JSONObject patientActivity = Database.getPatientActivity(pId);
+        System.out.println(patientActivity);
+        String summary = "<h2> Patient Summary </h2> ";
+        summary += "<p> Patient visitation and prescription summary for patient id " + pId + " : </p>";
+        
+        String tmp = "<ul> <li>Visits with primary doctor: %s </li>" +
+                     "<li>Total visits: %s </li>" +
+                     "<li>Active prescriptions: %s </li>"+
+                     "<li>Total prescriptions: %s </li></ul>";
+        
+        summary += String.format(
+                    tmp,
+                    patientActivity.get("primary_visit_count"),
+                    patientActivity.get("total_visit_count"),
+                    patientActivity.get("active_prescription_count"),
+                    patientActivity.get("total_prescription_count")
+                   );
+        
+        return summary;
     }
     
     /**
@@ -168,7 +187,27 @@ public class FinanceViewModel {
      * @return HTML formatted summary block
      */
     public String formatVisitSummary(int vId){
-        return "<p> Visit Summary - TODO - vId: " + vId + "</p>";
+        JSONObject visit = Database.getVisit(vId);
+        System.out.println(visit);
+        
+        String summary = "<h2> Visit Details </h2>";
+        
+        String tmp = "<p> Visit Date: %s, Start time: %s, End time: %s </p>";
+        
+        summary += String.format(
+                    tmp,
+                    visit.get("visit_date"),
+                    visit.get("visit_start_time"),
+                    visit.get("visit_end_time")
+                   );
+        summary += "<p> Procedure performed: </p>";
+        summary += models.Helpers.FormatHelper.formatProcedures(vId);
+        summary += "<p> Diagnosis: </p>";
+        summary += models.Helpers.FormatHelper.formatDiagnoses(vId);
+        summary += "<p> Prescriptions perscribed: </p>";
+        summary += models.Helpers.FormatHelper.formatPrescriptions(vId);
+        
+        return summary;
     }
     
 }

@@ -48,8 +48,8 @@
                 }).done(function(msg){
                     $('.ddetails').html(msg);
                     //clear visit and patient details
-                    $('.vdetails').html('');
-                    
+                    $('.vdetails').html('<h2> Visit Details </h2>');
+                    $('.pdetails').html('<h2> Patient Summary </h2>');
                     //refresh events
                 });
             };
@@ -77,7 +77,7 @@
                         
                 }).done(function(msg){
                     $('.pdetails').html(msg);
-                    $('.vdetails').html('');
+                    $('.vdetails').html('<h2> Visit Details </h2>');
                 });
             };
             
@@ -119,6 +119,17 @@
         <div class="view-container rounded backteal">
             <div class="finance-container">
                 <div class="vhalf">
+                    <div class="third ddetails">
+                        <h2> Doctor Summary </h2>
+                    </div>
+                    <div class="third pdetails">
+                        <h2> Patient Summary </h2>
+                    </div>
+                    <div class="third vdetails">
+                        <h2> Visit Details </h2>
+                    </div>
+                </div>
+                <div class="vhalf">
                     <div class="third">
                         <%= financeVM.formatDoctorList() %>
                     </div>
@@ -129,17 +140,7 @@
                         <%= financeVM.formatVisitList(-1,-1,false) %>
                     </div>
                 </div>
-                <div class="vhalf">
-                    <div class="third ddetails">
-                        
-                    </div>
-                    <div class="third pdetails">
-                        
-                    </div>
-                    <div class="third vdetails">
-                        
-                    </div>
-                </div>
+                
             </div> 
         </div>
     </body>

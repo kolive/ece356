@@ -122,7 +122,12 @@ div .third{
     display: inline-block;
     width:31%;
     margin:10px;
+    vertical-align:top;
     
+}
+
+.vhalf{
+    height:500px;
 }
 
 .vhalftable{
