@@ -126,8 +126,14 @@ public class FinanceViewModel {
      * @return HTML formatted summary block
      */
     public String formatDoctorSummary(int dId){
-        //TODO: make a statistics view or query for doctors in db which has:
-        // for each doctor has #primary patients, #patients, #visits
+        
+        /*
+            SELECT
+                (SELECT COUNT(*) FROM ece356.`patient-of` WHERE doctor_id=?) as primary_patient_count,
+                (SELECT COUNT(DISTINCT pid) from ece356.`visit` WHERE eid=?) as total_patient_count,
+                (SELECT COUNT(DISTINCT visit_id) from ece356.`visit` WHERE eid=?) as total_visit_count;
+        
+        */
         return "<p> Doctor Summary - TODO - EID: " + dId + "</p>";
     }
     
@@ -137,8 +143,22 @@ public class FinanceViewModel {
      * @return HTML formatted summary block
      */
     public String formatPatientSummary(int pId){
-        //TODO: make a statistics view or query for patients in db which has:
-        // for each patient has #visits, #prescriptions, #visits with primary doctor
+        /*
+            SELECT
+                (SELECT COUNT(DISTINCT visit_id) 
+                    FROM ece356.`visit` INNER JOIN ece356.`patient-of` 
+                    ON ece356.`visit`.eid = ece356.`patient-of`.doctor_id
+                    WHERE pid=1) as primary_visit_count,
+                (SELECT COUNT(*) from ece356.`visit` WHERE pid=1 ) as total_visit_count,
+                (SELECT COUNT(*) 
+                    FROM ece356.prescription INNER JOIN ece356.visit
+                    ON ece356.prescription.visit_id = ece356.visit.visit_id
+                    WHERE ece356.visit.pid = 1) as total_prescription_count,
+                (SELECT COUNT(*) 
+                    FROM ece356.prescription INNER JOIN ece356.visit
+                    ON ece356.prescription.visit_id = ece356.visit.visit_id
+                    WHERE ece356.visit.pid = 1 and ece356.prescription.expires >= NOW()) as active_prescription_count
+        */
         return "<p> Patient Summary - TODO - PID: " + pId + "</p>";
     }
     
