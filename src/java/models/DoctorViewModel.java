@@ -143,8 +143,6 @@ public class DoctorViewModel {
                         patient.get("sin"),
                         patient.get("pid")
                     );
-        
-        // TODO: Number of visits?
      
         details += "</div>";
         
@@ -165,19 +163,7 @@ public class DoctorViewModel {
                 "</tr>";
     }
     
-    // TODO: bool param to switch on patients/advisees?
-    public String formatPatientVisitsTable(int patientId, boolean isPatient){                
-        JSONArray visits = new JSONArray();
-        
-        if(patientId != -1){
-            if(isPatient){
-                visits = Database.getPatientVisitsForDoctor(patientId, getDoctorId());
-            }
-            else{
-                visits = Database.getAdviseeVisitsForDoctor(patientId, getDoctorId());
-            }
-        }
-        
+    public String formatPatientVisitsTable(int patientId, boolean isPatient){                        
         //TODO: Comments section
         
         String formatted = 
@@ -195,32 +181,58 @@ public class DoctorViewModel {
         
         formatted += formatPatientVisitsFilter();
         
-        for(int i = 0; i < visits.size(); i++){
-            JSONObject visit = (JSONObject) visits.get(i);
-            
-            int visitId = Integer.parseInt(visit.get("visit_id").toString());
-            
-            formatted += "<tr>";
-            
-            formatted += String.format(
-                                "<td class='visit_id'>%s</td><td>%s</td><td>%s</td>",
-                                visit.get("visit_id"),
-                                visit.get("visit_date"),
-                                visit.get("eid")
-                            );
-            
-            formatted += String.format(
-                                "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
-                                visit.get("visit_start_time"),
-                                visit.get("visit_end_time"),
-                                FormatHelper.formatProcedures(visitId),
-                                FormatHelper.formatDiagnoses(visitId),
-                                FormatHelper.formatPrescriptions(visitId)
-                            );
+        JSONArray rows = buildPatientVisitsRows(patientId, isPatient, new JSONObject());
+        
+        for(int i = 0; i < rows.size(); i++){
+            formatted += rows.get(i);
         }
         
-        formatted += "</tr></table>";
+        formatted += "</table>";
         
         return formatted;
+    }
+    
+    public JSONArray buildPatientVisitsRows(int patientId, boolean isPatient, JSONObject filters){
+        JSONArray formattedRows = new JSONArray();
+        
+        if(patientId != -1){
+            JSONArray visits = new JSONArray();
+            
+            if(isPatient){
+                visits = Database.getPatientVisitsForDoctor(patientId, getDoctorId(), filters);
+            }
+            else{
+                visits = Database.getAdviseeVisitsForDoctor(patientId, getDoctorId(), filters);
+            }
+            
+            for(int i = 0; i < visits.size(); i++){
+                JSONObject visit = (JSONObject) visits.get(i);
+
+                int visitId = Integer.parseInt(visit.get("visit_id").toString());
+
+                String formattedRow = "<tr>";
+
+                formattedRow += String.format(
+                                    "<td class='visit_id'>%s</td><td>%s</td><td>%s</td>",
+                                    visit.get("visit_id"),
+                                    visit.get("visit_date"),
+                                    visit.get("eid")
+                                );
+
+                formattedRow += String.format(
+                                    "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
+                                    visit.get("visit_start_time"),
+                                    visit.get("visit_end_time"),
+                                    FormatHelper.formatProcedures(visitId),
+                                    FormatHelper.formatDiagnoses(visitId),
+                                    FormatHelper.formatPrescriptions(visitId)
+                                );
+                formattedRow += "</tr>";
+                
+                formattedRows.add(formattedRow);
+            }
+        }
+        
+        return formattedRows;
     }
 }

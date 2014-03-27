@@ -542,7 +542,7 @@ public class Database {
      * @param doctorId
      * @return 
      */
-    public static JSONArray getPatientVisitsForDoctor(int patientId, int doctorId){
+    public static JSONArray getPatientVisitsForDoctor(int patientId, int doctorId, JSONObject filters){
         boolean status = true;
         if(connection == null){
             status = openConnection();
@@ -588,7 +588,7 @@ public class Database {
      * @param doctorId
      * @return 
      */
-    public static JSONArray getAdviseeVisitsForDoctor(int adviseeId, int doctorId){
+    public static JSONArray getAdviseeVisitsForDoctor(int adviseeId, int doctorId, JSONObject filters){
         boolean status = true;
         if(connection == null){
             status = openConnection();
