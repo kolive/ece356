@@ -261,7 +261,14 @@ public class Database {
                         ") AS p ON p.pid=v.pid " +
                         "WHERE eid=? AND is_valid='1' " +
                         buildPatientsFilters(filters) +
-                        "GROUP BY v.pid"
+                        "GROUP BY v.pid " +
+                        buildPatientsDateFilter(
+                                filters.get("last_visit_start") != null
+                                ? filters.get("last_visit_start").toString().trim()
+                                : "",
+                                filters.get("last_visit_end") != null
+                                ? filters.get("last_visit_end").toString().trim()
+                                : "")
                 );
                 
                 ps.setInt(1, doctorId);
@@ -311,7 +318,14 @@ public class Database {
                         ") AS p on p.pid=v.pid " +
                         "WHERE v.is_valid='1' " +
                         buildPatientsFilters(filters) +
-                        " GROUP BY v.pid"
+                        " GROUP BY v.pid " +
+                        buildPatientsDateFilter(
+                        filters.get("last_visit_start") != null
+                        ? filters.get("last_visit_start").toString().trim()
+                        : "",
+                        filters.get("last_visit_end") != null
+                        ? filters.get("last_visit_end").toString().trim()
+                        : "")
                 );
                 
                 ps.setInt(1, doctorId);
@@ -363,26 +377,34 @@ public class Database {
             String filterValue = filters.get("current_health").toString().trim();
             filter += String.format(" AND p.current_health LIKE '%%%s%%'", filterValue);
         }
-
-        if(filters.get("last_visit_start") != null && !filters.get("last_visit_start").toString().trim().equals("") &&
-                filters.get("last_visit_end") != null && !filters.get("last_visit_end").toString().trim().equals("")){
-            String startDate = filters.get("last_visit_start").toString().trim();
-            String endDate = filters.get("last_visit_end").toString().trim();
-            
-            filter += String.format(" AND v.visit_date BETWEEN '%s' AND '%s'", startDate, endDate);
-        }
-        else if(filters.get("last_visit_start") != null && !filters.get("last_visit_start").toString().trim().equals("")){
-            String startDate = filters.get("last_visit_start").toString().trim();
-            filter += String.format(" AND v.visit_date='%s'", startDate);
-        }
-        else if(filters.get("last_visit_end") != null && !filters.get("last_visit_end").toString().trim().equals("")){
-            String endDate = filters.get("last_visit_end").toString().trim();
-            filter += String.format(" AND v.visit_date='%s'", endDate);
-        }
         
         filter += " ";
         
         return filter;
+    }
+    
+    private static String buildPatientsDateFilter(String startDate, String endDate){
+        if(!startDate.trim().equals("") && !endDate.trim().equals("")){
+            return String.format(
+                        "HAVING last_visit BETWEEN '%s' AND '%s'",
+                        startDate,
+                        endDate
+                    );
+        }
+        else if(!startDate.trim().equals("")){
+            return String.format(
+                        "HAVING last_visit >= '%s'",
+                        startDate
+                    );
+        }
+        else if(!endDate.trim().equals("")){
+            return String.format(
+                        "HAVING last_visit <= '%s'",
+                        endDate
+                    );
+        }
+        
+        return "";
     }
     
     /**
