@@ -23,6 +23,7 @@
             $( document ).ready(function() { 
                 $('table').footable();
                 $('.patientrow').click(pClickHandler); 
+                $('.adviseerow').click(aClickHandler);
                 
                 $('#patient-lastvisitstart-filter').datepicker({dateFormat: 'yy/mm/dd', changeYear: true});
                 $('#patient-lastvisitend-filter').datepicker({dateFormat: 'yy/mm/dd', changeYear: true});
@@ -125,6 +126,8 @@
                     $('#patientslist td').each(function() {
                         $(this).show();
                     });
+                    
+                    $('.patientrow').click(pClickHandler); 
                 });
             };
             
@@ -143,9 +146,9 @@
                         isPatientsList: false
                     }
                 }).done(function(rows){
-                    var patientsList = $('#patientslist').data('footable');
+                    var patientsList = $('#adviseeslist').data('footable');
                     
-                    $('.patientrow').each(function() {
+                    $('.adviseerow').each(function() {
                         patientsList.removeRow(this);
                     });
                     
@@ -153,13 +156,15 @@
                         patientsList.appendRow(this);
                     });
                     
-                    $('#patientslist th').each(function() {
+                    $('#adviseeslist th').each(function() {
                        $(this).show(); 
                     });
                     
-                    $('#patientslist td').each(function() {
+                    $('#adviseeslist td').each(function() {
                         $(this).show();
                     });
+                    
+                    $('.adviseerow').click(aClickHandler); 
                 });
             }
         });
