@@ -297,13 +297,18 @@ public class Database {
             ResultSet rs;
             try{
                 ps = connection.prepareStatement(
-                        "SELECT pid, MAX(visit_date) as last_visit " +
-                            "FROM ece356.visit as V " +
-                            "INNER JOIN ( " +
-                                "SELECT visit_id " +
-                                "FROM ece356.advises AS a " +
-                                "WHERE doctor_id=? " +
-                            ") ON a.visit_id=v.visit_id " +
+                        "SELECT v.pid, p.fname, p.lname, p.current_health, MAX(v.visit_date) as last_visit " +
+                        "FROM ece356.visit as v " +
+                        "INNER JOIN ( " +
+                            "SELECT visit_id " +
+                            "FROM ece356.advises " +
+                            "WHERE doctor_id=? " +
+                        ") AS a ON a.visit_id=v.visit_id " +
+                        "INNER JOIN ( " +
+                            "SELECT pid, fname, lname, current_health " +
+                            "FROM ece356.patient " +
+                            "WHERE is_enabled='1' " +
+                        ") AS p on p.pid=v.pid " +
                         "WHERE v.is_valid='1' " +
                         buildPatientsFilters(filters) +
                         " GROUP BY v.pid"
