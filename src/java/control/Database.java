@@ -7,8 +7,6 @@
 package control;
 
 import java.sql.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import java.util.Set;
@@ -87,7 +85,7 @@ public class Database {
                  if(patient){
                     ps = connection.prepareStatement("SELECT * FROM ece356.patient WHERE pid=? AND password=? AND is_enabled=1");
                 }else{
-                    ps = connection.prepareStatement("SELECT * FROM ece356.patient WHERE eid=? AND password=? AND is_enabled=1");
+                    ps = connection.prepareStatement("SELECT * FROM ece356.employee WHERE eid=? AND password=? AND is_enabled=1");
                 }
                 
                 ps.setInt(1, Integer.parseInt(id));
@@ -255,10 +253,11 @@ public class Database {
             Statement s;
             ResultSet rs;
             try{
-                ps = connection.prepareStatement("SELECT * FROM ece356.patient-of WHERE doctor_id=?");
+                //this should also have a join with visits where eid=dId and get all distinct pids
+                //doctors can have patients that aren't their primary patients (so wouldn't be in the patient-of relation)
+                ps = connection.prepareStatement("SELECT * FROM ece356.`patient-of` WHERE doctor_id=?");
                 
                 ps.setInt(1, doctorId);
-                
                 rs = ps.executeQuery();
                
                 rows = convertToJson(rs);
@@ -269,10 +268,59 @@ public class Database {
                     //get patient information
                     for (int i = 0; i < rows.size(); i++)
                     {
-                        patients.add(getPatient(Integer.parseInt(((JSONObject)rows.get(i)).get("pid").toString())));
+                        patients.add(getPatient(Integer.parseInt(((JSONObject)rows.get(i)).get("patient_id").toString())));
                     }
                     
                 }
+            }catch(SQLException e){
+                e.printStackTrace();
+                return patients;
+            }
+            
+        }
+        
+        return patients;
+        
+    }
+
+    
+    /**
+     * Gets all the patient records for patients of a given doctor
+     * @param doctorId
+     * @return A JSONArray with all the patient records
+     */
+    public static JSONArray getPatientsWithVisitsInRange(int doctorId, Date date1, Date date2){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray patients = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //this should also have a join with visits where eid=dId and get all distinct pids
+                //doctors can have patients that aren't their primary patients (so wouldn't be in the patient-of relation)
+                ps = connection.prepareStatement(
+                        "SELECT * FROM ece356.patient inner join"
+                                 + "(SELECT DISTINCT(pid) FROM ece356.`visit`"
+                                 + " WHERE eid=? AND visit_date >= ? AND visit_date <= ?) as p"
+                                 + " ON p.pid = ece356.patient.pid;"
+                );
+                
+                ps.setInt(1, doctorId);
+                ps.setDate(2, date1);
+                ps.setDate(3, date2);
+                System.out.println(ps);
+                rs = ps.executeQuery();
+               
+                patients = convertToJson(rs);
+                
+                
             }catch(SQLException e){
                 e.printStackTrace();
                 return patients;
@@ -369,13 +417,58 @@ public class Database {
     }
     
     /**
+     * Queries database for information about a particular visit
+     * @param visitId
+     * @return A JSONObject describing a visit row
+     */
+    public static JSONObject getVisit(int visitId){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONObject visit = new JSONObject();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                ps = connection.prepareStatement(
+                       "SELECT visit_id, max(last_updated) last_updated, visit_date, visit_start_time, visit_end_time, pid, eid, is_valid"+
+                       " FROM ece356.visit WHERE visit_id=? ");
+                ps.setInt(1, visitId);
+                rs = ps.executeQuery();
+               
+                visit = convertRowToJson(rs);
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return visit;
+            }
+            
+        }
+        return visit;
+    }
+    
+    /**
+     * Same as getVisits but doesn't filter by doctor
+     * @param patientId
+     * @return 
+     */
+    public static JSONArray getVisits(int patientId){
+        return getVisits(patientId, -1);
+    }
+    
+    /**
      * Queries for a list of all visitation records for a particular patient
      * Only gets most up-to-date records
      * @param patientId
      * @return a JSONArray describing all patient visits
      */
-    public static JSONArray getVisits(int patientId){
+    public static JSONArray getVisits(int patientId, int doctorId){
         boolean status = true;
+        
         if(connection == null){
             status = openConnection();
         }
@@ -389,16 +482,30 @@ public class Database {
             try{
                 //selects each visit with the biggest "last updated" time
                 //and that isn't a cancelled visit
-                String preparedStatement = "select * " +
+                String preparedStatement;
+                if(doctorId == -1){
+                    preparedStatement = "select * " +
                     "from ece356.visit v " +
                     "inner join( " +
                     "select visit_id, max(last_updated) last_updated " +
                     "from ece356.visit where pid=? and is_valid=1 " +
                     "group by visit_id" +
                     " ) mv on mv.visit_id = v.visit_id and mv.last_updated = v.last_updated;";
-               
-                ps = connection.prepareStatement(preparedStatement);
-                ps.setInt(1, patientId);
+                    ps = connection.prepareStatement(preparedStatement);
+                    ps.setInt(1, patientId);
+                }else{
+                    preparedStatement = "select * " +
+                    "from ece356.visit v " +
+                    "inner join( " +
+                    "select visit_id, max(last_updated) last_updated " +
+                    "from ece356.visit where pid=? and eid=? and is_valid=1 " +
+                    "group by visit_id" +
+                    " ) mv on mv.visit_id = v.visit_id and mv.last_updated = v.last_updated;";
+                    ps = connection.prepareStatement(preparedStatement);
+                    ps.setInt(1, patientId);
+                    ps.setInt(2, doctorId);
+                }
+                
                 
                 rs = ps.executeQuery();
                
@@ -620,5 +727,248 @@ public class Database {
         
     }
     
+    /**
+     * Queries the database to return a JSONArray of all doctors 
+     * @param 
+     * @return a JSONArray describing doctor row(s)
+     */
+    public static JSONArray getDoctors(){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray doctors = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "select * from ece356.employee WHERE is_enabled=1 AND dept=\"DOCTOR\"";
+                ps = connection.prepareStatement(preparedStatement);
+                
+                rs = ps.executeQuery();
+                doctors = convertToJson(rs);
+                
+                
+              return doctors;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return doctors;
+            }
+            
+        }
+        
+        return doctors;
+        
+    }
+    
+    /**
+     * Queries the database to get a summary on a doctor's activity
+     * @param dId, doctor id
+     * @return a JSONArray describing doctor summary row
+     */
+    public static JSONObject getDoctorActivity(int dId){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONObject doctoractivity = new JSONObject();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = " SELECT" +
+                    " (SELECT COUNT(*) FROM ece356.`patient-of` WHERE doctor_id=?) as primary_patient_count," +
+                    " (SELECT COUNT(DISTINCT pid) from ece356.`visit` WHERE eid=?) as total_patient_count," +
+                    " (SELECT COUNT(DISTINCT visit_id) from ece356.`visit` WHERE eid=?) as total_visit_count;";
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, dId);
+                ps.setInt(2, dId);
+                ps.setInt(3, dId);
+                
+                rs = ps.executeQuery();
+                doctoractivity = convertRowToJson(rs);
+                
+                
+              return doctoractivity;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return doctoractivity;
+            }
+            
+        }
+        
+        return doctoractivity;
+        
+    }
+    
+    /**
+     * Queries the database to return a JSONArray of an employee 
+     * @param eId, employee id
+     * @return a JSONArray describing employee row(s)
+     */
+    public static JSONObject getEmployee(int eId){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONObject employee = new JSONObject();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "SELECT * from ece356.employee WHERE eid=?;";
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, eId);
+                
+                rs = ps.executeQuery();
+                employee = convertRowToJson(rs);
+                
+                
+              return employee;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return employee;
+            }
+            
+        }
+        
+        return employee;
+        
+    }
+    
+     /**
+     * Queries the database to return a JSONArray of a patient's activity summary 
+     * @param pId, patient's id
+     * @return a JSONArray with patient summary counts
+     */
+    public static JSONObject getPatientActivity(int pId){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONObject patientactivity = new JSONObject();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = " SELECT" +
+                "(SELECT COUNT(DISTINCT visit_id) " +
+                "    FROM ece356.`visit` INNER JOIN ece356.`patient-of` " +
+                "    ON ece356.`visit`.eid = ece356.`patient-of`.doctor_id" +
+                "    WHERE pid=?) as primary_visit_count," +
+                "(SELECT COUNT(*) from ece356.`visit` WHERE pid=? ) as total_visit_count," +
+                "(SELECT COUNT(*) " +
+                "    FROM ece356.prescription INNER JOIN ece356.visit" +
+                "    ON ece356.prescription.visit_id = ece356.visit.visit_id" +
+                "    WHERE ece356.visit.pid = ?) as total_prescription_count," +
+                "(SELECT COUNT(*) " +
+                "    FROM ece356.prescription INNER JOIN ece356.visit" +
+                "    ON ece356.prescription.visit_id = ece356.visit.visit_id" +
+                "    WHERE ece356.visit.pid = ? and ece356.prescription.expires >= NOW()) as active_prescription_count";
+                
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, pId);
+                ps.setInt(2, pId);
+                ps.setInt(3, pId);
+                ps.setInt(4, pId);
+                
+                rs = ps.executeQuery();
+                patientactivity = convertRowToJson(rs);
+                
+                
+              return patientactivity;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return patientactivity;
+            }
+            
+        }
+        
+        return patientactivity;
+        
+    }
+    
+    /**
+     * Queries for a list of all visitation records for a particular patient within a particular range of dates
+     * Only gets most up-to-date records
+     * @param patientId patient's id
+     * @param doctorId doctor's id (-1 will fetch visits for all doctors)
+     * @param date1 start date of range
+     * @param date2 end date of range
+     * @return a JSONArray describing all patient visits
+     */
+    public static JSONArray getVisitsInRange(int patientId, int doctorId, Date date1, Date date2){
+        boolean status = true;
+        
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray visits = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //selects each visit with the biggest "last updated" time
+                //and that isn't a cancelled visit
+                String preparedStatement;
+                if(doctorId == -1){
+                    preparedStatement = "select * " +
+                    "from ece356.visit v " +
+                    "inner join( " +
+                    "select visit_id, max(last_updated) last_updated " +
+                    "from ece356.visit where pid=? and is_valid=1 and visit_date >= ? and visit_date <= ? " +
+                    "group by visit_id" +
+                    " ) mv on mv.visit_id = v.visit_id and mv.last_updated = v.last_updated;";
+                    ps = connection.prepareStatement(preparedStatement);
+                    ps.setInt(1, patientId);
+                    ps.setDate(2, date1);
+                    ps.setDate(3, date2);
+                }else{
+                    preparedStatement = "select * " +
+                    "from ece356.visit v " +
+                    "inner join( " +
+                    "select visit_id, max(last_updated) last_updated " +
+                    "from ece356.visit where pid=? and eid=? and is_valid=1 and visit_date >= ? and visit_date <= ?" +
+                    "group by visit_id" +
+                    " ) mv on mv.visit_id = v.visit_id and mv.last_updated = v.last_updated;";
+                    ps = connection.prepareStatement(preparedStatement);
+                    ps.setInt(1, patientId);
+                    ps.setInt(2, doctorId);
+                    ps.setDate(3, date1);
+                    ps.setDate(4, date2);
+                }
+                
+                
+                rs = ps.executeQuery();
+               
+                visits = convertToJson(rs);
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return visits;
+            }
+            
+        }
+        return visits;
+    }
     
 }

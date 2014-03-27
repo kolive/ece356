@@ -118,3 +118,27 @@ body,html{
     min-height:300px;
 }
 
+div .third{
+    display: inline-block;
+    width:31%;
+    margin:10px;
+    vertical-align:top;
+    
+}
+
+.vhalf{
+    height:500px;
+}
+
+.vhalftable{
+    min-height:450px;
+    height:45%;
+}
+
+.dselected, .pselected, .vselected{
+    background-color: grey;
+}
+
+.pdetails{
+    height:400px;
+}
