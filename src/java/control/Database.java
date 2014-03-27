@@ -252,30 +252,22 @@ public class Database {
             ResultSet rs;
             try{
                 ps = connection.prepareStatement(
-                        "SELECT pid, max(visit_date) AS last_visit " +
-                        "FROM ece356.visit " +
+                        "SELECT v.pid, p.fname, p.lname, p.current_health, max(v.visit_date) AS last_visit " +
+                        "FROM ece356.visit AS v " +
+                        "INNER JOIN ( " +
+                            "SELECT pid, fname, lname, current_health " +
+                            "FROM ece356.patient " +
+                            "WHERE is_enabled='1'" +
+                        ") AS p ON p.pid=v.pid " +
                         "WHERE eid=? AND is_valid='1' " +
                         buildPatientsFilters(filters) +
-                        "GROUP BY pid"
+                        "GROUP BY v.pid"
                 );
                 
                 ps.setInt(1, doctorId);
                 
-                rs = ps.executeQuery();
-                rows = convertToJson(rs);
-                
-                if (!rows.isEmpty())
-                {
-                    //found patient to doctor mappings
-                    //get patient information
-                    for (int i = 0; i < rows.size(); i++)
-                    {
-                        JSONObject patient = getPatient(Integer.parseInt(((JSONObject)rows.get(i)).get("pid").toString()));  
-                        patient.put("last_visit", ((JSONObject)rows.get(i)).get("last_visit"));
-                        patients.add(patient);
-                    }
-                    
-                }
+                rs = ps.executeQuery();                
+                patients = convertToJson(rs);
             }catch(SQLException e){
                 e.printStackTrace();
                 return patients;
@@ -320,7 +312,7 @@ public class Database {
                 ps.setInt(1, doctorId);
                 
                 rs = ps.executeQuery();
-                rows = convertToJson(rs);
+                advisees = convertToJson(rs);
                 
                 if (!rows.isEmpty())
                 {
@@ -349,22 +341,22 @@ public class Database {
         if(filters.get("pid") != null && !filters.get("pid").toString().trim().equals("")){
             String filterValue = filters.get("pid").toString().trim();
 
-            filter += String.format(" AND pid LIKE '%%%s%%'", filterValue);
+            filter += String.format(" AND v.pid LIKE '%%%s%%'", filterValue);
         }
 
         if(filters.get("fname") != null && !filters.get("fname").toString().trim().equals("")){
             String filterValue = filters.get("fname").toString().trim();
-            filter += String.format(" AND fname LIKE '%%%s%%'", filterValue);
+            filter += String.format(" AND p.fname LIKE '%%%s%%'", filterValue);
         }
 
         if(filters.get("lname") != null && !filters.get("lname").toString().trim().equals("")){
             String filterValue = filters.get("lname").toString().trim();
-            filter += String.format(" AND lname LIKE '%%%s%%'", filterValue);
+            filter += String.format(" AND p.lname LIKE '%%%s%%'", filterValue);
         }
 
         if(filters.get("current_health") != null && !filters.get("current_health").toString().trim().equals("")){
             String filterValue = filters.get("current_health").toString().trim();
-            filter += String.format(" AND current_health LIKE '%%%s%%'", filterValue);
+            filter += String.format(" AND p.current_health LIKE '%%%s%%'", filterValue);
         }
 
         if(filters.get("last_visit_start") != null && !filters.get("last_visit_start").toString().trim().equals("") &&
@@ -372,15 +364,15 @@ public class Database {
             String startDate = filters.get("last_visit_start").toString().trim();
             String endDate = filters.get("last_visit_end").toString().trim();
             
-            filter += String.format(" AND visit_date BETWEEN '%s' AND '%s'", startDate, endDate);
+            filter += String.format(" AND v.visit_date BETWEEN '%s' AND '%s'", startDate, endDate);
         }
         else if(filters.get("last_visit_start") != null && !filters.get("last_visit_start").toString().trim().equals("")){
             String startDate = filters.get("last_visit_start").toString().trim();
-            filter += String.format(" AND visit_date='%s'", startDate);
+            filter += String.format(" AND v.visit_date='%s'", startDate);
         }
         else if(filters.get("last_visit_end") != null && !filters.get("last_visit_end").toString().trim().equals("")){
             String endDate = filters.get("last_visit_end").toString().trim();
-            filter += String.format(" AND visit_date='%s'", endDate);
+            filter += String.format(" AND v.visit_date='%s'", endDate);
         }
         
         filter += " ";
