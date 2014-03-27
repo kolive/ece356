@@ -14,6 +14,7 @@
         <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
         <script src="js/footable.js" type="text/javascript"></script>
         <script src="js/footable.paginate.js" type="text/javascript"></script>
+        <script src="js/footable.filter.js" type="text/javascript"></script>
         <link href="css/footable.core.css" rel="stylesheet" type="text/css" />
         <link href="css/footable.metro.css" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" type="text/css" href="css/style.css">
@@ -28,9 +29,6 @@
                 
                 $( '#date1' ).datepicker({dateFormat: 'yy-mm-dd', changeYear: true}).datepicker('setDate', new Date("January 1, 2000 00:00:00"));
                 $( '#date2' ).datepicker({dateFormat: 'yy-mm-dd', changeYear: true}).datepicker('setDate', new Date("January 1, 2100 00:00:00"));
-
-                //$( '#date2' ).datepicker( "option", "dateFormat", 'yy-mm-dd' );
-                //$( '#date1' ).datepicker( "option", "dateFormat", 'yy-mm-dd' );
             });
             
             var dClickHandler = function(){
@@ -106,7 +104,6 @@
                                 vId : $(this).find('td:first').text() }
                         
                 }).done(function(msg){
-                    //TODO: should update the summary div
                     $('.vdetails').html(msg);
                 });
             };

@@ -131,8 +131,8 @@ div .third{
 }
 
 .vhalftable{
-    min-height:500px;
-    height:50%;
+    min-height:450px;
+    height:45%;
 }
 
 .dselected, .pselected, .vselected{

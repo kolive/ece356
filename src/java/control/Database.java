@@ -7,8 +7,6 @@
 package control;
 
 import java.sql.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import java.util.Set;
@@ -291,7 +289,7 @@ public class Database {
      * @param doctorId
      * @return A JSONArray with all the patient records
      */
-    public static JSONArray getPatientsWithVisitsInRange(int doctorId, java.sql.Date date1, java.sql.Date date2){
+    public static JSONArray getPatientsWithVisitsInRange(int doctorId, Date date1, Date date2){
         
         boolean status = true;
         if(connection == null){
@@ -418,6 +416,11 @@ public class Database {
         return visit;
     }
     
+    /**
+     * Queries database for information about a particular visit
+     * @param visitId
+     * @return A JSONObject describing a visit row
+     */
     public static JSONObject getVisit(int visitId){
         boolean status = true;
         if(connection == null){
@@ -448,6 +451,11 @@ public class Database {
         return visit;
     }
     
+    /**
+     * Same as getVisits but doesn't filter by doctor
+     * @param patientId
+     * @return 
+     */
     public static JSONArray getVisits(int patientId){
         return getVisits(patientId, -1);
     }
@@ -758,9 +766,9 @@ public class Database {
     }
     
     /**
-     * Queries the database to return a JSONArray of all doctors 
+     * Queries the database to get a summary on a doctor's activity
      * @param dId, doctor id
-     * @return a JSONArray describing doctor row(s)
+     * @return a JSONArray describing doctor summary row
      */
     public static JSONObject getDoctorActivity(int dId){
         
@@ -803,8 +811,8 @@ public class Database {
     
     /**
      * Queries the database to return a JSONArray of an employee 
-     * @param dId, doctor id
-     * @return a JSONArray describing doctor row(s)
+     * @param eId, employee id
+     * @return a JSONArray describing employee row(s)
      */
     public static JSONObject getEmployee(int eId){
         
@@ -842,8 +850,8 @@ public class Database {
     
      /**
      * Queries the database to return a JSONArray of a patient's activity summary 
-     * @param dId, doctor id
-     * @return a JSONArray describing doctor row(s)
+     * @param pId, patient's id
+     * @return a JSONArray with patient summary counts
      */
     public static JSONObject getPatientActivity(int pId){
         
@@ -899,10 +907,13 @@ public class Database {
     /**
      * Queries for a list of all visitation records for a particular patient within a particular range of dates
      * Only gets most up-to-date records
-     * @param patientId
+     * @param patientId patient's id
+     * @param doctorId doctor's id (-1 will fetch visits for all doctors)
+     * @param date1 start date of range
+     * @param date2 end date of range
      * @return a JSONArray describing all patient visits
      */
-    public static JSONArray getVisitsInRange(int patientId, int doctorId, java.sql.Date date1, java.sql.Date date2){
+    public static JSONArray getVisitsInRange(int patientId, int doctorId, Date date1, Date date2){
         boolean status = true;
         
         if(connection == null){

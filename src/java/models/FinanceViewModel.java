@@ -7,7 +7,6 @@
 package models;
 
 import control.Database;
-import models.Helpers.FormatHelper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 /**
@@ -16,9 +15,7 @@ import org.json.simple.JSONObject;
  */
 public class FinanceViewModel {
     
-    //TODO: once working for all time periods, modify view so there's a field for range of time
-    //use field for DB queries in AJAX calls
-    
+      
     //TODO: might want to just make a helper class with stuff like building a table
     
     /**
@@ -29,7 +26,9 @@ public class FinanceViewModel {
      */
     public String formatDoctorList(){
         JSONArray doctors = Database.getDoctors();
-        String formattedList = "<table class='footable vhalftable dlist' data-page-navigation='.pagination'><thead><tr> <th> Employee ID </th> <th> First Name </th> <th> Last Name </th></tr></thead>";
+        String formattedList = "Search doctors : <input id='dfilter' type='text' />"+
+                                "<table class='footable vhalftable dlist'data-filter-minimum='1' data-filter='#dfilter' data-page-navigation='.pagination'>"+
+                                "<thead><tr> <th> Employee ID </th> <th> First Name </th> <th> Last Name </th></tr></thead>";
         String tmp;
         for(int i = 0; i < doctors.size(); i++){
             JSONObject doctor = (JSONObject)doctors.get(i);
@@ -67,7 +66,9 @@ public class FinanceViewModel {
         
         String formattedList = "";
         if(!onlyRows){
-            formattedList += "<table class='footable vhalftable patlist' data-page-navigation='.pagination'><thead><tr> <th> Patient ID </th> <th> First Name </th> <th> Last Name </th></tr></thead><tbody>";
+            formattedList += "Search patients : <input id='pfilter' type='text' />"+
+                            "<table class='footable vhalftable patlist' data-filter-minimum='1' data-filter='#pfilter' data-page-navigation='.pagination'>"+
+                            "<thead><tr> <th> Patient ID </th> <th> First Name </th> <th> Last Name </th></tr></thead><tbody>";
         }
         String tmp;
         for(int i = 0; i < patients.size(); i++){
@@ -109,7 +110,9 @@ public class FinanceViewModel {
         
         String formattedList = "";
         if(!onlyRows){
-            formattedList += "<table class='footable vhalftable vlist' data-page-navigation='.pagination'><thead><tr> <th> Visit ID </th> <th> Visit Date </th> </tr></thead><tbody>";
+            formattedList += "Search visits : <input id='vfilter' type='text' />" +
+                            "<table class='footable vhalftable vlist' data-filter-minimum='1' data-filter='#vfilter' data-page-navigation='.pagination'>"+ 
+                            "<thead><tr> <th> Visit ID </th> <th> Visit Date </th> </tr></thead><tbody>";
         }
         String tmp;
         for(int i = 0; i < visits.size(); i++){
