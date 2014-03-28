@@ -260,18 +260,54 @@ public class Database {
                             "WHERE is_enabled='1'" +
                         ") AS p ON p.pid=v.pid " +
                         "WHERE eid=? AND is_valid='1' " +
-                        buildPatientsFilters(filters) +
+                        buildPatientsFilters() +
                         "GROUP BY v.pid " +
-                        buildPatientsDateFilter(
-                                filters.get("last_visit_start") != null
-                                ? filters.get("last_visit_start").toString().trim()
-                                : "",
-                                filters.get("last_visit_end") != null
-                                ? filters.get("last_visit_end").toString().trim()
-                                : "")
+                        "HAVING last_visit BETWEEN ? AND ?"
                 );
                 
                 ps.setInt(1, doctorId);
+                
+                ps.setString(
+                    2,
+                    filters.get("pid") != null 
+                        ? "%%" + filters.get("pid").toString().trim() + "%%"
+                        : "%%"
+                    );
+                
+                ps.setString(
+                    3,
+                    filters.get("fname") != null
+                        ? "%%" + filters.get("fname").toString().trim() + "%%"
+                        : "%%"
+                );
+                
+                ps.setString(
+                    4,
+                    filters.get("lname") != null
+                        ? "%%" + filters.get("lname").toString().trim() + "%%"
+                        : "%%"
+                );
+                
+                ps.setString(
+                    5,
+                    filters.get("current_health") != null
+                        ? "%%" + filters.get("current_health").toString().trim() + "%%"
+                        : "%%"
+                );
+                
+                ps.setDate(
+                    6,
+                    filters.get("last_visit_start") != null && !filters.get("last_visit_start").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("last_visit_start").toString().trim())
+                        : java.sql.Date.valueOf("2000-01-01")
+                );
+                
+                ps.setDate(
+                    7,
+                    filters.get("last_visit_end") != null && !filters.get("last_visit_end").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("last_visit_end").toString().trim())
+                        : java.sql.Date.valueOf("2100-01-01")    
+                );
                 
                 rs = ps.executeQuery();                
                 patients = convertToJson(rs);
@@ -317,18 +353,54 @@ public class Database {
                             "WHERE is_enabled='1' " +
                         ") AS p on p.pid=v.pid " +
                         "WHERE v.is_valid='1' " +
-                        buildPatientsFilters(filters) +
-                        " GROUP BY v.pid " +
-                        buildPatientsDateFilter(
-                        filters.get("last_visit_start") != null
-                        ? filters.get("last_visit_start").toString().trim()
-                        : "",
-                        filters.get("last_visit_end") != null
-                        ? filters.get("last_visit_end").toString().trim()
-                        : "")
+                        buildPatientsFilters() +
+                        "GROUP BY v.pid " +
+                        "HAVING last_visit BETWEEN ? AND ?"
                 );
                 
                 ps.setInt(1, doctorId);
+                
+                ps.setString(
+                    2,
+                    filters.get("pid") != null 
+                        ? "%%" + filters.get("pid").toString().trim() + "%%"
+                        : "%%"
+                    );
+                
+                ps.setString(
+                    3,
+                    filters.get("fname") != null
+                        ? "%%" + filters.get("fname").toString().trim() + "%%"
+                        : "%%"
+                );
+                
+                ps.setString(
+                    4,
+                    filters.get("lname") != null
+                        ? "%%" + filters.get("lname").toString().trim() + "%%"
+                        : "%%"
+                );
+                
+                ps.setString(
+                    5,
+                    filters.get("current_health") != null
+                        ? "%%" + filters.get("current_health").toString().trim() + "%%"
+                        : "%%"
+                );
+                
+                ps.setDate(
+                    6,
+                    filters.get("last_visit_start") != null && !filters.get("last_visit_start").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("last_visit_start").toString().trim())
+                        : java.sql.Date.valueOf("2000-01-01")
+                );
+                
+                ps.setDate(
+                    7,
+                    filters.get("last_visit_end") != null && !filters.get("last_visit_end").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("last_visit_end").toString().trim())
+                        : java.sql.Date.valueOf("2100-01-01")    
+                );
                 
                 rs = ps.executeQuery();
                 advisees = convertToJson(rs);
@@ -354,10 +426,14 @@ public class Database {
         return advisees;
     }
     
-    private static String buildPatientsFilters(JSONObject filters){             
-        String filter = "";
+    private static String buildPatientsFilters(){             
+        String filter = " AND v.pid LIKE ?";
+        filter += " AND p.fname LIKE ?";
+        filter += " AND p.lname LIKE ?";
+        filter += " AND p.current_health LIKE ?";
+        filter += " ";
 
-        if(filters.get("pid") != null && !filters.get("pid").toString().trim().equals("")){
+        /*if(filters.get("pid") != null && !filters.get("pid").toString().trim().equals("")){
             String filterValue = filters.get("pid").toString().trim();
 
             filter += String.format(" AND v.pid LIKE '%%%s%%'", filterValue);
@@ -378,33 +454,9 @@ public class Database {
             filter += String.format(" AND p.current_health LIKE '%%%s%%'", filterValue);
         }
         
-        filter += " ";
+        filter += " ";*/
         
         return filter;
-    }
-    
-    private static String buildPatientsDateFilter(String startDate, String endDate){
-        if(!startDate.trim().equals("") && !endDate.trim().equals("")){
-            return String.format(
-                        "HAVING last_visit BETWEEN '%s' AND '%s'",
-                        startDate,
-                        endDate
-                    );
-        }
-        else if(!startDate.trim().equals("")){
-            return String.format(
-                        "HAVING last_visit >= '%s'",
-                        startDate
-                    );
-        }
-        else if(!endDate.trim().equals("")){
-            return String.format(
-                        "HAVING last_visit <= '%s'",
-                        endDate
-                    );
-        }
-        
-        return "";
     }
     
     /**

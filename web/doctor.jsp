@@ -25,23 +25,23 @@
                 $('.patientrow').click(pClickHandler); 
                 $('.adviseerow').click(aClickHandler);
                 
-                $('#patient-lastvisitstart-filter').datepicker({dateFormat: 'yy/mm/dd', changeYear: true});
-                $('#patient-lastvisitend-filter').datepicker({dateFormat: 'yy/mm/dd', changeYear: true});
+                $('#patient-lastvisitstart-filter').datepicker({dateFormat: 'yy-mm-dd', changeYear: true}).datepicker('setDate', new Date("January 1, 2000 00:00:00"));
+                $('#patient-lastvisitend-filter').datepicker({dateFormat: 'yy-mm-dd', changeYear: true}).datepicker('setDate', new Date("January 1, 2100 00:00:00"));
                 
-                $('#patient-pid-filter').change(patientsFilterChange);
-                $('#patient-fname-filter').change(patientsFilterChange);
-                $('#patient-lname-filter').change(patientsFilterChange);
-                $('#patient-currenthealth-filter').change(patientsFilterChange);
+                $('#patient-pid-filter').change(patientsFilterChange).val("");
+                $('#patient-fname-filter').change(patientsFilterChange).val("");
+                $('#patient-lname-filter').change(patientsFilterChange).val("");
+                $('#patient-currenthealth-filter').change(patientsFilterChange).val("");
                 $('#patient-lastvisitstart-filter').change(patientsFilterChange);
                 $('#patient-lastvisitend-filter').change(patientsFilterChange);     
                 
-                $('#advisee-lastvisitstart-filter').datepicker({dateFormat: 'yymm/dd', changeYear: true});
-                $('#advisee-lastvisitend-filter').datepicker({dateFormat: 'yy/mm/dd', changeYear: true});
+                $('#advisee-lastvisitstart-filter').datepicker({dateFormat: 'yy-mm-dd', changeYear: true}).datepicker('setDate', new Date("January 1, 2000 00:00:00"));
+                $('#advisee-lastvisitend-filter').datepicker({dateFormat: 'yy-mm-dd', changeYear: true}).datepicker('setDate', new Date("January 1, 2100 00:00:00"));
                 
-                $('#advisee-pid-filter').change(patientsFilterChange);
-                $('#advisee-fname-filter').change(patientsFilterChange);
-                $('#advisee-lname-filter').change(patientsFilterChange);
-                $('#advisee-currenthealth-filter').change(patientsFilterChange);
+                $('#advisee-pid-filter').change(patientsFilterChange).val("");
+                $('#advisee-fname-filter').change(patientsFilterChange).val("");
+                $('#advisee-lname-filter').change(patientsFilterChange).val("");
+                $('#advisee-currenthealth-filter').change(patientsFilterChange).val("");
                 $('#advisee-lastvisitstart-filter').change(patientsFilterChange);
                 $('#advisee-lastvisitend-filter').change(patientsFilterChange);  
             });
