@@ -16,6 +16,10 @@
         <servlet-name>DoctorServlet</servlet-name>
         <servlet-class>servlets.DoctorServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>FinanceServlet</servlet-name>
+        <servlet-class>servlets.FinanceServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserLoginServlet</servlet-name>
         <url-pattern>/UserLoginServlet</url-pattern>
@@ -31,6 +35,10 @@
     <servlet-mapping>
         <servlet-name>DoctorServlet</servlet-name>
         <url-pattern>/DoctorServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FinanceServlet</servlet-name>
+        <url-pattern>/FinanceServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
