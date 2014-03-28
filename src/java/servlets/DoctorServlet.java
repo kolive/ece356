@@ -89,22 +89,15 @@ public class DoctorServlet extends HttpServlet {
                     
                     out.println(doctorVM.formatPatientDetails(patientId));
                 }
-                else if(request.getParameter("type").equals("VisitRequest")){
-                    int patientId = Integer.parseInt(request.getParameter("patientId").trim());
-                    
-                    boolean isPatient = Boolean.parseBoolean(request.getParameter("isPatient").trim());
-                        
-                    out.println(doctorVM.formatPatientVisitsTable(patientId, isPatient));
-                }
                 else if(request.getParameter("type").equals("PatientFilter")){
                     JSONObject filters = new JSONObject();
                     
-                    filters.put("pid", request.getParameter("pid"));
-                    filters.put("fname", request.getParameter("fname"));
-                    filters.put("lname", request.getParameter("lname"));
-                    filters.put("current_health", request.getParameter("current_health"));
-                    filters.put("last_visit_start", request.getParameter("last_visit_start"));
-                    filters.put("last_visit_end", request.getParameter("last_visit_end"));
+                    filters.put("pid", request.getParameter("pid").trim());
+                    filters.put("fname", request.getParameter("fname").trim());
+                    filters.put("lname", request.getParameter("lname").trim());
+                    filters.put("current_health", request.getParameter("current_health").trim());
+                    filters.put("last_visit_start", request.getParameter("last_visit_start").trim());
+                    filters.put("last_visit_end", request.getParameter("last_visit_end").trim());
                     
                     boolean isPatientsList = Boolean.parseBoolean(request.getParameter("isPatientsList").trim());
                     
@@ -113,6 +106,16 @@ public class DoctorServlet extends HttpServlet {
                     for(int i = 0; i < rows.size(); i++){
                         out.println(rows.get(i));
                     }
+                }
+                else if(request.getParameter("type").equals("VisitRequest")){                   
+                    int patientId = Integer.parseInt(request.getParameter("patientId").trim());
+                    boolean isPatient = Boolean.parseBoolean((request.getParameter("isPatient").trim()));
+                    
+                    JSONArray rows = doctorVM.buildPatientVisitsRows(patientId, isPatient, new JSONObject());
+                    
+                    for(int i = 0; i < rows.size(); i++){
+                        out.println(rows.get(i));
+                    }       
                 }
             }
             else{

@@ -57,7 +57,7 @@
                     $('.patientdetails').html(msg);
                 });
                 
-                /*$.ajax({
+                $.ajax({
                     type: 'POST',
                     url: '/ece356/DoctorServlet',
                     data: {
@@ -65,9 +65,25 @@
                         patientId: $(this).find('td:first').text(),
                         isPatient: true
                     }
-                }).done(function(msg){
-                    $('.vtable').html(msg).trigger('footable_initialize');
-                });*/
+                }).done(function(rows){
+                    var visitsList = $('#visitstable').data('footable');
+                    
+                    $('.visitrow').each(function() {
+                        visitsList.removeRow(this);
+                    });
+                    
+                    $(rows).each(function(){
+                        visitsList.appendRow(this);
+                    });
+                    
+                    $('#visitsList th').each(function() {
+                       $(this).show(); 
+                    });
+                    
+                    $('#visitsList td').each(function() {
+                        $(this).show();
+                    });
+                });
             };
 
             var aClickHandler = function() {
@@ -81,7 +97,7 @@
                     $('.patientdetails').html(msg);
                 });
                 
-                /*$.ajax({
+                $.ajax({
                     type: 'POST',
                     url: '/ece356/DoctorServlet',
                     data: {
@@ -89,9 +105,25 @@
                         patientId: $(this).find('td:first').text(),
                         isPatient: false
                     }
-                }).done(function(msg){
-                    $('.vtable').html(msg).trigger('footable_initialize');
-                });*/
+                }).done(function(rows){
+                    var visitsList = $('#visitstable').data('footable');
+                    
+                    $('.visitrow').each(function() {
+                        visitsList.removeRow(this);
+                    });
+                    
+                    $(rows).each(function(){
+                        visitsList.appendRow(this);
+                    });
+                    
+                    $('#visitsList th').each(function() {
+                       $(this).show(); 
+                    });
+                    
+                    $('#visitsList td').each(function() {
+                        $(this).show();
+                    });
+                });
             };
             
             var patientsFilterChange = function() {                

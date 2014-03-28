@@ -167,7 +167,7 @@ public class DoctorViewModel {
         //TODO: Comments section
         
         String formatted = 
-                "<table class='vtable footable table-bordered toggle-circle toggle-small'>" +
+                "<table id='visitstable' class='footable table-bordered toggle-circle toggle-small'>" +
                 "<thead><tr>" +
                 "<th data-toggle='true'>Visit #</th>" +
                 "<th>Appointment Date</th>" +
@@ -210,10 +210,10 @@ public class DoctorViewModel {
 
                 int visitId = Integer.parseInt(visit.get("visit_id").toString());
 
-                String formattedRow = "<tr>";
+                String formattedRow = "<tr class='visitrow'>";
 
                 formattedRow += String.format(
-                                    "<td class='visit_id'>%s</td><td>%s</td><td>%s</td>",
+                                    "<td>%s</td><td>%s</td><td>%s</td>",
                                     visit.get("visit_id"),
                                     visit.get("visit_date"),
                                     visit.get("eid")

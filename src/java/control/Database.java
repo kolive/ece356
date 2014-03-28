@@ -722,7 +722,7 @@ public class Database {
                 ps = connection.prepareStatement(
                         "SELECT visit_id, MAX(last_updated) AS last_updated, visit_date, visit_start_time, visit_end_time, pid, eid " +
                         "FROM ece356.visit " +
-                        "WHERE pid=? AND eid=? is_valid='1' " +
+                        "WHERE pid=? AND eid=? AND is_valid='1' " +
                         "GROUP BY visit_id"
                 );
                 ps.setInt(1, patientId);
@@ -766,15 +766,15 @@ public class Database {
  
                
                 ps = connection.prepareStatement(
-                        "SELECT visit_id, MAX(last_updated) AS last_updated, visit_date, visit_start_time, visit_end_time, pid, eid " +
+                        "SELECT v.visit_id, MAX(last_updated) AS last_updated, visit_date, visit_start_time, visit_end_time, pid, eid " +
                             "FROM ece356.visit as v " +
                             "INNER JOIN ( " +
                                 "SELECT visit_id " +
-                                "FROM ece356.advises AS a " +
+                                "FROM ece356.advises " +
                                 "WHERE doctor_id=? " +
-                            ") ON a.visit_id=v.visit_id " +
+                            ") a ON a.visit_id=v.visit_id " +
                             "WHERE pid=? AND is_valid='1' " +
-                            "GROUP BY visit_id"
+                            "GROUP BY v.visit_id"
                 );
                 ps.setInt(1, doctorId);
                 ps.setInt(2, adviseeId);
