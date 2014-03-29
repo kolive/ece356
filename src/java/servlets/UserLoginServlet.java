@@ -71,6 +71,8 @@ public class UserLoginServlet extends HttpServlet {
                 System.out.println(userInfo.get("dept"));
             }
         }
+        
+        System.out.println(request.getParameter("type"));
             
             
         
