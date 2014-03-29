@@ -153,7 +153,7 @@ public class DoctorViewModel {
         return 
                 "<tr id='visits-filter-row'>" +
                 "<td><input type='text' id='visits-visitNum-filter'></td>" +
-                "<td><input type='text' id='visits-date-filter'></td>" +
+                "<td>Between <input type='text' id='visits-datestart-filter'> and <input type='text' id='visits-dateend-filter'></td>" +
                 "<td><input type='text' id='visits-doctor-filter'></td>" +
                 "<td>Between <input type='text' id='visits-starttimestart-filter'> and <input type='text' id='visits-starttimeend-filter'></td>" +
                 "<td>Between <input type='text' id='visits-endtimestart-filter'> and <input type='text' id='visits-endtimeend-filter'></td>" +
@@ -225,10 +225,30 @@ public class DoctorViewModel {
                                     "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
                                     visit.get("visit_start_time"),
                                     visit.get("visit_end_time"),
-                                    FormatHelper.formatProcedures(visitId),
-                                    FormatHelper.formatDiagnoses(visitId),
-                                    FormatHelper.formatPrescriptions(visitId),
-                                    FormatHelper.formatComments(visitId)
+                                    FormatHelper.formatProcedures(
+                                        visitId,
+                                        filters.get("procedure") != null && !filters.get("procedure").toString().trim().equals("")
+                                            ? filters.get("procedure").toString().trim()
+                                            : ""
+                                    ),
+                                    FormatHelper.formatDiagnoses(
+                                        visitId,
+                                        filters.get("diagnoses") != null && !filters.get("diagnoses").toString().trim().equals("")
+                                            ? filters.get("diagnoses").toString().trim()
+                                            : ""
+                                    ),
+                                    FormatHelper.formatPrescriptions(
+                                        visitId,
+                                        filters.get("prescriptions") != null && !filters.get("prescriptions").toString().trim().equals("")
+                                            ? filters.get("prescriptions").toString().trim()
+                                            : ""
+                                    ),
+                                    FormatHelper.formatComments(
+                                        visitId,
+                                        filters.get("comments") != null && !filters.get("comments").toString().trim().equals("")
+                                            ? filters.get("comments").toString().trim()
+                                            : ""   
+                                    )
                                 );
                 formattedRow += "</tr>";
                 

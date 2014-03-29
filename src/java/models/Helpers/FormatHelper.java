@@ -15,12 +15,13 @@ public class FormatHelper {
     /**
      * Gets the procedure(s) preformed during a visit and outputs a list of them
      * @param visitId
+     * @param filter
      * @return formatted, an HTML formatted paragraph
      */
-    public static String formatProcedures(int visitId){
+    public static String formatProcedures(int visitId, String filter){
         String formatted = "<div class='procedures'>";
         
-        JSONArray procedures = Database.getProcedureByVisit(visitId);
+        JSONArray procedures = Database.getProcedureByVisit(visitId, filter);
         
         if(procedures.size() == 0){
             return "<p>No procedure performed during this visit.</p>";
@@ -44,10 +45,11 @@ public class FormatHelper {
     /**
      * Gets the diagnosis(es) given during a visit and outputs a list of them
      * @param visitId
+     * @param filter
      * @return diagnoses, an HTML formatted paragraph
      */
-    public static String formatDiagnoses(int visitId){
-        JSONArray diagnoses = Database.getDiagnosisByVisit(visitId);
+    public static String formatDiagnoses(int visitId, String filter){
+        JSONArray diagnoses = Database.getDiagnosisByVisit(visitId, filter);
         
         if(diagnoses.size() == 0){
             return "<p>No diagnosis given during this visit.</p>";
@@ -72,10 +74,11 @@ public class FormatHelper {
     /**
      * Gets any prescriptions prescribed in a given visit and outputs a list of them 
      * @param visitId
+     * @param filter
      * @return prescriptions, an HTML formatted unordered list
      */
-    public static String formatPrescriptions(int visitId){
-        JSONArray prescriptions = Database.getPrescriptionsByVisit(visitId);
+    public static String formatPrescriptions(int visitId, String filter){
+        JSONArray prescriptions = Database.getPrescriptionsByVisit(visitId, filter);
         
         if(prescriptions.size() == 0){
             return "<p>No prescriptions prescribed during this visit.</p>";
@@ -98,8 +101,14 @@ public class FormatHelper {
         return formatted;
     }
     
-    public static String formatComments(int visitId){
-        JSONArray comments = Database.getCommentsByVisit(visitId);
+    /**
+     * Gets any comments for a given visit and outputs a list of them
+     * @param visitId
+     * @param filter
+     * @return comments, an HTML formatted unordered list
+     */
+    public static String formatComments(int visitId, String filter){
+        JSONArray comments = Database.getCommentsByVisit(visitId, filter);
         
         if(comments.size() == 0){
             return "<p>No comments for this visit.</p>";

@@ -45,15 +45,33 @@
                 $('#advisee-lastvisitstart-filter').change(adviseesFilterChange);
                 $('#advisee-lastvisitend-filter').change(adviseesFilterChange);
                 
-                $('#')
+                $('#visits-datestart-filter').datepicker({dateFormat: 'yy-mm-dd', changeYear: true}).datepicker('setDate', new Date("January 1, 2000 00:00:00"));
+                $('#visits-dateend-filter').datepicker({dateFormat: 'yy-mm-dd', changeYear: true}).datepicker('setDate', new Date("January 1, 2100 00:00:00"));
+                
+                $('#visits-visitNum-filter').change(visitFilterChange).val("");
+                $('#visits-datestart-filter').change(visitFilterChange).val("");
+                $('#visits-dateend-filter').change(visitFilterChange).val("");
+                $('#visits-doctor-filter').change(visitFilterChange).val("");
+                
+                $('#visits-starttimestart-filter').change(visitFilterChange).val("00:00:00");
+                $('#visits-starttimeend-filter').change(visitFilterChange).val("23:59:59");
+                $('#visits-endtimestart-filter').change(visitFilterChange).val("00:00:00");
+                $('#visits-endtimeend-filter').change(visitFilterChange).val("23:59:59");
+                $('#visits-procedures-filter').change(visitFilterChange).val("");
+                $('#visits-diagnoses-filter').change(visitFilterChange).val("");
+                $('#visits-prescriptions-filter').change(visitFilterChange).val("");
+                $('#visits-comments-filter').change(visitFilterChange).val("");
             });
 
             var pClickHandler = function() {
+                var patientId = $(this).find('td:first').text();
+                
                 $.ajax({
                    type: 'POST',
                    url: '/ece356/DoctorServlet',
                    data: {
-                       type: 'PatientRequest', patientId : $(this).find('td:first').text()
+                       type: 'PatientRequest', 
+                       patientId : patientId
                    }
                 }).done(function(msg){
                     $('.patientdetails').html(msg);
@@ -64,11 +82,14 @@
                     url: '/ece356/DoctorServlet',
                     data: {
                         type: 'VisitRequest', 
-                        patientId: $(this).find('td:first').text(),
+                        patientId: patientId,
                         isPatient: true
                     }
                 }).done(function(rows){
                     var visitsList = $('#visitstable').data('footable');
+                    
+                    $('#visitstable').data("isPatient", true);
+                    $('#visitstable').data("patientId", patientId);
                     
                     $('.visitrow').each(function() {
                         visitsList.removeRow(this);
@@ -89,11 +110,14 @@
             };
 
             var aClickHandler = function() {
+                var patientId = $(this).find('td:first').text();
+                
                 $.ajax({
                    type: 'POST',
                    url: '/ece356/DoctorServlet',
                    data: {
-                       type: 'PatientRequest', patientId : $(this).find('td:first').text()
+                       type: 'PatientRequest', 
+                       patientId : patientId
                    }
                 }).done(function(msg){
                     $('.patientdetails').html(msg);
@@ -104,11 +128,14 @@
                     url: '/ece356/DoctorServlet',
                     data: {
                         type: 'VisitRequest', 
-                        patientId: $(this).find('td:first').text(),
+                        patientId: patientId,
                         isPatient: false
                     }
                 }).done(function(rows){
                     var visitsList = $('#visitstable').data('footable');
+                    
+                    $('#visitstable').data("isPatient", false);
+                    $('#visitstable').data("patientId", patientId);
                     
                     $('.visitrow').each(function() {
                         visitsList.removeRow(this);
@@ -199,6 +226,40 @@
                     });
                     
                     $('.adviseerow').click(aClickHandler); 
+                });
+            }
+            
+            var visitFilterChange = function() {                
+                $.ajax({
+                   type: 'POST',
+                   url: '/ece356/DoctorServlet',
+                   data: {
+                       type: 'VisitsFilter',
+                       patientId: $('#visitstable').data("patientId"),
+                       visitNum: $('#visits-visitNum-filter').val(),
+                       dateStart: $('#visits-datestart-filter').val(),
+                       dateEnd: $('#visits-dateend-filter').val(),
+                       doctor: $('#visits-doctor-filter').val(),
+                       starttimestart: $('#visits-starttimestart-filter').val(),
+                       starttimeend: $('#visits-starttimeend-filter').val(),
+                       endtimestart: $('#visits-endtimestart-filter').val(),
+                       endtimeend: $('#visits-endtimeend-filter').val(),
+                       procedures: $('#visits-procedures-filter').val(),
+                       diagnoses: $('#visits-diagnoses-filter').val(),
+                       prescriptions: $('#visits-prescriptions-filter').val(),
+                       comments: $('#visits-comments-filter').val(),
+                       isPatient: $('#visitstable').data("isPatient")
+                   }
+                }).done(function(rows){
+                    var visitsList = $('#visitstable').data('footable');
+                    
+                    $('.visitrow').each(function() {
+                        visitsList.removeRow(this);
+                    });
+                    
+                    $(rows).each(function(){
+                        visitsList.appendRow(this);
+                    });
                 });
             }
         });

@@ -269,30 +269,30 @@ public class Database {
                 
                 ps.setString(
                     2,
-                    filters.get("pid") != null 
-                        ? "%%" + filters.get("pid").toString().trim() + "%%"
-                        : "%%"
+                    filters.get("pid") != null && !filters.get("pid").toString().trim().equals("")
+                        ? filters.get("pid").toString().trim()
+                        : "%"
                     );
                 
                 ps.setString(
                     3,
                     filters.get("fname") != null
-                        ? "%%" + filters.get("fname").toString().trim() + "%%"
-                        : "%%"
+                        ? "%" + filters.get("fname").toString().trim() + "%"
+                        : "%"
                 );
                 
                 ps.setString(
                     4,
                     filters.get("lname") != null
-                        ? "%%" + filters.get("lname").toString().trim() + "%%"
-                        : "%%"
+                        ? "%" + filters.get("lname").toString().trim() + "%"
+                        : "%"
                 );
                 
                 ps.setString(
                     5,
                     filters.get("current_health") != null
-                        ? "%%" + filters.get("current_health").toString().trim() + "%%"
-                        : "%%"
+                        ? "%" + filters.get("current_health").toString().trim() + "%"
+                        : "%"
                 );
                 
                 ps.setDate(
@@ -362,30 +362,30 @@ public class Database {
                 
                 ps.setString(
                     2,
-                    filters.get("pid") != null 
-                        ? "%%" + filters.get("pid").toString().trim() + "%%"
-                        : "%%"
+                    filters.get("pid") != null && !filters.get("pid").toString().trim().equals("")
+                        ? filters.get("pid").toString().trim()
+                        : "%"
                     );
                 
                 ps.setString(
                     3,
                     filters.get("fname") != null
-                        ? "%%" + filters.get("fname").toString().trim() + "%%"
-                        : "%%"
+                        ? "%" + filters.get("fname").toString().trim() + "%"
+                        : "%"
                 );
                 
                 ps.setString(
                     4,
                     filters.get("lname") != null
-                        ? "%%" + filters.get("lname").toString().trim() + "%%"
-                        : "%%"
+                        ? "%" + filters.get("lname").toString().trim() + "%"
+                        : "%"
                 );
                 
                 ps.setString(
                     5,
                     filters.get("current_health") != null
-                        ? "%%" + filters.get("current_health").toString().trim() + "%%"
-                        : "%%"
+                        ? "%" + filters.get("current_health").toString().trim() + "%"
+                        : "%"
                 );
                 
                 ps.setDate(
@@ -432,29 +432,6 @@ public class Database {
         filter += " AND p.lname LIKE ?";
         filter += " AND p.current_health LIKE ?";
         filter += " ";
-
-        /*if(filters.get("pid") != null && !filters.get("pid").toString().trim().equals("")){
-            String filterValue = filters.get("pid").toString().trim();
-
-            filter += String.format(" AND v.pid LIKE '%%%s%%'", filterValue);
-        }
-
-        if(filters.get("fname") != null && !filters.get("fname").toString().trim().equals("")){
-            String filterValue = filters.get("fname").toString().trim();
-            filter += String.format(" AND p.fname LIKE '%%%s%%'", filterValue);
-        }
-
-        if(filters.get("lname") != null && !filters.get("lname").toString().trim().equals("")){
-            String filterValue = filters.get("lname").toString().trim();
-            filter += String.format(" AND p.lname LIKE '%%%s%%'", filterValue);
-        }
-
-        if(filters.get("current_health") != null && !filters.get("current_health").toString().trim().equals("")){
-            String filterValue = filters.get("current_health").toString().trim();
-            filter += String.format(" AND p.current_health LIKE '%%%s%%'", filterValue);
-        }
-        
-        filter += " ";*/
         
         return filter;
     }
@@ -720,13 +697,65 @@ public class Database {
  
                
                 ps = connection.prepareStatement(
-                        "SELECT visit_id, MAX(last_updated) AS last_updated, visit_date, visit_start_time, visit_end_time, pid, eid " +
-                        "FROM ece356.visit " +
-                        "WHERE pid=? AND eid=? AND is_valid='1' " +
-                        "GROUP BY visit_id"
+                        "SELECT v.visit_id, MAX(v.last_updated) AS last_updated, v.visit_date, v.visit_start_time, v.visit_end_time, v.pid, v.eid " +
+                        "FROM ece356.visit AS v" +
+                        "WHERE v.pid=? AND v.eid=? AND v.is_valid='1' " +
+                        buildVisitsFilters() +
+                        "GROUP BY v.visit_id"
                 );
                 ps.setInt(1, patientId);
                 ps.setInt(2, doctorId);
+                
+                ps.setString(
+                    3,
+                    filters.get("visit_id") != null && !filters.get("visit_id").toString().trim().equals("")
+                        ? filters.get("visit_id").toString().trim()
+                        : "%"
+                );
+                
+                ps.setDate(
+                    4,
+                    filters.get("visit_date_start") != null && !filters.get("visit_date_start").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("visit_date_start").toString().trim())
+                        : java.sql.Date.valueOf("2000-01-01")
+                );
+                
+                ps.setDate(
+                    5,
+                    filters.get("visit_date_end") != null && !filters.get("visit_date_end").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("visit_date_end").toString().trim())
+                        : java.sql.Date.valueOf("2100-01-01") 
+                );
+                  
+                ps.setString(
+                    6,
+                    filters.get("visit_start_time_start") != null && !filters.get("visit_start_time_start").toString().trim().equals("")
+                        ? filters.get("visit_start_time_start").toString().trim()
+                        : "00:00:00"
+                );
+                
+                ps.setString(
+                    7,
+                    filters.get("visit_start_time_end") != null && !filters.get("visit_start_time_end").toString().trim().equals("")
+                        ? filters.get("visit_start_time_end").toString().trim()
+                        : "23:59:59"
+                );
+                
+                ps.setString(
+                    8,
+                    filters.get("visit_end_time_start") != null && !filters.get("visit_end_time_start").toString().trim().equals("")
+                        ? filters.get("visit_end_time_start").toString().trim()
+                        : "00:00:00"
+                );
+                
+                ps.setString(
+                    9,
+                    filters.get("visit_end_time_end") != null && !filters.get("visit_end_time_end").toString().trim().equals("")
+                        ? filters.get("visit_end_time_end").toString().trim()
+                        : "23:59:59"
+                );
+                
+                ps.setInt(8, doctorId);
                 
                 rs = ps.executeQuery();
                
@@ -767,17 +796,74 @@ public class Database {
                
                 ps = connection.prepareStatement(
                         "SELECT v.visit_id, MAX(last_updated) AS last_updated, visit_date, visit_start_time, visit_end_time, pid, eid " +
-                            "FROM ece356.visit as v " +
+                            "FROM ece356.visit AS v " +
                             "INNER JOIN ( " +
                                 "SELECT visit_id " +
                                 "FROM ece356.advises " +
                                 "WHERE doctor_id=? " +
                             ") a ON a.visit_id=v.visit_id " +
                             "WHERE pid=? AND is_valid='1' " +
+                            buildVisitsFilters() +
                             "GROUP BY v.visit_id"
                 );
                 ps.setInt(1, doctorId);
                 ps.setInt(2, adviseeId);
+                
+                ps.setString(
+                    3,
+                    filters.get("visit_id") != null && !filters.get("visit_id").toString().trim().equals("")
+                        ? filters.get("visit_id").toString().trim()
+                        : "%"
+                );
+                
+                ps.setDate(
+                    4,
+                    filters.get("visit_date_start") != null && !filters.get("visit_date_start").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("visit_date_start").toString().trim())
+                        : java.sql.Date.valueOf("2000-01-01")
+                );
+                
+                ps.setDate(
+                    5,
+                    filters.get("visit_date_end") != null && !filters.get("visit_date_end").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("visit_date_end").toString().trim())
+                        : java.sql.Date.valueOf("2100-01-01") 
+                );
+                  
+                ps.setString(
+                    6,
+                    filters.get("visit_start_time_start") != null && !filters.get("visit_start_time_start").toString().trim().equals("")
+                        ? filters.get("visit_start_time_start").toString().trim()
+                        : "00:00:00"
+                );
+                
+                ps.setString(
+                    7,
+                    filters.get("visit_start_time_end") != null && !filters.get("visit_start_time_end").toString().trim().equals("")
+                        ? filters.get("visit_start_time_end").toString().trim()
+                        : "23:59:59"
+                );
+                
+                ps.setString(
+                    8,
+                    filters.get("visit_end_time_start") != null && !filters.get("visit_end_time_start").toString().trim().equals("")
+                        ? filters.get("visit_end_time_start").toString().trim()
+                        : "00:00:00"
+                );
+                
+                ps.setString(
+                    9,
+                    filters.get("visit_end_time_end") != null && !filters.get("visit_end_time_end").toString().trim().equals("")
+                        ? filters.get("visit_end_time_end").toString().trim()
+                        : "23:59:59"
+                );
+                
+                ps.setString(
+                    10,
+                    filters.get("eid") != null && !filters.get("eid").toString().trim().equals("")
+                        ? filters.get("eid").toString().trim()
+                        : "%"
+                );
                 
                 rs = ps.executeQuery();
                
@@ -791,6 +877,16 @@ public class Database {
         }
         
         return visits;
+    }
+    
+    private static String buildVisitsFilters(){
+        String filter = " AND v.visit_id LIKE ?";
+        filter += " AND visit_date BETWEEN ? AND ?";
+        filter += " AND visit_start_time BETWEEN ? AND ?";
+        filter += " AND visit_end_time BETWEEN ? AND ?";
+        filter += " AND eid LIKE ? ";
+        
+        return filter;
     }
     
     /**
@@ -866,9 +962,10 @@ public class Database {
      * Queries the database to return a JSONArray of prescriptions perscribed for a given visit
      * The query only considers the most up-to-date record of the visit.
      * @param visitId
+     * @param filter
      * @return a JSONArray describing prescription row(s)
      */
-    public static JSONArray getPrescriptionsByVisit(int visitId){
+    public static JSONArray getPrescriptionsByVisit(int visitId, String filter){
         
         boolean status = true;
         if(connection == null){
@@ -888,9 +985,12 @@ public class Database {
                 "select visit_id, drug_name, max(last_updated) last_updated " +
                 "from ece356.prescription where visit_id=? " +
                 "group by visit_id, drug_name" +
-                " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.drug_name = p.drug_name;";
+                " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.drug_name = p.drug_name " +
+                "WHERE p.drug_name LIKE ?";
+                
                 ps = connection.prepareStatement(preparedStatement);
                 ps.setInt(1, visitId);
+                ps.setString(2, filter);
                 
                 rs = ps.executeQuery();
                 prescriptions = convertToJson(rs);
@@ -912,9 +1012,10 @@ public class Database {
      * Queries the database to return a JSONArray of procedures for a given visit
      * The query only considers the most up-to-date record of the visit.
      * @param visitId
+     * @param filter
      * @return a JSONArray describing procedure row(s)
      */
-    public static JSONArray getProcedureByVisit(int visitId){
+    public static JSONArray getProcedureByVisit(int visitId, String filter){
         
         boolean status = true;
         if(connection == null){
@@ -934,9 +1035,13 @@ public class Database {
                 "select visit_id, procedure_name, max(last_updated) last_updated " +
                 "from ece356.procedure where visit_id=? " +
                 "group by visit_id, procedure_name" +
-                " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.procedure_name = p.procedure_name;";
+                " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.procedure_name = p.procedure_name " +
+                "WHERE p.procedure_name LIKE ? OR p.description LIKE ?";
+                
                 ps = connection.prepareStatement(preparedStatement);
                 ps.setInt(1, visitId);
+                ps.setString(2, filter);
+                ps.setString(3, filter);
                 
                 rs = ps.executeQuery();
                 procedures = convertToJson(rs);
@@ -958,9 +1063,10 @@ public class Database {
      * Queries the database to return a JSONArray of diagnoses for a given visit
      * The query only considers the most up-to-date record of the visit.
      * @param visitId
+     * @param filter
      * @return a JSONArray describing diagnosis row(s)
      */
-    public static JSONArray getDiagnosisByVisit(int visitId){
+    public static JSONArray getDiagnosisByVisit(int visitId, String filter){
         
         boolean status = true;
         if(connection == null){
@@ -980,9 +1086,12 @@ public class Database {
                 "select visit_id, max(last_updated) last_updated " +
                 "from ece356.diagnosis where visit_id=? " +
                 "group by visit_id, last_updated" +
-                " ) dd on dd.visit_id = d.visit_id and dd.last_updated = d.last_updated;";
+                " ) dd on dd.visit_id = d.visit_id and dd.last_updated = d.last_updated " +
+                "WHERE d.severity LIKE ?";
+                
                 ps = connection.prepareStatement(preparedStatement);
                 ps.setInt(1, visitId);
+                ps.setString(2, filter);
                 
                 rs = ps.executeQuery();
                 diagnoses = convertToJson(rs);
@@ -1000,7 +1109,14 @@ public class Database {
         
     }
     
-    public static JSONArray getCommentsByVisit(int visitId){
+    /**
+     * Queries the database to return a JSONArray of comments for a given visit
+     * The query only considers the most up-to-date record of the visit.
+     * @param visitId
+     * @param filter
+     * @return a JSONArray describing comment row(s)
+     */
+    public static JSONArray getCommentsByVisit(int visitId, String filter){
         boolean status = true;
         if(connection == null){
             status = openConnection();
@@ -1021,10 +1137,12 @@ public class Database {
                             "SELECT visit_id, timestamp, content, MAX(last_updated) AS last_updated " +
                                 "FROM ece356.comment WHERE visit_id=? " +
                                 "GROUP BY visit_id, timestamp " +
-                            ") mc on mc.visit_id=c.visit_id AND mc.last_updated=c.last_updated AND mc.timestamp=c.timestamp"
+                            ") mc on mc.visit_id=c.visit_id AND mc.last_updated=c.last_updated AND mc.timestamp=c.timestamp " +
+                            "WHERE c.comment LIKE ?"
                         );
                 
                 ps.setInt(1, visitId);
+                ps.setString(2, filter);
                 
                 rs = ps.executeQuery();
                 comments = convertToJson(rs);

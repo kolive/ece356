@@ -103,8 +103,8 @@ public class DoctorServlet extends HttpServlet {
                     
                     JSONArray rows = doctorVM.buildPatientsListRows(filters, isPatientsList);
                     
-                    for(int i = 0; i < rows.size(); i++){
-                        out.println(rows.get(i));
+                    for (Object row : rows) {
+                        out.println(row);
                     }
                 }
                 else if(request.getParameter("type").equals("VisitRequest")){                   
@@ -113,9 +113,35 @@ public class DoctorServlet extends HttpServlet {
                     
                     JSONArray rows = doctorVM.buildPatientVisitsRows(patientId, isPatient, new JSONObject());
                     
-                    for(int i = 0; i < rows.size(); i++){
-                        out.println(rows.get(i));
+                    for (Object row : rows) {
+                        out.println(row);
                     }       
+                }
+                else if(request.getParameter("type").equals("VisitsFilter")){
+                    int patientId = Integer.parseInt(request.getParameter("patientId").trim());
+                    boolean isPatient = Boolean.parseBoolean(request.getParameter("isPatient"));
+                    
+                    JSONObject filters = new JSONObject();
+                    
+                    filters.put("visit_id", request.getParameter("visitNum").trim());
+                    filters.put("visit_date_start", request.getParameter("dateStart").trim());
+                    filters.put("visit_date_end", request.getParameter("dateEnd").trim());
+                    filters.put("eid", request.getParameter("doctor").trim());
+                    filters.put("visit_start_time_start", request.getParameter("starttimestart").trim());
+                    filters.put("visit_start_time_end", request.getParameter("starttimeend").trim());
+                    filters.put("visit_end_time_start", request.getParameter("endtimestart").trim());
+                    filters.put("visit_end_time_end", request.getParameter("endtimeend").trim());
+                    
+                    filters.put("procedure", request.getParameter("procedures").trim());
+                    filters.put("diagnoses", request.getParameter("diagnoses").trim());
+                    filters.put("prescriptions", request.getParameter("prescriptions").trim());
+                    filters.put("comments", request.getParameter("comments").trim());
+                    
+                    JSONArray rows = doctorVM.buildPatientVisitsRows(patientId, isPatient, filters);
+                    
+                    for (Object row : rows) {
+                        out.println(row);
+                    }
                 }
             }
             else{
