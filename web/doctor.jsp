@@ -48,19 +48,21 @@
                 $('#visits-datestart-filter').datepicker({dateFormat: 'yy-mm-dd', changeYear: true}).datepicker('setDate', new Date("January 1, 2000 00:00:00"));
                 $('#visits-dateend-filter').datepicker({dateFormat: 'yy-mm-dd', changeYear: true}).datepicker('setDate', new Date("January 1, 2100 00:00:00"));
                 
+                $('#visits-filter').trigger("footable_expand_first_row");
+                
                 $('#visits-visitNum-filter').change(visitFilterChange).val("");
-                $('#visits-datestart-filter').change(visitFilterChange).val("");
-                $('#visits-dateend-filter').change(visitFilterChange).val("");
+                $('#visits-datestart-filter').change(visitFilterChange);
+                $('#visits-dateend-filter').change(visitFilterChange);
                 $('#visits-doctor-filter').change(visitFilterChange).val("");
                 
-                $('#visits-starttimestart-filter').change(visitFilterChange).val("00:00:00");
-                $('#visits-starttimeend-filter').change(visitFilterChange).val("23:59:59");
-                $('#visits-endtimestart-filter').change(visitFilterChange).val("00:00:00");
-                $('#visits-endtimeend-filter').change(visitFilterChange).val("23:59:59");
-                $('#visits-procedures-filter').change(visitFilterChange).val("");
-                $('#visits-diagnoses-filter').change(visitFilterChange).val("");
-                $('#visits-prescriptions-filter').change(visitFilterChange).val("");
-                $('#visits-comments-filter').change(visitFilterChange).val("");
+                $('.visits-starttimestart-filter').change(visitFilterChange).val("00:00:00");
+                $('.visits-starttimeend-filter').change(visitFilterChange).val("23:59:59");
+                $('.visits-endtimestart-filter').change(visitFilterChange).val("00:00:00");
+                $('.visits-endtimeend-filter').change(visitFilterChange).val("23:59:59");
+                $('.visits-procedures-filter').change(visitFilterChange).val("");
+                $('.visits-diagnoses-filter').change(visitFilterChange).val("");
+                $('.visits-prescriptions-filter').change(visitFilterChange).val("");
+                $('.visits-comments-filter').change(visitFilterChange).val("");
             });
 
             var pClickHandler = function() {
@@ -240,14 +242,14 @@
                        dateStart: $('#visits-datestart-filter').val(),
                        dateEnd: $('#visits-dateend-filter').val(),
                        doctor: $('#visits-doctor-filter').val(),
-                       starttimestart: $('#visits-starttimestart-filter').val(),
-                       starttimeend: $('#visits-starttimeend-filter').val(),
-                       endtimestart: $('#visits-endtimestart-filter').val(),
-                       endtimeend: $('#visits-endtimeend-filter').val(),
-                       procedures: $('#visits-procedures-filter').val(),
-                       diagnoses: $('#visits-diagnoses-filter').val(),
-                       prescriptions: $('#visits-prescriptions-filter').val(),
-                       comments: $('#visits-comments-filter').val(),
+                       starttimestart: $($('.visits-starttimestart-filter')[1]).val(),
+                       starttimeend: $($('.visits-starttimeend-filter')[1]).val(),
+                       endtimestart: $($('.visits-endtimestart-filter')[1]).val(),
+                       endtimeend: $($('.visits-endtimeend-filter')[1]).val(),
+                       procedures: $($('.visits-procedures-filter')[1]).val(),
+                       diagnoses: $($('.visits-diagnoses-filter')[1]).val(),
+                       prescriptions: $($('.visits-prescriptions-filter')[1]).val(),
+                       comments: $($('.visits-comments-filter')[1]).val(),
                        isPatient: $('#visitstable').data("isPatient")
                    }
                 }).done(function(rows){
@@ -288,6 +290,9 @@
                 </div>
             </div>
             <div class="patient-visits-container">
+                <div class="patient-visits-filter">
+                    <%= doctorVM.formatPatientVisitsFilter() %>
+                </div>
                 <div class="patient-visits-table">
                     <%= doctorVM.formatPatientVisitsTable(-1, false) %>
                 </div>

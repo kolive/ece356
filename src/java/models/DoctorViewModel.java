@@ -149,19 +149,35 @@ public class DoctorViewModel {
         return details;
     }
     
-    private String formatPatientVisitsFilter(){
-        return 
+    public static String formatPatientVisitsFilter(){
+        String formatted = 
+                "<table id='visits-filter' class='footable table-bordered toggle-circle toggle-small'>" +
+                "<thead><tr>" +
+                "<th data-toggle='true'>Visit #</th>" +
+                "<th>Appointment Date</th>" +
+                "<th>Assigned Physician</th>" +
+                "<th data-hide='all'>Start Time</th>" +
+                "<th data-hide='all'>End Time</th>" +
+                "<th data-hide='all'>Procedure Performed</th>" +
+                "<th data-hide='all'>Diagnosis</th>" +
+                "<th data-hide='all'>Prescriptions Prescribed</th>" +
+                "<th data-hide='all'>Comments</th>" +
+                "</tr></thead>"; 
+        
+        formatted +=
                 "<tr id='visits-filter-row'>" +
                 "<td><input type='text' id='visits-visitNum-filter'></td>" +
                 "<td>Between <input type='text' id='visits-datestart-filter'> and <input type='text' id='visits-dateend-filter'></td>" +
                 "<td><input type='text' id='visits-doctor-filter'></td>" +
-                "<td>Between <input type='text' id='visits-starttimestart-filter'> and <input type='text' id='visits-starttimeend-filter'></td>" +
-                "<td>Between <input type='text' id='visits-endtimestart-filter'> and <input type='text' id='visits-endtimeend-filter'></td>" +
-                "<td><input type='text' id='visits-procedures-filter'></td>" +
-                "<td><input type='text' id='visits-diagnoses-filter'></td>" +
-                "<td><input type='text' id='visits-prescriptions-filter'></td>" +
-                "<td><input type='text' id='visits-comments-filter'></td>" +
-                "</tr>";
+                "<td>Between <input type='text' class='visits-starttimestart-filter'> and <input type='text' class='visits-starttimeend-filter'></td>" +
+                "<td>Between <input type='text' class='visits-endtimestart-filter'> and <input type='text' class='visits-endtimeend-filter'></td>" +
+                "<td><input type='text' class='visits-procedures-filter'></td>" +
+                "<td><input type='text' class='visits-diagnoses-filter'></td>" +
+                "<td><input type='text' class='visits-prescriptions-filter'></td>" +
+                "<td><input type='text' class='visits-comments-filter'></td>" +
+                "</tr></table>";
+        
+        return formatted;
     }
     
     public String formatPatientVisitsTable(int patientId, boolean isPatient){                        
@@ -181,7 +197,7 @@ public class DoctorViewModel {
                 "<th data-hide='all'>Comments</th>" +
                 "</tr></thead>"; 
         
-        formatted += formatPatientVisitsFilter();
+        /*formatted += formatPatientVisitsFilter();*/
         
         JSONArray rows = buildPatientVisitsRows(patientId, isPatient, new JSONObject());
         
@@ -189,7 +205,7 @@ public class DoctorViewModel {
             formatted += rows.get(i);
         }
         
-        formatted += "</table>";
+        formatted += "<tbody></tbody></table>";
         
         return formatted;
     }
