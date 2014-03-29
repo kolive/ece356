@@ -1400,4 +1400,51 @@ public class Database {
         return visits;
     }
     
+    public static void InsertComment(int visitId, int doctorId, String comment){
+        /*boolean status = true;
+        
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            
+            try{
+                ps = connection.prepareStatement(
+                            "SELECT MAX(last_updated) as last_updated " +
+                            "FROM ece356.visit " +
+                            "WHERE visit_id=?"
+                        );
+                
+                ps.setInt(1, visitId);
+                
+                rs = ps.executeQuery();
+                
+                JSONObject result = convertRowToJson(rs);
+                
+                String lastUpdated = result.get("last_updated").toString().trim();
+                
+                ps = connection.prepareStatement(
+                            "INSERT INTO ece356.comment " +
+                            "(visit_id, last_updated, eid, timestamp, content) " +
+                            "VALUES (?, ?, ?, NOW(), ?)"
+                        );
+                
+                ps.setInt(1, visitId);
+                ps.setString(2, lastUpdated);
+                ps.setInt(3, doctorId);
+                ps.setString(4, comment);
+                
+                ps.executeQuery();
+            }catch(SQLException e){
+                e.printStackTrace();
+                return;
+            }
+        }*/
+        
+        return;
+    }
 }

@@ -6,6 +6,7 @@
 
 package servlets;
 
+import control.Database;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -142,6 +143,12 @@ public class DoctorServlet extends HttpServlet {
                     for (Object row : rows) {
                         out.println(row);
                     }
+                }
+                else if(request.getParameter("type").equals("SubmitComment")){
+                    int visitId = Integer.parseInt(request.getParameter("visitId").trim());
+                    String comment = request.getParameter("comment").trim();
+                    
+                    doctorVM.InsertComment(visitId, comment);
                 }
             }
             else{

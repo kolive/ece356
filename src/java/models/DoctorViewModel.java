@@ -242,7 +242,9 @@ public class DoctorViewModel {
                                 );
 
                 formattedRow += String.format(
-                                    "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
+                                    "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>" +
+                                    "<td><p>%s</p>" +
+                                    "<p>New Comment: <input type='text' class='new-comment'><button type='button' class='new-comment-submit'>Submit</button></p></td>",
                                     visit.get("visit_start_time"),
                                     visit.get("visit_end_time"),
                                     FormatHelper.formatProcedures(
@@ -277,5 +279,9 @@ public class DoctorViewModel {
         }
         
         return formattedRows;
+    }
+    
+    public void InsertComment(int visitId, String comment){
+        Database.InsertComment(visitId, getDoctorId(), comment);
     }
 }
