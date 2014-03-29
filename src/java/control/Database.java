@@ -1000,6 +1000,44 @@ public class Database {
         
     }
     
+    public static JSONArray getCommentsByVisit(int visitId){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray comments = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            
+            try{
+                ps = connection.prepareStatement(
+                            "SELECT * " +
+                            "FROM ece356.comment AS c " +
+                            "INNER JOIN ( " +
+                            "SELECT visit_id, timestamp, content, MAX(last_updated) AS last_updated " +
+                                "FROM ece356.comment WHERE visit_id=? " +
+                                "GROUP BY visit_id, timestamp " +
+                            ") mc on mc.visit_id=c.visit_id AND mc.last_updated=c.last_updated AND mc.timestamp=c.timestamp"
+                        );
+                
+                ps.setInt(1, visitId);
+                
+                rs = ps.executeQuery();
+                comments = convertToJson(rs);
+            }
+            catch(SQLException e){
+                e.printStackTrace();
+                return comments;
+            }
+        }
+        
+        return comments;
+    }
+    
     /**
      * Queries the database to return a JSONArray of all doctors 
      * @param 

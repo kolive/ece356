@@ -160,6 +160,7 @@ public class DoctorViewModel {
                 "<td><input type='text' id='visits-procedures-filter'></td>" +
                 "<td><input type='text' id='visits-diagnoses-filter'></td>" +
                 "<td><input type='text' id='visits-prescriptions-filter'></td>" +
+                "<td><input type='text' id='visits-comments-filter'></td>" +
                 "</tr>";
     }
     
@@ -177,6 +178,7 @@ public class DoctorViewModel {
                 "<th data-hide='all'>Procedure Performed</th>" +
                 "<th data-hide='all'>Diagnosis</th>" +
                 "<th data-hide='all'>Prescriptions Prescribed</th>" +
+                "<th data-hide='all'>Comments</th>" +
                 "</tr></thead>"; 
         
         formatted += formatPatientVisitsFilter();
@@ -220,12 +222,13 @@ public class DoctorViewModel {
                                 );
 
                 formattedRow += String.format(
-                                    "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
+                                    "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
                                     visit.get("visit_start_time"),
                                     visit.get("visit_end_time"),
                                     FormatHelper.formatProcedures(visitId),
                                     FormatHelper.formatDiagnoses(visitId),
-                                    FormatHelper.formatPrescriptions(visitId)
+                                    FormatHelper.formatPrescriptions(visitId),
+                                    FormatHelper.formatComments(visitId)
                                 );
                 formattedRow += "</tr>";
                 

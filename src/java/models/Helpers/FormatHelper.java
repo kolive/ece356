@@ -97,4 +97,28 @@ public class FormatHelper {
         
         return formatted;
     }
+    
+    public static String formatComments(int visitId){
+        JSONArray comments = Database.getCommentsByVisit(visitId);
+        
+        if(comments.size() == 0){
+            return "<p>No comments for this visit.</p>";
+        }
+        
+        String formatted = "<ul class='comments'>";
+        
+        for(int i = 0; i< comments.size(); i++){
+            JSONObject comment = (JSONObject) comments.get(i);
+            
+            formatted += String.format(
+                                "<li> %s: %s</li>",
+                                comment.get("timestamp").toString().trim(),
+                                comment.get("content").toString().trim()
+                            );
+        }
+        
+        formatted += "</ul>";
+        
+        return formatted;
+    }
 }
