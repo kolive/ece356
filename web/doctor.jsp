@@ -273,6 +273,7 @@
             <div class="patient-container">
                 <div class="patients-list-container">
                     <div class="patients-list-filter">
+                        <%= doctorVM.formatPatientsListFilters(true) %>
                     </div>
                     <div class="patients-list">
                         <%= doctorVM.formatPatientsList(true) %>
@@ -280,6 +281,7 @@
                 </div>
                 <div class="advisees-list-container">
                     <div class="advisees-list-filter">
+                        <%= doctorVM.formatPatientsListFilters(false) %>
                     </div>
                     <div class="advisees-list">
                         <%= doctorVM.formatPatientsList(false) %>

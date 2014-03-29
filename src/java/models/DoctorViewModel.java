@@ -26,26 +26,30 @@ public class DoctorViewModel {
         return Integer.parseInt(m_doctor.getStringParam("eid"));
     }
     
-    private String formatPatientsListFilters(boolean isPatientsList){        
+    public static String formatPatientsListFilters(boolean isPatientsList){        
         if(isPatientsList){
             return 
+                "<table>" +
+                "<thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Last Visit</th></thead>" +
                 "<tr id='patient-filter-row'>" +        
                 "<td><input type='text' id='patient-pid-filter'></td>" +
                 "<td><input type='text' id='patient-fname-filter'></td>" + 
                 "<td><input type='text' id='patient-lname-filter'></td>" +
                 "<td><input type='text' id='patient-currenthealth-filter'></td>" +
                 "<td>Between:</br><input type='text' id='patient-lastvisitstart-filter'></br>and:</br><input type='text' id='patient-lastvisitend-filter'></td>" +
-                "</tr>";
+                "</tr><tbody></tbody></table>";
         }    
         else{
             return 
+                "<table>" +
+                "<thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Last Visit</th></thead>" +
                 "<tr id='patient-filter-row'>" +        
                 "<td><input type='text' id='advisee-pid-filter'></td>" +
                 "<td><input type='text' id='advisee-fname-filter'></td>" + 
                 "<td><input type='text' id='advisee-lname-filter'></td>" +
                 "<td><input type='text' id='advisee-currenthealth-filter'></td>" +
                 "<td>Between:</br><input type='text' id='advisee-lastvisitstart-filter'></br>and:</br><input type='text' id='advisee-lastvisitend-filter'></td>" +
-                "</tr>";
+                "</tr><tbody></tbody></table>";
         }                    
     }
     
@@ -61,7 +65,7 @@ public class DoctorViewModel {
         
         formattedList += "<thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Last Visit</th></thead>";
         
-        formattedList += formatPatientsListFilters(isPatientsList);
+        /*formattedList += formatPatientsListFilters(isPatientsList);*/
         
         JSONArray rows = buildPatientsListRows(new JSONObject(), isPatientsList);
         
