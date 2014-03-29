@@ -38,12 +38,14 @@
                 $('#advisee-lastvisitstart-filter').datepicker({dateFormat: 'yy-mm-dd', changeYear: true}).datepicker('setDate', new Date("January 1, 2000 00:00:00"));
                 $('#advisee-lastvisitend-filter').datepicker({dateFormat: 'yy-mm-dd', changeYear: true}).datepicker('setDate', new Date("January 1, 2100 00:00:00"));
                 
-                $('#advisee-pid-filter').change(patientsFilterChange).val("");
-                $('#advisee-fname-filter').change(patientsFilterChange).val("");
-                $('#advisee-lname-filter').change(patientsFilterChange).val("");
-                $('#advisee-currenthealth-filter').change(patientsFilterChange).val("");
-                $('#advisee-lastvisitstart-filter').change(patientsFilterChange);
-                $('#advisee-lastvisitend-filter').change(patientsFilterChange);  
+                $('#advisee-pid-filter').change(adviseesFilterChange).val("");
+                $('#advisee-fname-filter').change(adviseesFilterChange).val("");
+                $('#advisee-lname-filter').change(adviseesFilterChange).val("");
+                $('#advisee-currenthealth-filter').change(adviseesFilterChange).val("");
+                $('#advisee-lastvisitstart-filter').change(adviseesFilterChange);
+                $('#advisee-lastvisitend-filter').change(adviseesFilterChange);
+                
+                $('#')
             });
 
             var pClickHandler = function() {
