@@ -69,7 +69,7 @@ public class InsertVisitationServlet extends HttpServlet {
             form += String.format("<input type='hidden' name='pid', value='%s'>", patientId); 
             
             // Pass as parameter and make it a header
-            form += String.format("<h3>Patient Id: %s </h3> </br>", patientId);
+            form += String.format("<h3>Patient ID: %s </h3> </br>", patientId);
             form += "<h3>Appointment Date:</h3> <input type='text' id='apptdate' name='visit_date'> </br>";
             form += "<h3>Start Time:</h3> <input type='text' name='visit_start_time'></br>";
             form += "<h3>End Time:</h3> <input type='text' name='visit_end_time'></br>";
