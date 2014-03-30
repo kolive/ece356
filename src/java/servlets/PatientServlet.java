@@ -37,7 +37,8 @@ public class PatientServlet extends HttpServlet {
            request.getSession().setAttribute("patientVM", patientVM);
            response.sendRedirect("/ece356/patient.jsp");
         }else{
-            //redirect to error page
+             //redirect to failed login page
+            response.sendRedirect("/ece356/error.jsp");
         }
     }
 
