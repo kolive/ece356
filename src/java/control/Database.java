@@ -283,6 +283,209 @@ public class Database {
         
     }
 
+    /**
+     * Gets all the patient records for patients of a given doctor
+     * @param doctorId
+     * @return A JSONArray with all the patient records
+     */
+    public static JSONArray getDoctorPatients(int doctorId, JSONObject filters){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray rows = new JSONArray();
+        JSONArray patients = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                ps = connection.prepareStatement(
+                        "SELECT v.pid, p.fname, p.lname, p.current_health, max(v.visit_date) AS last_visit " +
+                        "FROM ece356.visit AS v " +
+                        "INNER JOIN ( " +
+                            "SELECT pid, fname, lname, current_health " +
+                            "FROM ece356.patient " +
+                            "WHERE is_enabled='1'" +
+                        ") AS p ON p.pid=v.pid " +
+                        "WHERE eid=? AND is_valid='1' " +
+                        buildPatientsFilters() +
+                        "GROUP BY v.pid " +
+                        "HAVING last_visit BETWEEN ? AND ?"
+                );
+                
+                ps.setInt(1, doctorId);
+                
+                ps.setString(
+                    2,
+                    filters.get("pid") != null && !filters.get("pid").toString().trim().equals("")
+                        ? filters.get("pid").toString().trim()
+                        : "%"
+                    );
+                
+                ps.setString(
+                    3,
+                    filters.get("fname") != null
+                        ? "%" + filters.get("fname").toString().trim() + "%"
+                        : "%"
+                );
+                
+                ps.setString(
+                    4,
+                    filters.get("lname") != null
+                        ? "%" + filters.get("lname").toString().trim() + "%"
+                        : "%"
+                );
+                
+                ps.setString(
+                    5,
+                    filters.get("current_health") != null
+                        ? "%" + filters.get("current_health").toString().trim() + "%"
+                        : "%"
+                );
+                
+                ps.setDate(
+                    6,
+                    filters.get("last_visit_start") != null && !filters.get("last_visit_start").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("last_visit_start").toString().trim())
+                        : java.sql.Date.valueOf("2000-01-01")
+                );
+                
+                ps.setDate(
+                    7,
+                    filters.get("last_visit_end") != null && !filters.get("last_visit_end").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("last_visit_end").toString().trim())
+                        : java.sql.Date.valueOf("2100-01-01")    
+                );
+                
+                rs = ps.executeQuery();                
+                patients = convertToJson(rs);
+            }catch(SQLException e){
+                e.printStackTrace();
+                return patients;
+            } 
+        }
+        
+        return patients;
+    }
+    
+    /**
+     * Gets all the patient records for advisees of a given doctor
+     * @param doctorId
+     * @return A JSONArray with all the advisee records
+     */
+    public static JSONArray getAdvisees(int doctorId, JSONObject filters){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray rows = new JSONArray();
+        JSONArray advisees = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                ps = connection.prepareStatement(
+                        "SELECT v.pid, p.fname, p.lname, p.current_health, MAX(v.visit_date) as last_visit " +
+                        "FROM ece356.visit as v " +
+                        "INNER JOIN ( " +
+                            "SELECT visit_id " +
+                            "FROM ece356.advises " +
+                            "WHERE doctor_id=? " +
+                        ") AS a ON a.visit_id=v.visit_id " +
+                        "INNER JOIN ( " +
+                            "SELECT pid, fname, lname, current_health " +
+                            "FROM ece356.patient " +
+                            "WHERE is_enabled='1' " +
+                        ") AS p on p.pid=v.pid " +
+                        "WHERE v.is_valid='1' " +
+                        buildPatientsFilters() +
+                        "GROUP BY v.pid " +
+                        "HAVING last_visit BETWEEN ? AND ?"
+                );
+                
+                ps.setInt(1, doctorId);
+                
+                ps.setString(
+                    2,
+                    filters.get("pid") != null && !filters.get("pid").toString().trim().equals("")
+                        ? filters.get("pid").toString().trim()
+                        : "%"
+                    );
+                
+                ps.setString(
+                    3,
+                    filters.get("fname") != null
+                        ? "%" + filters.get("fname").toString().trim() + "%"
+                        : "%"
+                );
+                
+                ps.setString(
+                    4,
+                    filters.get("lname") != null
+                        ? "%" + filters.get("lname").toString().trim() + "%"
+                        : "%"
+                );
+                
+                ps.setString(
+                    5,
+                    filters.get("current_health") != null
+                        ? "%" + filters.get("current_health").toString().trim() + "%"
+                        : "%"
+                );
+                
+                ps.setDate(
+                    6,
+                    filters.get("last_visit_start") != null && !filters.get("last_visit_start").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("last_visit_start").toString().trim())
+                        : java.sql.Date.valueOf("2000-01-01")
+                );
+                
+                ps.setDate(
+                    7,
+                    filters.get("last_visit_end") != null && !filters.get("last_visit_end").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("last_visit_end").toString().trim())
+                        : java.sql.Date.valueOf("2100-01-01")    
+                );
+
+                rs = ps.executeQuery();
+                advisees = convertToJson(rs);
+                
+                if (!rows.isEmpty())
+                {
+                    //found patient to doctor mappings
+                    //get patient information
+                    for (int i = 0; i < rows.size(); i++)
+                    {
+                        JSONObject advisee = getPatient(Integer.parseInt(((JSONObject)rows.get(i)).get("pid").toString()));  
+                        advisee.put("last_visit", ((JSONObject)rows.get(i)).get("last_visit"));
+                        advisees.add(advisee);
+                    }
+                    
+                }
+            }catch(SQLException e){
+                e.printStackTrace();
+                return advisees;
+            }
+        }
+        
+        return advisees;
+    }
+    
+    private static String buildPatientsFilters(){             
+        String filter = " AND v.pid LIKE ?";
+        filter += " AND p.fname LIKE ?";
+        filter += " AND p.lname LIKE ?";
+        filter += " AND p.current_health LIKE ?";
+        filter += " ";
+        
+        return filter;
+    }
     
     /**
      * Gets all the patient records for patients of a given doctor
@@ -521,6 +724,222 @@ public class Database {
     }
 
     /**
+     * 
+     * @param patientId
+     * @param doctorId
+     * @return 
+     */
+    public static JSONArray getPatientVisitsForDoctor(int patientId, int doctorId, JSONObject filters){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray visits = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //selects each visit with the biggest "last updated" time
+                //and that isn't a cancelled visit
+ 
+               
+                ps = connection.prepareStatement(
+                        "SELECT v.visit_id, MAX(v.last_updated) AS last_updated, v.visit_date, v.visit_start_time, v.visit_end_time, v.pid, v.eid " +
+                        "FROM ece356.visit AS v " +
+                        "WHERE v.pid=? AND v.eid=? AND v.is_valid='1' " +
+                        buildVisitsFilters() +
+                        "GROUP BY v.visit_id"
+                );
+                ps.setInt(1, patientId);
+                ps.setInt(2, doctorId);
+                
+                ps.setString(
+                    3,
+                    filters.get("visit_id") != null && !filters.get("visit_id").toString().trim().equals("")
+                        ? filters.get("visit_id").toString().trim()
+                        : "%"
+                );
+                
+                ps.setDate(
+                    4,
+                    filters.get("visit_date_start") != null && !filters.get("visit_date_start").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("visit_date_start").toString().trim())
+                        : java.sql.Date.valueOf("2000-01-01")
+                );
+                
+                ps.setDate(
+                    5,
+                    filters.get("visit_date_end") != null && !filters.get("visit_date_end").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("visit_date_end").toString().trim())
+                        : java.sql.Date.valueOf("2100-01-01") 
+                );
+                  
+                ps.setString(
+                    6,
+                    filters.get("visit_start_time_start") != null && !filters.get("visit_start_time_start").toString().trim().equals("")
+                        ? filters.get("visit_start_time_start").toString().trim()
+                        : "00:00:00"
+                );
+                
+                ps.setString(
+                    7,
+                    filters.get("visit_start_time_end") != null && !filters.get("visit_start_time_end").toString().trim().equals("")
+                        ? filters.get("visit_start_time_end").toString().trim()
+                        : "23:59:59"
+                );
+                
+                ps.setString(
+                    8,
+                    filters.get("visit_end_time_start") != null && !filters.get("visit_end_time_start").toString().trim().equals("")
+                        ? filters.get("visit_end_time_start").toString().trim()
+                        : "00:00:00"
+                );
+                
+                ps.setString(
+                    9,
+                    filters.get("visit_end_time_end") != null && !filters.get("visit_end_time_end").toString().trim().equals("")
+                        ? filters.get("visit_end_time_end").toString().trim()
+                        : "23:59:59"
+                );
+                
+                ps.setInt(10, doctorId);
+                
+                rs = ps.executeQuery();
+               
+                visits = convertToJson(rs);
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return visits;
+            }
+            
+        }
+        
+        return visits;
+    }
+
+    /**
+     * 
+     * @param adviseeId
+     * @param doctorId
+     * @return 
+     */
+    public static JSONArray getAdviseeVisitsForDoctor(int adviseeId, int doctorId, JSONObject filters){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray visits = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //selects each visit with the biggest "last updated" time
+                //and that isn't a cancelled visit
+ 
+               
+                ps = connection.prepareStatement(
+                        "SELECT v.visit_id, MAX(last_updated) AS last_updated, visit_date, visit_start_time, visit_end_time, pid, eid " +
+                            "FROM ece356.visit AS v " +
+                            "INNER JOIN ( " +
+                                "SELECT visit_id " +
+                                "FROM ece356.advises " +
+                                "WHERE doctor_id=? " +
+                            ") a ON a.visit_id=v.visit_id " +
+                            "WHERE pid=? AND is_valid='1' " +
+                            buildVisitsFilters() +
+                            "GROUP BY v.visit_id"
+                );
+                ps.setInt(1, doctorId);
+                ps.setInt(2, adviseeId);
+                
+                ps.setString(
+                    3,
+                    filters.get("visit_id") != null && !filters.get("visit_id").toString().trim().equals("")
+                        ? filters.get("visit_id").toString().trim()
+                        : "%"
+                );
+                
+                ps.setDate(
+                    4,
+                    filters.get("visit_date_start") != null && !filters.get("visit_date_start").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("visit_date_start").toString().trim())
+                        : java.sql.Date.valueOf("2000-01-01")
+                );
+                
+                ps.setDate(
+                    5,
+                    filters.get("visit_date_end") != null && !filters.get("visit_date_end").toString().trim().equals("")
+                        ? java.sql.Date.valueOf(filters.get("visit_date_end").toString().trim())
+                        : java.sql.Date.valueOf("2100-01-01") 
+                );
+                  
+                ps.setString(
+                    6,
+                    filters.get("visit_start_time_start") != null && !filters.get("visit_start_time_start").toString().trim().equals("")
+                        ? filters.get("visit_start_time_start").toString().trim()
+                        : "00:00:00"
+                );
+                
+                ps.setString(
+                    7,
+                    filters.get("visit_start_time_end") != null && !filters.get("visit_start_time_end").toString().trim().equals("")
+                        ? filters.get("visit_start_time_end").toString().trim()
+                        : "23:59:59"
+                );
+                
+                ps.setString(
+                    8,
+                    filters.get("visit_end_time_start") != null && !filters.get("visit_end_time_start").toString().trim().equals("")
+                        ? filters.get("visit_end_time_start").toString().trim()
+                        : "00:00:00"
+                );
+                
+                ps.setString(
+                    9,
+                    filters.get("visit_end_time_end") != null && !filters.get("visit_end_time_end").toString().trim().equals("")
+                        ? filters.get("visit_end_time_end").toString().trim()
+                        : "23:59:59"
+                );
+                
+                ps.setString(
+                    10,
+                    filters.get("eid") != null && !filters.get("eid").toString().trim().equals("")
+                        ? filters.get("eid").toString().trim()
+                        : "%"
+                );
+                
+                rs = ps.executeQuery();
+               
+                visits = convertToJson(rs);
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return visits;
+            }
+            
+        }
+        
+        return visits;
+    }
+    
+    private static String buildVisitsFilters(){
+        String filter = " AND v.visit_id LIKE ?";
+        filter += " AND visit_date BETWEEN ? AND ?";
+        filter += " AND visit_start_time BETWEEN ? AND ?";
+        filter += " AND visit_end_time BETWEEN ? AND ?";
+        filter += " AND eid LIKE ? ";
+        
+        return filter;
+    }
+    
+    /**
      * Gets all prescriptions for a given patient (only looking at most up-to-date records)
      * if onlyValid is true, only gets prescriptions that haven't expired
      * otherwise, gets all prescriptions
@@ -589,13 +1008,14 @@ public class Database {
     }
     
     
-     /**
+    /**
      * Queries the database to return a JSONArray of prescriptions perscribed for a given visit
      * The query only considers the most up-to-date record of the visit.
      * @param visitId
+     * @param filter
      * @return a JSONArray describing prescription row(s)
      */
-    public static JSONArray getPrescriptionsByVisit(int visitId){
+    public static JSONArray getPrescriptionsByVisit(int visitId, String filter){
         
         boolean status = true;
         if(connection == null){
@@ -615,9 +1035,18 @@ public class Database {
                 "select visit_id, drug_name, max(last_updated) last_updated " +
                 "from ece356.prescription where visit_id=? " +
                 "group by visit_id, drug_name" +
-                " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.drug_name = p.drug_name;";
+                " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.drug_name = p.drug_name " +
+                "WHERE p.drug_name LIKE ?";
+                
                 ps = connection.prepareStatement(preparedStatement);
                 ps.setInt(1, visitId);
+                
+                ps.setString(
+                    2,
+                    !filter.equals("")
+                    ? "%" + filter + "%"
+                    : "%"
+                );
                 
                 rs = ps.executeQuery();
                 prescriptions = convertToJson(rs);
@@ -639,9 +1068,10 @@ public class Database {
      * Queries the database to return a JSONArray of procedures for a given visit
      * The query only considers the most up-to-date record of the visit.
      * @param visitId
+     * @param filter
      * @return a JSONArray describing procedure row(s)
      */
-    public static JSONArray getProcedureByVisit(int visitId){
+    public static JSONArray getProcedureByVisit(int visitId, String filter){
         
         boolean status = true;
         if(connection == null){
@@ -661,9 +1091,25 @@ public class Database {
                 "select visit_id, procedure_name, max(last_updated) last_updated " +
                 "from ece356.procedure where visit_id=? " +
                 "group by visit_id, procedure_name" +
-                " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.procedure_name = p.procedure_name;";
+                " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.procedure_name = p.procedure_name " +
+                "WHERE p.procedure_name LIKE ? OR p.description LIKE ?";
+                
                 ps = connection.prepareStatement(preparedStatement);
                 ps.setInt(1, visitId);
+                
+                ps.setString(
+                    2,
+                    !filter.equals("")
+                    ? "%" + filter + "%"
+                    : "%"
+                );
+                
+                ps.setString(
+                    3,
+                    !filter.equals("")
+                    ? "%" + filter + "%"
+                    : "%"
+                );
                 
                 rs = ps.executeQuery();
                 procedures = convertToJson(rs);
@@ -685,9 +1131,10 @@ public class Database {
      * Queries the database to return a JSONArray of diagnoses for a given visit
      * The query only considers the most up-to-date record of the visit.
      * @param visitId
+     * @param filter
      * @return a JSONArray describing diagnosis row(s)
      */
-    public static JSONArray getDiagnosisByVisit(int visitId){
+    public static JSONArray getDiagnosisByVisit(int visitId, String filter){
         
         boolean status = true;
         if(connection == null){
@@ -707,9 +1154,18 @@ public class Database {
                 "select visit_id, max(last_updated) last_updated " +
                 "from ece356.diagnosis where visit_id=? " +
                 "group by visit_id, last_updated" +
-                " ) dd on dd.visit_id = d.visit_id and dd.last_updated = d.last_updated;";
+                " ) dd on dd.visit_id = d.visit_id and dd.last_updated = d.last_updated " +
+                "WHERE d.severity LIKE ?";
+                
                 ps = connection.prepareStatement(preparedStatement);
                 ps.setInt(1, visitId);
+                
+                ps.setString(
+                    2,
+                    !filter.equals("")
+                    ? "%" + filter + "%"
+                    : "%"
+                );
                 
                 rs = ps.executeQuery();
                 diagnoses = convertToJson(rs);
@@ -725,6 +1181,59 @@ public class Database {
         
         return diagnoses;
         
+    }
+    
+    /**
+     * Queries the database to return a JSONArray of comments for a given visit
+     * The query only considers the most up-to-date record of the visit.
+     * @param visitId
+     * @param filter
+     * @return a JSONArray describing comment row(s)
+     */
+    public static JSONArray getCommentsByVisit(int visitId, String filter){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray comments = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            
+            try{
+                ps = connection.prepareStatement(
+                            "SELECT * " +
+                            "FROM ece356.comment AS c " +
+                            "INNER JOIN ( " +
+                            "SELECT visit_id, timestamp, content, MAX(last_updated) AS last_updated " +
+                                "FROM ece356.comment WHERE visit_id=? " +
+                                "GROUP BY visit_id, timestamp " +
+                            ") mc on mc.visit_id=c.visit_id AND mc.last_updated=c.last_updated AND mc.timestamp=c.timestamp " +
+                            "WHERE c.content LIKE ?"
+                        );
+                
+                ps.setInt(1, visitId);
+                
+                ps.setString(
+                    2,
+                    !filter.equals("")
+                    ? "%" + filter + "%"
+                    : "%"
+                );
+                
+                rs = ps.executeQuery();
+                comments = convertToJson(rs);
+            }
+            catch(SQLException e){
+                e.printStackTrace();
+                return comments;
+            }
+        }
+        
+        return comments;
     }
     
     /**
@@ -971,4 +1480,136 @@ public class Database {
         return visits;
     }
     
+    public static boolean InsertNewRecord(int doctorId, JSONObject params){
+        boolean status = true;
+        
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            
+            try{                
+                ps = connection.prepareStatement(
+                            "INSERT INTO ece356.visit " +
+                            "(last_updated, visit_date, visit_start_time, visit_end_time, pid, eid, is_valid) " +
+                            "VALUES (NOW(), ?, ?, ?, ?, ?, '1')",
+                            Statement.RETURN_GENERATED_KEYS
+                        );
+                
+                // Required parameters
+                if(params.get("visit_date") == null || params.get("visit_date").toString().trim().equals("") ||
+                        params.get("visit_start_time") == null || params.get("visit_start_time").toString().trim().equals("") ||
+                        params.get("visit_end_time") == null || params.get("visit_end_time").toString().trim().equals("") ||
+                        params.get("pid") == null || params.get("pid").toString().trim().equals("")){
+                    return false;
+                }
+                
+                ps.setDate(1, java.sql.Date.valueOf(params.get("visit_date").toString().trim()));
+                ps.setString(2, params.get("visit_start_time").toString().trim());
+                ps.setString(3, params.get("visit_end_time").toString().trim());
+                ps.setInt(4, Integer.parseInt(params.get("pid").toString().trim()));
+                ps.setInt(5, doctorId);
+                
+                ps.executeUpdate();
+                
+                ps = connection.prepareStatement(
+                            "SELECT v.visit_id, v.last_updated " +
+                            "FROM ece356.visit AS v " +
+                            "INNER JOIN ( " +
+                                "SELECT MAX(visit_id) AS visit_id " +
+                                "FROM ece356.visit " +
+                            ") AS mv on v.visit_id=mv.visit_id"
+                        );
+                
+                rs = ps.executeQuery();
+                
+                JSONObject insertedVisit = convertRowToJson(rs);
+                
+                int visitId = Integer.parseInt(insertedVisit.get("visit_id").toString().trim());
+                java.sql.Timestamp lastUpdated = java.sql.Timestamp.valueOf(insertedVisit.get("last_updated").toString().trim());
+                
+                // Insert procedure for new visit
+                if(params.get("procedure_name") != null && !params.get("procedure_name").toString().trim().equals("") &&
+                        params.get("description") != null && !params.get("description").toString().trim().equals("")){
+                    ps = connection.prepareStatement(
+                                "INSERT INTO ece356.procedure " +
+                                "(visit_id, last_updated, procedure_name, description) " +
+                                "VALUES (?, ?, ?, ?)"
+                            );
+
+                    ps.setInt(1, visitId);
+                    ps.setTimestamp(2, lastUpdated);
+                    ps.setString(3, params.get("procedure_name").toString().trim());
+                    ps.setString(4, params.get("description").toString().trim());
+                }
+                
+                ps.executeUpdate();
+                
+                // Insert diagnosis for new visit
+                if(params.get("severity") != null && !params.get("severity").toString().trim().equals("")){
+                    ps = connection.prepareStatement(
+                            "INSERT INTO ece356.diagnosis " +
+                            "(visit_id, last_updated, severity) " +
+                            "VALUES (?, ?, ?)"
+                        );
+
+                    ps.setInt(1, visitId);
+                    ps.setTimestamp(2, lastUpdated);
+                    ps.setString(3, params.get("severity").toString().trim());
+                }
+                
+                ps.executeUpdate();
+                
+                // Insert comment for new visit
+                if(params.get("content") != null && !params.get("content").toString().trim().equals("")){
+                    ps = connection.prepareStatement(
+                                "INSERT INTO ece356.comment " +
+                                "(visit_id, last_updated, eid, timestamp, content) " +
+                                "VALUES (?, ?, ?, ?, ?)"
+                            );
+
+                    ps.setInt(1, visitId);
+                    ps.setTimestamp(2, lastUpdated);
+                    ps.setInt(3, doctorId);
+                    ps.setTimestamp(4, lastUpdated);
+                    ps.setString(5, params.get("content").toString().trim());
+
+                    ps.executeUpdate();
+                }
+                
+                // Insert prescriptions
+                
+                if(params.get("prescriptions") != null){
+                    JSONArray prescriptions = (JSONArray) params.get("prescriptions");
+                    
+                    for(int i = 0; i < prescriptions.size(); i++){
+                        JSONObject prescription = (JSONObject) prescriptions.get(i);
+                        
+                        ps = connection.prepareStatement(
+                                    "INSERT INTo ece356.prescription " +
+                                    "(visit_id, last_updated, drug_name, expires) " +
+                                    "VALUES (?, ?, ?, ?)"        
+                                );
+                        
+                        ps.setInt(1, visitId);
+                        ps.setTimestamp(2, lastUpdated);
+                        ps.setString(3, prescription.get("drug_name").toString());
+                        ps.setDate(4, java.sql.Date.valueOf(prescription.get("expires").toString().trim()));
+                        
+                        ps.executeUpdate();
+                    }
+                }
+            }
+            catch(SQLException e){
+                e.printStackTrace();
+                return false;
+            }
+        }
+        
+        return true;
+    }
 }

@@ -152,7 +152,7 @@ public class PatientViewModel {
      * @return prescriptions, an HTML formatted unordered list
      */
     public String formatPrescriptions(String visitId){        
-        return FormatHelper.formatPrescriptions(Integer.parseInt(visitId));
+        return FormatHelper.formatPrescriptions(Integer.parseInt(visitId), "");
     }
     
     /**
@@ -161,7 +161,7 @@ public class PatientViewModel {
      * @return procedures, an HTML formatted paragraph
      */
     public String formatProcedures(String visitId){
-        return FormatHelper.formatProcedures(Integer.parseInt(visitId));
+        return FormatHelper.formatProcedures(Integer.parseInt(visitId), "");
     }
     
     /**
@@ -170,7 +170,7 @@ public class PatientViewModel {
      * @return diagnoses, an HTML formatted paragraph
      */
     public String formatDiagnoses(String visitId){
-        return FormatHelper.formatDiagnoses(Integer.parseInt(visitId));
+        return FormatHelper.formatDiagnoses(Integer.parseInt(visitId), "");
     }
     
     /**

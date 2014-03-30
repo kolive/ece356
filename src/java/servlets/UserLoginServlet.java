@@ -60,10 +60,17 @@ public class UserLoginServlet extends HttpServlet {
             }else if(request.getParameter("type") != null){
                 //employee login
                 JSONObject userInfo = Database.userLogin(request.getParameter("username"), request.getParameter("password"), false);
-                if(!userInfo.isEmpty() && userInfo.get("dept").equals("FINANCE") ){
-                    User p = new User(userInfo, User.UserType.FAUDITOR);
-                    request.getSession().setAttribute("user", p);
-                    response.sendRedirect("/ece356/FinanceServlet");
+                if(!userInfo.isEmpty()){
+                    if(userInfo.get("dept").equals("DOCTOR")){
+                        User p = new User(userInfo, User.UserType.DOCTOR);
+                        request.getSession().setAttribute("user", p);
+                        response.sendRedirect("DoctorServlet");
+                    }
+                    else if(userInfo.get("dept").equals("FINANCE")){
+                        User p = new User(userInfo, User.UserType.FAUDITOR);
+                        request.getSession().setAttribute("user", p);
+                        response.sendRedirect("/ece356/FinanceServlet");
+                    }
                 }else{
                     //redirect to failed login page
                     response.sendRedirect("/ece356/error.jsp");
