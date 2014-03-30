@@ -3,12 +3,12 @@
     Created on : Mar 11, 2014, 10:21:51 AM
     Author     : Kyle
 --%>
-
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html" pageEncoding="UTF-8" errorPage="error.jsp"%>
 <!DOCTYPE html>
 <html>
     <head>
          <jsp:useBean id="patientVM" type="models.PatientViewModel" scope="session" />
+         <jsp:useBean id="user" type="models.User" scope="session" />
          <%= patientVM.updatePatientInfo() %>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" type="text/javascript"></script>
@@ -41,7 +41,10 @@
         -->
                
        
-    
+        <div class="nav"> 
+            <p> Logged in as: <%= user.getStringParam("fname") %> <%= user.getStringParam("lname") %> </p>
+            <a href="LogoutServlet"> Log Out </a>
+        </div>
         <div class="view-container rounded backteal">
             <div class="patient-container">
                 <div class="status">

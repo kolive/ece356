@@ -7,18 +7,17 @@
 package servlets;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import models.PatientViewModel;
-import models.User;
 /**
  *
  * @author Kyle
  */
-public class PatientServlet extends HttpServlet {
+public class LogoutServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -31,14 +30,11 @@ public class PatientServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        User patient = (User)request.getSession().getAttribute("user");
-        if(patient != null && patient.getUserType() == User.UserType.PATIENT){
-           PatientViewModel patientVM = new PatientViewModel(patient);
-           request.getSession().setAttribute("patientVM", patientVM);
-           response.sendRedirect("/ece356/patient.jsp");
-        }else{
-             //redirect to failed login page
-            response.sendRedirect("/ece356/error.jsp");
+        
+        try{
+            request.getSession().invalidate();
+        }finally{
+            response.sendRedirect("/ece356/");
         }
     }
 

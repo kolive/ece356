@@ -81,7 +81,7 @@ public class DoctorViewModel {
         JSONArray patients = new JSONArray();
         
         if(isPatientsList){
-            patients = Database.getPatients(getDoctorId(), filters);
+            patients = Database.getDoctorPatients(getDoctorId(), filters);
         }
         else{
             patients = Database.getAdvisees(getDoctorId(), filters);

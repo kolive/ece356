@@ -34,52 +34,54 @@ public class UserLoginServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        
-        
-        if(request.getSession().getAttribute("user") != null){
-            //redirect to logout confirmation before allowing to login
-            //for now i'll just delete the current user attribute
-            request.getSession().setAttribute("user", null);
-        }
-
-        //Two cases, want to login as a patient or employee
-
-        if(request.getParameter("type") != null 
-                && request.getParameter("type").equals("patient")){
-
-            JSONObject userInfo = Database.userLogin(request.getParameter("username"), request.getParameter("password"), true);
-            if(!userInfo.isEmpty()){
-                User p = new User(userInfo, User.UserType.PATIENT);
-                request.getSession().setAttribute("user", p);
-                response.sendRedirect("PatientServlet");
-            }else{
-                //redirect to failed login page
+       try{
+            if(request.getSession().getAttribute("user") != null){
+                //redirect to logout confirmation before allowing to login
+                //for now i'll just delete the current user attribute
+                request.getSession().setAttribute("user", null);
             }
 
+            //Two cases, want to login as a patient or employee
 
-        }else if(request.getParameter("type") != null){
-            //employee login
-            JSONObject userInfo = Database.userLogin(request.getParameter("username"), request.getParameter("password"), false);
+            if(request.getParameter("type") != null 
+                    && request.getParameter("type").equals("patient")){
 
-            if(!userInfo.isEmpty()){
-                if(userInfo.get("dept").equals("DOCTOR")){
-                    User p = new User(userInfo, User.UserType.DOCTOR);
+                JSONObject userInfo = Database.userLogin(request.getParameter("username"), request.getParameter("password"), true);
+                if(!userInfo.isEmpty()){
+                    User p = new User(userInfo, User.UserType.PATIENT);
                     request.getSession().setAttribute("user", p);
-                    response.sendRedirect("DoctorServlet");
+                    response.sendRedirect("PatientServlet");
+                }else{
+                     //redirect to failed login page
+                    response.sendRedirect("/ece356/error.jsp");
                 }
-                else if(userInfo.get("dept").equals("FINANCE")){
-                    User p = new User(userInfo, User.UserType.FAUDITOR);
-                    request.getSession().setAttribute("user", p);
-                    response.sendRedirect("/ece356/FinanceServlet");
+
+
+            }else if(request.getParameter("type") != null){
+                //employee login
+                JSONObject userInfo = Database.userLogin(request.getParameter("username"), request.getParameter("password"), false);
+                if(!userInfo.isEmpty()){
+                    if(userInfo.get("dept").equals("DOCTOR")){
+                        User p = new User(userInfo, User.UserType.DOCTOR);
+                        request.getSession().setAttribute("user", p);
+                        response.sendRedirect("DoctorServlet");
+                    }
+                    else if(userInfo.get("dept").equals("FINANCE")){
+                        User p = new User(userInfo, User.UserType.FAUDITOR);
+                        request.getSession().setAttribute("user", p);
+                        response.sendRedirect("/ece356/FinanceServlet");
+                    }
+                }else{
+                    //redirect to failed login page
+                    response.sendRedirect("/ece356/error.jsp");
                 }
             }
-            else{
-                //redirect to failed login page
-                System.out.println(userInfo.get("dept"));
-            }
-        }
+
+            System.out.println(request.getParameter("type"));
+       }catch(Exception e){
+           //redirect to failed login page
+            response.sendRedirect("/ece356/error.jsp");
+       }
             
             
         

@@ -102,7 +102,8 @@ public class Database {
             
         }
         
-        return user;      
+        return user;
+        
     }
     
     
@@ -237,7 +238,57 @@ public class Database {
      * @param doctorId
      * @return A JSONArray with all the patient records
      */
-    public static JSONArray getPatients(int doctorId, JSONObject filters){
+    public static JSONArray getPatients(int doctorId){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray rows = new JSONArray();
+        JSONArray patients = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //this should also have a join with visits where eid=dId and get all distinct pids
+                //doctors can have patients that aren't their primary patients (so wouldn't be in the patient-of relation)
+                ps = connection.prepareStatement("SELECT * FROM ece356.`patient-of` WHERE doctor_id=?");
+                
+                ps.setInt(1, doctorId);
+                rs = ps.executeQuery();
+               
+                rows = convertToJson(rs);
+                
+                if (!rows.isEmpty())
+                {
+                    //found patient to doctor mappings
+                    //get patient information
+                    for (int i = 0; i < rows.size(); i++)
+                    {
+                        patients.add(getPatient(Integer.parseInt(((JSONObject)rows.get(i)).get("patient_id").toString())));
+                    }
+                    
+                }
+            }catch(SQLException e){
+                e.printStackTrace();
+                return patients;
+            }
+            
+        }
+        
+        return patients;
+        
+    }
+
+    /**
+     * Gets all the patient records for patients of a given doctor
+     * @param doctorId
+     * @return A JSONArray with all the patient records
+     */
+    public static JSONArray getDoctorPatients(int doctorId, JSONObject filters){
         boolean status = true;
         if(connection == null){
             status = openConnection();
@@ -435,7 +486,6 @@ public class Database {
         
         return filter;
     }
-
     
     /**
      * Gets all the patient records for patients of a given doctor
@@ -672,7 +722,7 @@ public class Database {
         }
         return visits;
     }
-    
+
     /**
      * 
      * @param patientId
@@ -958,7 +1008,7 @@ public class Database {
     }
     
     
-     /**
+    /**
      * Queries the database to return a JSONArray of prescriptions perscribed for a given visit
      * The query only considers the most up-to-date record of the visit.
      * @param visitId

@@ -4,11 +4,12 @@
     Author     : Kyle
 --%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html" pageEncoding="UTF-8" errorPage="error.jsp"%>
 <!DOCTYPE html>
 <html>
     <head>
-         <jsp:useBean id="financeVM" type="models.FinanceViewModel" scope="session" />
+        <jsp:useBean id="financeVM" type="models.FinanceViewModel" scope="session" />
+        <jsp:useBean id="user" type="models.User" scope="session" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" type="text/javascript"></script>
         <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
@@ -125,9 +126,29 @@
         -->
                
        
-    
+        <div class="nav"> 
+            <p> Logged in as: <%= user.getStringParam("fname") %> <%= user.getStringParam("lname") %> </p>
+            <a href="LogoutServlet"> Log Out </a>
+        </div>
         <div class="view-container rounded backteal">
+            <h1 class="third"> Welcome, <%= user.getStringParam("fname") %> </h1>
+             <div class="third" style='vertical-align:bottom'> 
+                Show only Patients with visits between dates: <br/> <input id="date1" type="text">
+                and <input id="date2" type="text">
+            </div>
             <div class="finance-container">
+                <div class="vhalf">
+                    <div class="third">
+                        <%= financeVM.formatDoctorList() %>
+                    </div>
+                    <div class="third"> 
+                       
+                        <%= financeVM.formatPatientList(-1, false, "2000-01-01", "2100-01-01") %>
+                    </div>
+                    <div class="third">
+                        <%= financeVM.formatVisitList(-1,-1,false, "2000-01-01", "2100-01-01" ) %>
+                    </div>
+                </div>
                 <div class="vhalf">
                     <div class="third ddetails">
                         <h2> Doctor Summary </h2>
@@ -136,26 +157,13 @@
                         <div class='pdetails'>
                             <h2> Patient Summary </h2>
                         </div>
-                        <div style='vertical-align:bottom'> 
-                            Show only Patients with visits between dates: <br/> <input id="date1" type="text">
-                            and <input id="date2" type="text">
-                        </div>
+                        
                     </div>
                     <div class="third vdetails">
                         <h2> Visit Details </h2>
                     </div>
                 </div>
-                <div class="vhalf">
-                    <div class="third">
-                        <%= financeVM.formatDoctorList() %>
-                    </div>
-                    <div class="third">                        
-                        <%= financeVM.formatPatientList(-1, false, "2000-01-01", "2100-01-01") %>
-                    </div>
-                    <div class="third">
-                        <%= financeVM.formatVisitList(-1,-1,false, "2000-01-01", "2100-01-01" ) %>
-                    </div>
-                </div>
+                
                 
             </div> 
         </div>
