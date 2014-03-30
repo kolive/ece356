@@ -63,11 +63,6 @@
                 $('.visits-diagnoses-filter').change(visitFilterChange).val("");
                 $('.visits-prescriptions-filter').change(visitFilterChange).val("");
                 $('.visits-comments-filter').change(visitFilterChange).val("");
-                
-                $('#visitstable').on('footable_row_detail_updated', function(){
-                    $('.new-comment-submit').off('click');
-                    $('.new-comment-submit').on('click', newCommentClickHandler);
-                })
             });
 
             var pClickHandler = function() {
@@ -114,6 +109,17 @@
                         $(this).show();
                     });
                 });
+                
+                $.ajax({
+                    type: 'POST',
+                    url: '/ece356/DoctorServlet',
+                    data: {
+                        type: 'NewVisitLink',
+                        patientId: patientId
+                    }
+                }).done(function(html){
+                    $('.new-visit').html(html);
+                })
             };
 
             var aClickHandler = function() {
@@ -160,6 +166,17 @@
                         $(this).show();
                     });
                 });
+                
+                $.ajax({
+                    type: 'POST',
+                    url: '/ece356/DoctorServlet',
+                    data: {
+                        type: 'NewVisitLink',
+                        patientId: patientId
+                    }
+                }).done(function(html){
+                    $('.new-visit').html(html);
+                })
             };
             
             var patientsFilterChange = function() {                
@@ -269,23 +286,6 @@
                     });
                 });
             }
-            
-            var newCommentClickHandler = function() {
-                var comment = $(this).siblings('input.new-comment').val();
-                var visitId = $(this).closest('.footable-row-detail').prev().find('td:first').text();
-                
-                $.ajax({
-                    type: 'POST',
-                    url: '/ece356/DoctorServlet',
-                    data: {
-                        type: 'SubmitComment',
-                        visitId: visitId,
-                        comment: comment
-                    }
-                }).done(function(){
-                    visitFilterChange();
-                })
-            }
         });
         </script>
         <title>Doctor Homepage</title>
@@ -314,6 +314,8 @@
                 </div>
             </div>
             <div class="patient-visits-container">
+                <div class="new-visit">
+                </div>
                 <div class="patient-visits-filter">
                     <%= doctorVM.formatPatientVisitsFilter() %>
                 </div>

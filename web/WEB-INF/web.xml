@@ -20,6 +20,10 @@
         <servlet-name>FinanceServlet</servlet-name>
         <servlet-class>servlets.FinanceServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>InsertVisitationServlet</servlet-name>
+        <servlet-class>servlets.InsertVisitationServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserLoginServlet</servlet-name>
         <url-pattern>/UserLoginServlet</url-pattern>
@@ -39,6 +43,10 @@
     <servlet-mapping>
         <servlet-name>FinanceServlet</servlet-name>
         <url-pattern>/FinanceServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>InsertVisitationServlet</servlet-name>
+        <url-pattern>/InsertVisitationServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

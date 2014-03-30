@@ -184,9 +184,7 @@ public class DoctorViewModel {
         return formatted;
     }
     
-    public String formatPatientVisitsTable(int patientId, boolean isPatient){                        
-        //TODO: Comments section
-        
+    public String formatPatientVisitsTable(int patientId, boolean isPatient){                                
         String formatted = 
                 "<table id='visitstable' class='footable table-bordered toggle-circle toggle-small'>" +
                 "<thead><tr>" +
@@ -200,8 +198,6 @@ public class DoctorViewModel {
                 "<th data-hide='all'>Prescriptions Prescribed</th>" +
                 "<th data-hide='all'>Comments</th>" +
                 "</tr></thead>"; 
-        
-        /*formatted += formatPatientVisitsFilter();*/
         
         JSONArray rows = buildPatientVisitsRows(patientId, isPatient, new JSONObject());
         
@@ -243,8 +239,7 @@ public class DoctorViewModel {
 
                 formattedRow += String.format(
                                     "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>" +
-                                    "<td><p>%s</p>" +
-                                    "<p>New Comment: <input type='text' class='new-comment'><button type='button' class='new-comment-submit'>Submit</button></p></td>",
+                                    "<td>%s</td>",
                                     visit.get("visit_start_time"),
                                     visit.get("visit_end_time"),
                                     FormatHelper.formatProcedures(
@@ -281,7 +276,10 @@ public class DoctorViewModel {
         return formattedRows;
     }
     
-    public void InsertComment(int visitId, String comment){
-        Database.InsertComment(visitId, getDoctorId(), comment);
+    public String formatNewPatientLink(int patientId){
+        return "<p><a href=\'#\' onclick=\"javascript:window.open('InsertVisitationServlet?patientId=" + patientId +
+                "', '_blank', 'scrollbars=1, resizable=1, height=550, width=700', title='New Visitation Record')\" title=\"New Visitation Record\">" +
+                "New Visitation Record" +
+                "</a></p>";
     }
 }

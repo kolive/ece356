@@ -144,11 +144,10 @@ public class DoctorServlet extends HttpServlet {
                         out.println(row);
                     }
                 }
-                else if(request.getParameter("type").equals("SubmitComment")){
-                    int visitId = Integer.parseInt(request.getParameter("visitId").trim());
-                    String comment = request.getParameter("comment").trim();
+                else if(request.getParameter("type").equals("NewVisitLink")){
+                    int patientId = Integer.parseInt(request.getParameter("patientId").trim());
                     
-                    doctorVM.InsertComment(visitId, comment);
+                    out.println(doctorVM.formatNewPatientLink(patientId));
                 }
             }
             else{

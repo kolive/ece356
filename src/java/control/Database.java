@@ -698,7 +698,7 @@ public class Database {
                
                 ps = connection.prepareStatement(
                         "SELECT v.visit_id, MAX(v.last_updated) AS last_updated, v.visit_date, v.visit_start_time, v.visit_end_time, v.pid, v.eid " +
-                        "FROM ece356.visit AS v" +
+                        "FROM ece356.visit AS v " +
                         "WHERE v.pid=? AND v.eid=? AND v.is_valid='1' " +
                         buildVisitsFilters() +
                         "GROUP BY v.visit_id"
@@ -755,7 +755,7 @@ public class Database {
                         : "23:59:59"
                 );
                 
-                ps.setInt(8, doctorId);
+                ps.setInt(10, doctorId);
                 
                 rs = ps.executeQuery();
                
@@ -990,7 +990,13 @@ public class Database {
                 
                 ps = connection.prepareStatement(preparedStatement);
                 ps.setInt(1, visitId);
-                ps.setString(2, filter);
+                
+                ps.setString(
+                    2,
+                    !filter.equals("")
+                    ? "%" + filter + "%"
+                    : "%"
+                );
                 
                 rs = ps.executeQuery();
                 prescriptions = convertToJson(rs);
@@ -1040,8 +1046,20 @@ public class Database {
                 
                 ps = connection.prepareStatement(preparedStatement);
                 ps.setInt(1, visitId);
-                ps.setString(2, filter);
-                ps.setString(3, filter);
+                
+                ps.setString(
+                    2,
+                    !filter.equals("")
+                    ? "%" + filter + "%"
+                    : "%"
+                );
+                
+                ps.setString(
+                    3,
+                    !filter.equals("")
+                    ? "%" + filter + "%"
+                    : "%"
+                );
                 
                 rs = ps.executeQuery();
                 procedures = convertToJson(rs);
@@ -1091,7 +1109,13 @@ public class Database {
                 
                 ps = connection.prepareStatement(preparedStatement);
                 ps.setInt(1, visitId);
-                ps.setString(2, filter);
+                
+                ps.setString(
+                    2,
+                    !filter.equals("")
+                    ? "%" + filter + "%"
+                    : "%"
+                );
                 
                 rs = ps.executeQuery();
                 diagnoses = convertToJson(rs);
@@ -1138,11 +1162,17 @@ public class Database {
                                 "FROM ece356.comment WHERE visit_id=? " +
                                 "GROUP BY visit_id, timestamp " +
                             ") mc on mc.visit_id=c.visit_id AND mc.last_updated=c.last_updated AND mc.timestamp=c.timestamp " +
-                            "WHERE c.comment LIKE ?"
+                            "WHERE c.content LIKE ?"
                         );
                 
                 ps.setInt(1, visitId);
-                ps.setString(2, filter);
+                
+                ps.setString(
+                    2,
+                    !filter.equals("")
+                    ? "%" + filter + "%"
+                    : "%"
+                );
                 
                 rs = ps.executeQuery();
                 comments = convertToJson(rs);
@@ -1400,8 +1430,8 @@ public class Database {
         return visits;
     }
     
-    public static void InsertComment(int visitId, int doctorId, String comment){
-        /*boolean status = true;
+    public static boolean InsertNewRecord(int doctorId, JSONObject params){
+        boolean status = true;
         
         if(connection == null){
             status = openConnection();
@@ -1412,39 +1442,124 @@ public class Database {
             Statement s;
             ResultSet rs;
             
-            try{
+            try{                
                 ps = connection.prepareStatement(
-                            "SELECT MAX(last_updated) as last_updated " +
-                            "FROM ece356.visit " +
-                            "WHERE visit_id=?"
+                            "INSERT INTO ece356.visit " +
+                            "(last_updated, visit_date, visit_start_time, visit_end_time, pid, eid, is_valid) " +
+                            "VALUES (NOW(), ?, ?, ?, ?, ?, '1')",
+                            Statement.RETURN_GENERATED_KEYS
                         );
                 
-                ps.setInt(1, visitId);
+                // Required parameters
+                if(params.get("visit_date") == null || params.get("visit_date").toString().trim().equals("") ||
+                        params.get("visit_start_time") == null || params.get("visit_start_time").toString().trim().equals("") ||
+                        params.get("visit_end_time") == null || params.get("visit_end_time").toString().trim().equals("") ||
+                        params.get("pid") == null || params.get("pid").toString().trim().equals("")){
+                    return false;
+                }
+                
+                ps.setDate(1, java.sql.Date.valueOf(params.get("visit_date").toString().trim()));
+                ps.setString(2, params.get("visit_start_time").toString().trim());
+                ps.setString(3, params.get("visit_end_time").toString().trim());
+                ps.setInt(4, Integer.parseInt(params.get("pid").toString().trim()));
+                ps.setInt(5, doctorId);
+                
+                ps.executeUpdate();
+                
+                ps = connection.prepareStatement(
+                            "SELECT v.visit_id, v.last_updated " +
+                            "FROM ece356.visit AS v " +
+                            "INNER JOIN ( " +
+                                "SELECT MAX(visit_id) AS visit_id " +
+                                "FROM ece356.visit " +
+                            ") AS mv on v.visit_id=mv.visit_id"
+                        );
                 
                 rs = ps.executeQuery();
                 
-                JSONObject result = convertRowToJson(rs);
+                JSONObject insertedVisit = convertRowToJson(rs);
                 
-                String lastUpdated = result.get("last_updated").toString().trim();
+                int visitId = Integer.parseInt(insertedVisit.get("visit_id").toString().trim());
+                java.sql.Timestamp lastUpdated = java.sql.Timestamp.valueOf(insertedVisit.get("last_updated").toString().trim());
                 
-                ps = connection.prepareStatement(
-                            "INSERT INTO ece356.comment " +
-                            "(visit_id, last_updated, eid, timestamp, content) " +
-                            "VALUES (?, ?, ?, NOW(), ?)"
+                // Insert procedure for new visit
+                if(params.get("procedure_name") != null && !params.get("procedure_name").toString().trim().equals("") &&
+                        params.get("description") != null && !params.get("description").toString().trim().equals("")){
+                    ps = connection.prepareStatement(
+                                "INSERT INTO ece356.procedure " +
+                                "(visit_id, last_updated, procedure_name, description) " +
+                                "VALUES (?, ?, ?, ?)"
+                            );
+
+                    ps.setInt(1, visitId);
+                    ps.setTimestamp(2, lastUpdated);
+                    ps.setString(3, params.get("procedure_name").toString().trim());
+                    ps.setString(4, params.get("description").toString().trim());
+                }
+                
+                ps.executeUpdate();
+                
+                // Insert diagnosis for new visit
+                if(params.get("severity") != null && !params.get("severity").toString().trim().equals("")){
+                    ps = connection.prepareStatement(
+                            "INSERT INTO ece356.diagnosis " +
+                            "(visit_id, last_updated, severity) " +
+                            "VALUES (?, ?, ?)"
                         );
+
+                    ps.setInt(1, visitId);
+                    ps.setTimestamp(2, lastUpdated);
+                    ps.setString(3, params.get("severity").toString().trim());
+                }
                 
-                ps.setInt(1, visitId);
-                ps.setString(2, lastUpdated);
-                ps.setInt(3, doctorId);
-                ps.setString(4, comment);
+                ps.executeUpdate();
                 
-                ps.executeQuery();
-            }catch(SQLException e){
-                e.printStackTrace();
-                return;
+                // Insert comment for new visit
+                if(params.get("content") != null && !params.get("content").toString().trim().equals("")){
+                    ps = connection.prepareStatement(
+                                "INSERT INTO ece356.comment " +
+                                "(visit_id, last_updated, eid, timestamp, content) " +
+                                "VALUES (?, ?, ?, ?, ?)"
+                            );
+
+                    ps.setInt(1, visitId);
+                    ps.setTimestamp(2, lastUpdated);
+                    ps.setInt(3, doctorId);
+                    ps.setTimestamp(4, lastUpdated);
+                    ps.setString(5, params.get("content").toString().trim());
+
+                    ps.executeUpdate();
+                }
+                
+                // Insert prescriptions
+                
+                if(params.get("prescriptions") != null){
+                    JSONArray prescriptions = (JSONArray) params.get("prescriptions");
+                    
+                    for(int i = 0; i < prescriptions.size(); i++){
+                        JSONObject prescription = (JSONObject) prescriptions.get(i);
+                        
+                        ps = connection.prepareStatement(
+                                    "INSERT INTo ece356.prescription " +
+                                    "(visit_id, last_updated, drug_name, expires) " +
+                                    "VALUES (?, ?, ?, ?)"        
+                                );
+                        
+                        ps.setInt(1, visitId);
+                        ps.setTimestamp(2, lastUpdated);
+                        ps.setString(3, prescription.get("drug_name").toString());
+                        ps.setDate(4, java.sql.Date.valueOf(prescription.get("expires").toString().trim()));
+                        
+                        ps.executeUpdate();
+                    }
+                }
             }
-        }*/
+            catch(SQLException e){
+                e.printStackTrace();
+                return false;
+            }
+        }
         
-        return;
+        return true;
     }
 }
