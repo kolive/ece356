@@ -4,7 +4,7 @@
     Author     : Herbert
 --%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html" pageEncoding="UTF-8" errorPage="error.jsp"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -64,6 +64,8 @@
                 $('.visits-diagnoses-filter').change(visitFilterChange).val("");
                 $('.visits-prescriptions-filter').change(visitFilterChange).val("");
                 $('.visits-comments-filter').change(visitFilterChange).val("");
+                
+                $( '#tabs' ).tabs();
             });
 
             var pClickHandler = function() {
@@ -287,6 +289,7 @@
                     });
                 });
             }
+            
         });
         </script>
         <title>Doctor Homepage</title>
@@ -296,9 +299,13 @@
             <p> Logged in as: <%= user.getStringParam("fname") %> <%= user.getStringParam("lname") %> </p>
             <a href="LogoutServlet"> Log Out </a>
         </div>
-        <div class="view-container rounded backteal">
-            <div class="patient-container">
-                <div class="patients-list-container">
+        <div class="view-container rounded backteal">            
+            <div class="two-thirds patient-container" id="tabs">
+                <ul>
+                    <li> <a href="#tabs1"> All Patients </a> </li>
+                    <li> <a href="#tabs2"> Advisee Patients </a> </li>
+                </ul>
+                <div class="two-thirds patients-list-container" id="tabs1">
                     <div class="patients-list-filter">
                         <%= doctorVM.formatPatientsListFilters(true) %>
                     </div>
@@ -306,7 +313,7 @@
                         <%= doctorVM.formatPatientsList(true) %>
                     </div>
                 </div>
-                <div class="advisees-list-container">
+                <div class="two-thirds advisees-list-container" id="tabs2">
                     <div class="advisees-list-filter">
                         <%= doctorVM.formatPatientsListFilters(false) %>
                     </div>
@@ -314,13 +321,13 @@
                         <%= doctorVM.formatPatientsList(false) %>
                     </div>
                 </div>
-                <div class="patient-details">
-                    <%= doctorVM.formatPatientDetails(-1) %>
+            </div>
+            <div class="patient-details">
+                <%= doctorVM.formatPatientDetails(-1) %>
+                <div class="new-visit">
                 </div>
             </div>
             <div class="patient-visits-container">
-                <div class="new-visit">
-                </div>
                 <div class="patient-visits-filter">
                     <%= doctorVM.formatPatientVisitsFilter() %>
                 </div>

@@ -20,7 +20,8 @@ and open the template in the editor.
 */
 
 .backgreen {
-    background-color: #B4CCB9;
+    //background-color: #B4CCB9;
+    background-color:#6FACB5;
 }
 
 .backteal {
@@ -47,7 +48,8 @@ body,html{
 }
 
 .rectangle1{
-    background-color:#B4CCB9;
+    //background-color:#B4CCB9;
+    background-color: #6FACB5;
     width:500px;
     height:300px;
 }
@@ -85,7 +87,7 @@ body,html{
     padding:30px;
     margin:50px;
     position: relative;
-    min-width: 300px;
+    min-width: 1250px;
 }
 
 .patientcontainer{
@@ -257,4 +259,23 @@ div .third{
     
     border-color: #888888;
    
+}
+
+.two-thirds{
+    width: 75%;
+    min-width:1200px;
+    margin:0px;
+    display:inline-block;
+}
+
+.patient-details{
+    width:20%;
+    margin:10px;
+    display: inline-block;
+    vertical-align:top;
+}
+
+.patient-container{
+    min-width:1250px;
+    
 }

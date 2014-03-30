@@ -30,7 +30,7 @@ public class DoctorViewModel {
         if(isPatientsList){
             return 
                 "<table>" +
-                "<thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Last Visit</th></thead>" +
+                "<thead><tr><th>Filter By ID</th><th>Filter By First Name</th><th>Filter By Last Name</th><th>Filter By Health</th><th>Filter By Last Visit</th></thead>" +
                 "<tr id='patient-filter-row'>" +        
                 "<td><input type='text' id='patient-pid-filter'></td>" +
                 "<td><input type='text' id='patient-fname-filter'></td>" + 
@@ -42,7 +42,7 @@ public class DoctorViewModel {
         else{
             return 
                 "<table>" +
-                "<thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Last Visit</th></thead>" +
+                "<thead><tr><th>Filter By ID</th><th>Filter By First Name</th><th>Filter By Last Name</th><th>Filter By Health</th><th>Filter By Last Visit</th></thead>" +
                 "<tr id='patient-filter-row'>" +        
                 "<td><input type='text' id='advisee-pid-filter'></td>" +
                 "<td><input type='text' id='advisee-fname-filter'></td>" + 
@@ -157,15 +157,15 @@ public class DoctorViewModel {
         String formatted = 
                 "<table id='visits-filter' class='footable table-bordered toggle-circle toggle-small'>" +
                 "<thead><tr>" +
-                "<th data-toggle='true'>Visit #</th>" +
-                "<th>Appointment Date</th>" +
-                "<th>Assigned Physician</th>" +
-                "<th data-hide='all'>Start Time</th>" +
-                "<th data-hide='all'>End Time</th>" +
-                "<th data-hide='all'>Procedure Performed</th>" +
-                "<th data-hide='all'>Diagnosis</th>" +
-                "<th data-hide='all'>Prescriptions Prescribed</th>" +
-                "<th data-hide='all'>Comments</th>" +
+                "<th data-toggle='true'>Filter By Visit #</th>" +
+                "<th>Filter By Appointment Date</th>" +
+                "<th>Filter By Assigned Physician</th>" +
+                "<th data-hide='all'>Filter By Start Time</th>" +
+                "<th data-hide='all'>Filter By End Time</th>" +
+                "<th data-hide='all'>Filter By Procedure Performed</th>" +
+                "<th data-hide='all'>Filter By Diagnosis</th>" +
+                "<th data-hide='all'>Filter By Prescriptions Prescribed</th>" +
+                "<th data-hide='all'>Filter By Comments</th>" +
                 "</tr></thead>"; 
         
         formatted +=
