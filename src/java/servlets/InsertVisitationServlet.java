@@ -42,14 +42,15 @@ public class InsertVisitationServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
+            out.println("<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js\" type=\"text/javascript\"></script>");
             out.println("<script src=\"http://code.jquery.com/ui/1.10.3/jquery-ui.js\" type=\"text/javascript\"></script>");
             out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"css/style.css\">");
             out.println("<link rel=\"stylesheet\" href=\"http://code.jquery.com/ui/1.10.3/themes/start/jquery-ui.css\">");
             
             out.println("<script type='text/javascript'>");
-            out.println("$(function ) {");
+            out.println("$(function () {");
             out.println("   $(document).ready(function () {");
-            out.println("       $('#apptdate').datepicker({dateFormat: 'yy-mm-dd', changeYear: true});");
+            out.println("       $('.date').datepicker({dateFormat: 'yy-mm-dd', changeYear: true});");
             out.println("   });");
             out.println("});");
             out.println("</script>");
@@ -70,7 +71,7 @@ public class InsertVisitationServlet extends HttpServlet {
             
             // Pass as parameter and make it a header
             form += String.format("<h3>Patient ID: %s </h3> </br>", patientId);
-            form += "<h3>Appointment Date:</h3> <input type='text' id='apptdate' name='visit_date'> </br>";
+            form += "<h3>Appointment Date:</h3> <input type='text' class='date' name='visit_date'> </br>";
             form += "<h3>Start Time:</h3> <input type='text' name='visit_start_time'></br>";
             form += "<h3>End Time:</h3> <input type='text' name='visit_end_time'></br>";
             
@@ -79,11 +80,11 @@ public class InsertVisitationServlet extends HttpServlet {
             form += "<h3>Procedure Performed:</h3> <p>Name: <input type='text' name='procedure_name'> Description: <input type='text' name='description'></p></br>";
             form += "<h3>Diagnosis:</h3> <input type='text' name='severity'></br>";
             form += "<h3>Prescriptions Prescribed:</h3> <div>";
-            form += "<p>Drug Name: <input type='text' name='drug_name1'> Expires: <input type='text' name='expires1'></p>";
-            form += "<p>Drug Name: <input type='text' name='drug_name2'> Expires: <input type='text' name='expires2'></p>";
-            form += "<p>Drug Name: <input type='text' name='drug_name3'> Expires: <input type='text' name='expires3'></p>";
-            form += "<p>Drug Name: <input type='text' name='drug_name4'> Expires: <input type='text' name='expires4'></p>";
-            form += "<p>Drug Name: <input type='text' name='drug_name5'> Expires: <input type='text' name='expires5'></p>";
+            form += "<p>Drug Name: <input type='text' name='drug_name1'> Expires: <input type='text' class='date' name='expires1'></p>";
+            form += "<p>Drug Name: <input type='text' name='drug_name2'> Expires: <input type='text' class='date' name='expires2'></p>";
+            form += "<p>Drug Name: <input type='text' name='drug_name3'> Expires: <input type='text' class='date' name='expires3'></p>";
+            form += "<p>Drug Name: <input type='text' name='drug_name4'> Expires: <input type='text' class='date' name='expires4'></p>";
+            form += "<p>Drug Name: <input type='text' name='drug_name5'> Expires: <input type='text' class='date' name='expires5'></p>";
             
             form += "</div></br>";
             form += "<h3>Comments:</h3> <input type='text' name='content'></br>";
