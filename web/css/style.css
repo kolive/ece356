@@ -143,26 +143,6 @@ div .third{
     
 }
 
-.vhalf{
-    height:500px;
-    display:inline-block;
-    width:100%;
-    margin-bottom:50px;
-    
-}
-
-.vhalftable{
-    min-height:450px;
-    height:45%;
-}
-
-.dselected, .pselected, .vselected{
-    background-color: grey;
-}
-
-.pdetails{
-    height:400px;
-}
 
 .button{
     width: 150px !important;

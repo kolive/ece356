@@ -2098,6 +2098,7 @@ public class Database {
                         //something went terribly wrong
                     }else{
                         return false;
+
                     }
                 }
                
@@ -2108,6 +2109,53 @@ public class Database {
             
         }
         return false;
+    }
+
+    
+    /**
+     * Gets all the patient records for patients of a given doctor
+     * @param doctorId
+     * @return A JSONArray with all the patient records
+     */
+    public static JSONArray getPatientsWithVisitsInRange(int doctorId, Date date1, Date date2){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray patients = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //this should also have a join with visits where eid=dId and get all distinct pids
+                //doctors can have patients that aren't their primary patients (so wouldn't be in the patient-of relation)
+                ps = connection.prepareStatement(
+                        "SELECT * FROM ece356.patient inner join"
+                                 + "(SELECT DISTINCT(pid) FROM ece356.`visit`"
+                                 + " WHERE eid=? AND visit_date >= ? AND visit_date <= ?) as p"
+                                 + " ON p.pid = ece356.patient.pid;"
+                );
+                
+                ps.setInt(1, doctorId);
+                System.out.println(ps);
+                rs = ps.executeQuery();
+               
+                patients = convertToJson(rs);
+                
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return patients;
+            }
+            
+        }
+        
+        return patients;
+        
     }
     
     public static boolean newPatient(int eid, JSONObject params){
@@ -2263,7 +2311,7 @@ public class Database {
             status = openConnection();
         }
         
-        JSONArray history = new JSONArray();
+        JSONArray visit = new JSONArray();
         
         if(status){
             PreparedStatement ps;
@@ -2271,21 +2319,24 @@ public class Database {
             ResultSet rs;
             try{
                 ps = connection.prepareStatement(
-                       "SELECT visit_id, last_updated"+
+                       "SELECT visit_id, max(last_updated) last_updated, visit_date, visit_start_time, visit_end_time, pid, eid, is_valid"+
                        " FROM ece356.visit WHERE visit_id=? ");
                 ps.setInt(1, visitId);
                 rs = ps.executeQuery();
                
-                history = convertToJson(rs);
+                visit = convertToJson(rs);
                 
             }catch(SQLException e){
                 e.printStackTrace();
-                return history;
+                return visit;
             }
             
         }
-        return history;
+        return visit;
     }
+    
+    
+   
     
     /**
      * Queries the database to return a JSONArray of prescriptions perscribed for a given visit

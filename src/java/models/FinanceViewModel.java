@@ -212,11 +212,7 @@ public class FinanceViewModel {
                     visit.get("visit_end_time")
                    );
         summary += "<p> Procedure performed: </p>";
-        summary += models.Helpers.FormatHelper.formatProcedures(vId, "");
-        summary += "<p> Diagnosis: </p>";
-        summary += models.Helpers.FormatHelper.formatDiagnoses(vId, "");
-        summary += "<p> Prescriptions perscribed: </p>";
-        summary += models.Helpers.FormatHelper.formatPrescriptions(vId, "");
+ 
         
         return summary;
     }

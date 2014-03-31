@@ -56,6 +56,9 @@
         <servlet-name>VisitHistoryServlet</servlet-name>
         <servlet-class>servlets.VisitHistoryServlet</servlet-class>
     </servlet>
+        <servlet-name>FinanceServlet</servlet-name>
+        <servlet-class>servlets.FinanceServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserLoginServlet</servlet-name>
         <url-pattern>/UserLoginServlet</url-pattern>
@@ -111,6 +114,9 @@
     <servlet-mapping>
         <servlet-name>VisitHistoryServlet</servlet-name>
         <url-pattern>/VisitHistoryServlet</url-pattern>
+    </servlet-mapping>
+        <servlet-name>FinanceServlet</servlet-name>
+        <url-pattern>/FinanceServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
