@@ -143,11 +143,12 @@ public class DoctorViewModel {
                     );
         
         details += String.format(
-                        "<p>SIN: %s</p><p>ID Number: %s</p>",
+                        "<p>SIN: %s</p><p> Healthcard Number: %s </p><p>ID Number: %s</p>",
                         patient.get("sin"),
+                        patient.get("healthcard_number"),
                         patient.get("pid")
                     );
-     
+
         details += "</div>";
         
         return details;

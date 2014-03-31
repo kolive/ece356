@@ -72,6 +72,9 @@ public class UpdatePatientServlet extends HttpServlet {
                 tmp = "SIN: <input type='text' name='sin' value='%s'> </br>";
                 updateForm += String.format(tmp, patient.getStringParam("sin"));
                 
+                tmp = "Healthcard Number: <input type='text' name='healthcard_number' value='%s'> </br>";
+                updateForm += String.format(tmp, patient.getStringParam("healthcard_number"));
+                
                 tmp = "Address : </br>";
                 tmp += "Street Address: # <input type='text' name='street_number' value='%s' > Street <input type='text' name='street' value='%s'> </br>";
                 updateForm += String.format(tmp, patient.getStringParam("street_number"), patient.getStringParam("street"));
@@ -99,7 +102,9 @@ public class UpdatePatientServlet extends HttpServlet {
             out.println("</div>");
             out.println("</body>");
             out.println("</html>");
-        } finally {
+        }catch(Exception e){
+            response.sendRedirect("/ece356/error.jsp");
+        }finally {
             out.close();
         }
     }
@@ -158,6 +163,7 @@ public class UpdatePatientServlet extends HttpServlet {
                 params.put("street", request.getParameter("street"));
                 params.put("city", request.getParameter("city"));
                 params.put("post_code", request.getParameter("post_code"));
+                params.put("healthcard_number", request.getParameter("healthcard_number"));
             }else{
                 //update password
                 params.put("password", request.getParameter("new_password"));

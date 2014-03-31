@@ -187,6 +187,9 @@ public class PatientViewModel {
          tmp = "<p> SIN: %s </p>";
          personal += String.format(tmp, patient.getStringParam("sin"));
          
+         tmp = "<p> Healthcard Number: %s </p>";
+         personal += String.format(tmp, patient.getStringParam("healthcard_number"));
+         
          tmp = "<p> ID Number: %s </p>";
          personal += String.format(tmp, patient.getStringParam("pid"));
          

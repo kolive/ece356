@@ -202,7 +202,7 @@ public class Database {
                 String preparedStatement = "UPDATE ece356.patient SET ";
                 Set keys = params.keySet();
                 for(int i = 0; i < params.size(); i++){
-                    if((keys.toArray()[i]).toString().equals("sin") || (keys.toArray()[i]).toString().equals("street_number")){
+                    if((keys.toArray()[i]).toString().equals("sin") || (keys.toArray()[i]).toString().equals("street_number") || (keys.toArray()[i]).toString().equals("healthcard_number")){
                         preparedStatement += (keys.toArray()[i]).toString() + "=" + params.get((keys.toArray()[i]).toString()).toString();
                     }else{
                         preparedStatement += (keys.toArray()[i]).toString() + "='" + params.get((keys.toArray()[i]).toString()).toString() + "'";
