@@ -115,6 +115,19 @@ body,html{
 .personal{
 }
 
+.users, .info{
+    min-width:300px;
+    width:44%;
+    margin: 2.5%;
+    padding:0px;
+    display: inline-block;
+    vertical-align:top;
+}
+
+.appointments{
+    margin: 2.5%;
+}
+
 .update{
     margin: 50px;
     padding:30px;
