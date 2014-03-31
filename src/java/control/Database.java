@@ -1924,5 +1924,42 @@ public class Database {
         }
         return false;
     }
+    
+    public static boolean editAppointment(JSONObject params){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+         if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //check conflict
+
+                String preparedStatement = "UPDATE `ece356`.`visit` SET" +
+                        "`is_valid`=\'0\' WHERE `visit_id`=\'" + params.get("vid") +
+                        "\' AND `pid`=\'" + params.get("pid") + "\' AND `eid`=\'" + params.get("eid") + "\';";
+                ps = connection.prepareStatement(preparedStatement);
+                
+                if(ps.executeUpdate() == 1 ){
+                    //success
+                    
+                    return bookAppointment(params);
+                }else if(ps.executeUpdate() > 1){
+                    //something went terribly wrong
+                }else{
+                    return false;
+                }
+               
+            }catch(SQLException e){
+                e.printStackTrace();
+                return false;
+            }
+            
+        }
+        return false;
+    }
 
 }

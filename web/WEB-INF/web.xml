@@ -49,8 +49,8 @@
         <servlet-class>servlets.UpdatePatientInformationServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>RescheduleAppointmentServlet</servlet-name>
-        <servlet-class>servlets.RescheduleAppointmentServlet</servlet-class>
+        <servlet-name>EditAppointmentServlet</servlet-name>
+        <servlet-class>servlets.EditAppointmentServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>UserLoginServlet</servlet-name>
@@ -101,8 +101,8 @@
         <url-pattern>/UpdatePatientInformationServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>RescheduleAppointmentServlet</servlet-name>
-        <url-pattern>/RescheduleAppointmentServlet</url-pattern>
+        <servlet-name>EditAppointmentServlet</servlet-name>
+        <url-pattern>/EditAppointmentServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
