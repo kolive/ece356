@@ -1761,7 +1761,7 @@ public class Database {
             ResultSet rs;
             try{
 
-                String preparedStatement = "INSERT ece356.`patient-of` (`doctor_id`, `patient_id`) VALUES ('?', '?');";
+                String preparedStatement = "INSERT ece356.`patient-of` (`doctor_id`, `patient_id`) VALUES (?, ?);";
                 ps = connection.prepareStatement(preparedStatement);
                 
                 ps.setInt(1, doctorId);
@@ -1887,7 +1887,7 @@ public class Database {
                 String preparedStatement = "INSERT INTO `ece356`.`patient` (`password`, `fname`, `lname`, `is_enabled`, `street_number`, `street`, `city`, `post_code`, `sin`, `num_visits`, `current_health`) VALUES "
                         +"('"+ params.get("password") +"', '" +
                         params.get("fname") + "', '" +
-                        params.get("lname") +"', '1'," +
+                        params.get("lname") +"', '1', '" +
                         params.get("street_number") +"', '"+
                         params.get("street") +"', '"+
                         params.get("city") +"', '"+
@@ -1897,6 +1897,18 @@ public class Database {
                 
                 if(ps.executeUpdate() == 1 ){
                     //success
+                    preparedStatement = "SELECT pid FROM `ece356`.`patient` where `password`=\'"+params.get("password")+"\' AND `fname`=\'"+params.get("fname")+"\' AND `lname`=\'"+params.get("lname")
+                            +"\' AND `street_number`=\'"+params.get("street_number")+"\' AND `street`=\'"+params.get("street")+"\' AND `city`=\'"+params.get("city")+"\' AND `post_code`=\'"+params.get("post_code")
+                                    +"\' AND `sin`=\'"+params.get("sin")+"\';";
+                    ps = connection.prepareStatement(preparedStatement);
+                    rs = ps.executeQuery();
+                    JSONObject value = convertRowToJson(rs);
+                    
+                    preparedStatement = "INSERT INTO `ece356`.`patient-of` (`doctor_id`, `patient_id`) VALUES (?, ?);";
+                    ps = connection.prepareStatement(preparedStatement);
+                    ps.setInt(1, eid);
+                    ps.setInt(2, Integer.parseInt(value.get("pid").toString()));
+                    ps.executeUpdate();
                     return true;
                 }else if(ps.executeUpdate() > 1){
                     //something went terribly wrong

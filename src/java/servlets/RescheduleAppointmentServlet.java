@@ -19,7 +19,7 @@ import org.json.simple.JSONObject;
  *
  * @author Ling
  */
-public class NewPatientServlet extends HttpServlet {
+public class RescheduleAppointmentServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -44,45 +44,39 @@ public class NewPatientServlet extends HttpServlet {
             out.println("<html>");
             out.println("<head>");
             out.println(" <link rel=\"stylesheet\" type=\"text/css\" href=\"css/style.css\">");
-            out.println("<title> New Patient </title>");       
+            out.println("<title> Book Appointment </title>");       
             out.println("</head>");
             out.println("<body class='backgreen'>");
             out.println("<div class='update rounded backteal'>");
-            out.println("<h1> New Patient </h1>");
+            out.println("<h1> Book Appointment </h1>");
+            
             
             String updateForm ="";
             String tmp="";
+            int pid = Integer.parseInt(request.getParameter("patient"));
+            JSONObject patient = Database.getPatient(pid);
+
+            updateForm += "<form action='BookAppointmentServlet' method='post'>";
+
+            tmp = "Patient ID : <input type'text' name='pid' value='%s'> </br>";
+            updateForm += String.format(tmp, pid);
             
-            updateForm += "<form action='NewPatientServlet' method='post'>";
-            
-            updateForm += "Doctor ID : <input type='text' name='eid'> </br>";
-
-            tmp = "First Name : <input type='text' name='fname'> </br>";
-            updateForm += tmp;
-
-            tmp = "Last Name :  <input type='text' name='lname'> </br>";
-            updateForm += tmp;
-
-            tmp = "SIN : <input type='text' name='sin'> </br>";
+            tmp = "Doctor ID : <input type='text' name='eid'> </br>";
             updateForm += tmp;
             
-            tmp = "Password : <input type='text' name='password'> </br>";
+            tmp = "Date: <input type='text' name='date'> </br>";
             updateForm += tmp;
 
-            tmp = "Address : </br>";
-            tmp += "Street Address: # <input type='text' name='street_number'> Street <input type='text' name='street'> </br>";
+            tmp = "Start Time :  <input type='text' name='starttime'> </br>";
             updateForm += tmp;
 
-            tmp = "City: <input type='text' name='city'> </br>";
+            tmp = "End Time : <input type='text' name='endtime'> </br>";
             updateForm += tmp;
 
-            tmp = "Post Code: <input type='text' name='post_code'> </br>";
-            updateForm += tmp;
-            updateForm += "<input type='submit' value='Submit Patient'> ";
+            updateForm += "<input type='submit' value='Book Appointment'> ";
             updateForm += "</form>";
             
             out.println(updateForm);
-
            
             out.println("</div>");
             out.println("</body>");
@@ -130,30 +124,25 @@ public class NewPatientServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title> Doctor Assignment </title>"); 
+            out.println("<title> Book Appointment </title>"); 
             out.println(" <link rel=\"stylesheet\" type=\"text/css\" href=\"css/style.css\">");
             out.println("</head>");
             out.println("<body class='backgreen'>");
             out.println("<div class='update rounded backteal'>");
-            
+            //use form data to update user
             JSONObject params = new JSONObject();
             //update personal details
-            params.put("fname", request.getParameter("fname"));
-            params.put("lname", request.getParameter("lname"));
-            params.put("sin", request.getParameter("sin"));
-            params.put("password", request.getParameter("password"));
-            params.put("street_number", request.getParameter("street_number"));
-            params.put("street", request.getParameter("street"));
-            params.put("city", request.getParameter("city"));
-            params.put("post_code", request.getParameter("post_code"));
-            
-            boolean success = Database.newPatient(
-                    Integer.parseInt(request.getParameter("eid").toString()),
-                    params);
+            params.put("pid", request.getParameter("pid"));
+            params.put("eid", request.getParameter("eid"));
+            params.put("date", request.getParameter("date"));
+            params.put("starttime", request.getParameter("starttime"));
+            params.put("endtime", request.getParameter("endtime"));
+                
+            boolean success = Database.bookAppointment(params);
             if(success){
-                out.println("<p class='status'> New Patient Submited </p>");
+                out.println("<p class='status'> Information update successful! </p>");
             }else{
-                out.println("<p class='status'> Submit failed. Please try again, or contact your system admin. </p>");
+                out.println("<p class='status'> Information update failed. Please try again, or contact your system admin. </p>");
             }
             out.println("<button class='close' type=\"button\" onclick=\"window.open('', '_self', ''); window.close();\">Close Window</button>");
             out.println("</div>");

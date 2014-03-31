@@ -39,7 +39,6 @@ public class UpdatePatientInformationServlet extends HttpServlet {
              * Depending on the GET parameter, will generate a password change form or user update form
              * Form will contain defaults from the user model stored in the HTTP session
              */
-            String formType =  request.getParameter("password").equals("false") ? "Account Change" : "Password Change";
             
             out.println("<!DOCTYPE html>");
             out.println("<html>");
