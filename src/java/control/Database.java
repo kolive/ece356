@@ -700,6 +700,42 @@ public class Database {
         return visit;
     }
     
+      /**
+     * Queries database for information about a particular visit
+     * @param visitId
+     * @return A JSONObject describing a visit row
+     */
+    public static JSONObject getVisit(int visitId, String lastUpdated){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONObject visit = new JSONObject();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                ps = connection.prepareStatement(
+                       "SELECT *"+
+                       " FROM ece356.visit WHERE visit_id=? and last_updated=?");
+                ps.setInt(1, visitId);
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(lastUpdated));
+                rs = ps.executeQuery();
+               
+                visit = convertRowToJson(rs);
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return visit;
+            }
+            
+        }
+        return visit;
+    }
+    
     /**
      * Same as getVisits but doesn't filter by doctor
      * @param patientId
@@ -2216,4 +2252,218 @@ public class Database {
                             + params.get("endtime") + "\' and \'23:59:59\')) and is_valid = 1;";
     }
 
+    /**
+     * Queries database for historyTrail about a particular visit
+     * @param visitId
+     * @return A JSONObject describing a visit row
+     */
+    public static JSONArray getHistoryTrail(int visitId){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray history = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                ps = connection.prepareStatement(
+                       "SELECT visit_id, last_updated"+
+                       " FROM ece356.visit WHERE visit_id=? ");
+                ps.setInt(1, visitId);
+                rs = ps.executeQuery();
+               
+                history = convertToJson(rs);
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return history;
+            }
+            
+        }
+        return history;
+    }
+    
+    /**
+     * Queries the database to return a JSONArray of prescriptions perscribed for a given visit
+     * The query only considers the most up-to-date record of the visit.
+     * @param visitId
+     * @param lastUpdated
+     * @return a JSONArray describing prescription row(s)
+     */
+    public static JSONArray getPrescriptionsAudit(int visitId, String lastUpdated){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray prescriptions = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "SELECT * " +
+                "FROM ece356.prescription WHERE visit_id=? AND last_updated=?";
+                
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, visitId);
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(lastUpdated));
+                
+                
+                rs = ps.executeQuery();
+                prescriptions = convertToJson(rs);
+                
+                
+              return prescriptions;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return prescriptions;
+            }
+            
+        }
+        
+        return prescriptions;
+        
+    }
+    
+    /**
+     * Queries the database to return a JSONArray of comments for a given visit
+     * The query only considers the most up-to-date record of the visit.
+     * @param visitId
+     * @param lastUpdated
+     * @return a JSONArray describing prescription row(s)
+     */
+    public static JSONArray getCommentsAudit(int visitId, String lastUpdated){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray comments = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "SELECT * " +
+                "FROM ece356.comment WHERE visit_id=? AND last_updated=?";
+                
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, visitId);
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(lastUpdated));
+                
+                
+                rs = ps.executeQuery();
+                comments = convertToJson(rs);
+                
+                
+              return comments;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return comments;
+            }
+            
+        }
+        
+        return comments;
+        
+    }
+    
+        /**
+     * Queries the database to return a JSONArray of procedures for a given visit
+     * The query only considers the most up-to-date record of the visit.
+     * @param visitId
+     * @param lastUpdated
+     * @return a JSONArray describing prescription row(s)
+     */
+    public static JSONArray getProcedureAudit(int visitId, String lastUpdated){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray procedure = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "SELECT * " +
+                "FROM ece356.procedure WHERE visit_id=? AND last_updated=?";
+                
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, visitId);
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(lastUpdated));
+                
+                
+                rs = ps.executeQuery();
+                procedure = convertToJson(rs);
+                
+                
+              return procedure;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return procedure;
+            }
+            
+        }
+        
+        return procedure;
+        
+    }
+    
+    /**
+     * Queries the database to return a JSONArray of diagnostics for a given visit
+     * The query only considers the most up-to-date record of the visit.
+     * @param visitId
+     * @param lastUpdated
+     * @return a JSONArray describing prescription row(s)
+     */
+    public static JSONArray getDiagnosisAudit(int visitId, String lastUpdated){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray diagnostic = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "SELECT * " +
+                "FROM ece356.diagnosis WHERE visit_id=? AND last_updated=?";
+                
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, visitId);
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(lastUpdated));
+                
+                
+                rs = ps.executeQuery();
+                diagnostic = convertToJson(rs);
+                
+                
+              return diagnostic;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return diagnostic;
+            }
+            
+        }
+        
+        return diagnostic;
+        
+    }
 }
