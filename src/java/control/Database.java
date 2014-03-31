@@ -618,6 +618,45 @@ public class Database {
         }
         return visit;
     }
+    /**
+     * Queries database for information about a particular visit and all attached records
+     * @param visitId
+     * @return A JSONObject describing a visit row
+     */
+    public static JSONObject getFullVisitRecord(int visitId){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONObject visit = new JSONObject();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                ps = connection.prepareStatement(
+                        "SELECT * FROM ece356.visit \n" +
+                        "NATURAL JOIN ( SELECT visit_id, MAX(last_updated) last_updated FROM ece356.visit WHERE visit_id = ? GROUP BY visit_id ) last_record\n" +
+                        "LEFT OUTER JOIN ece356.`procedure` ON ece356.`procedure`.visit_id = ece356.visit.visit_id AND ece356.`procedure`.last_updated = ece356.visit.last_updated\n" +
+                        "LEFT OUTER JOIN ece356.diagnosis ON ece356.diagnosis.visit_id = ece356.visit.visit_id AND ece356.diagnosis.last_updated = ece356.visit.last_updated\n" +
+                        "LEFT OUTER JOIN ece356.prescription ON ece356.prescription.visit_id = ece356.visit.visit_id AND ece356.prescription.last_updated = ece356.visit.last_updated\n" +
+                        "LEFT OUTER JOIN ece356.comment ON ece356.comment.visit_id = ece356.visit.visit_id AND ece356.comment.last_updated = ece356.visit.last_updated\n" +
+                        "WHERE ece356.visit.visit_id = last_record.visit_id AND ece356.visit.last_updated = last_record.last_updated;");
+                ps.setInt(1, visitId);
+                rs = ps.executeQuery();
+               
+                visit = convertRowToJson(rs);
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return visit;
+            }
+            
+        }
+        return visit;
+    }
     
     /**
      * Queries database for information about a particular visit

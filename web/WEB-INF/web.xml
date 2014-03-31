@@ -23,10 +23,14 @@
     <servlet>
         <servlet-name>InsertVisitationServlet</servlet-name>
         <servlet-class>servlets.InsertVisitationServlet</servlet-class>
-    </servlet>    
+    </servlet>
     <servlet>
         <servlet-name>LogoutServlet</servlet-name>
         <servlet-class>servlets.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UpdateVisitationServlet</servlet-name>
+        <servlet-class>servlets.UpdateVisitationServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>UserLoginServlet</servlet-name>
@@ -43,7 +47,7 @@
     <servlet-mapping>
         <servlet-name>DoctorServlet</servlet-name>
         <url-pattern>/DoctorServlet</url-pattern>
-    </servlet-mapping>    
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>FinanceServlet</servlet-name>
         <url-pattern>/FinanceServlet</url-pattern>
@@ -51,10 +55,14 @@
     <servlet-mapping>
         <servlet-name>InsertVisitationServlet</servlet-name>
         <url-pattern>/InsertVisitationServlet</url-pattern>
-    </servlet-mapping>    
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>LogoutServlet</servlet-name>
         <url-pattern>/LogoutServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UpdateVisitationServlet</servlet-name>
+        <url-pattern>/UpdateVisitationServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
