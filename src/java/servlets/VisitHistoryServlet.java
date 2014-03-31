@@ -6,19 +6,21 @@
 
 package servlets;
 
+import control.Database;
 import java.io.IOException;
+import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
-import models.PatientViewModel;
-import models.User;
 /**
  *
  * @author Kyle
  */
-public class PatientServlet extends HttpServlet {
+public class VisitHistoryServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -31,14 +33,36 @@ public class PatientServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        User patient = (User)request.getSession().getAttribute("user");
-        if(patient != null && patient.getUserType() == User.UserType.PATIENT){
-           PatientViewModel patientVM = new PatientViewModel(patient);
-           request.getSession().setAttribute("patientVM", patientVM);
-           response.sendRedirect("/ece356/patient.jsp");
-        }else{
-             //redirect to failed login page
-            response.sendRedirect("/ece356/error.jsp");
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        try {
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Visit Record History Table</title>"); 
+            out.println("<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js\" type=\"text/javascript\"></script>\n");
+            out.println("<script src=\"js/footable.js\" type=\"text/javascript\"></script>\n");
+            out.println("<link href=\"css/footable.core.css\" rel=\"stylesheet\" type=\"text/css\"/>");
+            out.println("<link href=\"css/footable.metro.css\" rel=\"stylesheet\" type=\"text/css\" />");
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"css/style.css\">");
+            out.println("<script type=\"text/javascript\">\n" +
+            "        $(function () {\n" +
+            "\n" +
+            "            $( document ).ready(function() { \n" +
+            "                $('table').footable() \n" +
+            "            });\n" +
+            "\n" +
+            "        });\n" +
+            "        </script>");
+            out.println("</head>");
+            out.println("<body class=\"backgreen\"><div class='container backteal'>");
+            out.println("<h1> Visit Audit Trail for Visit ID: " + request.getParameter("vid") + "</h1>");
+            out.println(models.Helpers.FormatHelper.generateVisitAuditTable(Integer.parseInt(request.getParameter("vid"))));
+            out.println("</div></body>");
+            out.println("</html>");
+            
+        } finally {
+            out.close();
         }
     }
 
@@ -81,4 +105,6 @@ public class PatientServlet extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
+    
+    
 }

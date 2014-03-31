@@ -35,43 +35,10 @@ public class UserLoginServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
         
         TestDataGenerator.run();
         
-        if(request.getSession().getAttribute("user") != null){
-            //redirect to logout confirmation before allowing to login
-            //for now i'll just delete the current user attribute
-            request.getSession().setAttribute("user", null);
-        }
-
-        //Two cases, want to login as a patient or employee
-
-        if(request.getParameter("type") != null 
-                && request.getParameter("type").equals("patient")){
-
-            JSONObject userInfo = Database.userLogin(request.getParameter("username"), request.getParameter("password"), true);
-            if(!userInfo.isEmpty()){
-                User p = new User(userInfo, User.UserType.PATIENT);
-                request.getSession().setAttribute("user", p);
-                response.sendRedirect("PatientServlet");
-            }else{
-                //redirect to failed login page
-            }
-
-
-        }else if(request.getParameter("type") != null){
-            //employee login
-            JSONObject userInfo = Database.userLogin(request.getParameter("username"), request.getParameter("password"), false);
-            if(!userInfo.isEmpty()){
-                User p = new User(userInfo, User.UserType.STAFF);
-                request.getSession().setAttribute("user", p);
-                response.sendRedirect("/ece356/patient.jsp");
-            }else{
-                //redirect to failed login page
-            }
-        }
+        
             
             
         

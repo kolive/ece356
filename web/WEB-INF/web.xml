@@ -12,6 +12,50 @@
         <servlet-name>UpdatePatientServlet</servlet-name>
         <servlet-class>servlets.UpdatePatientServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>DoctorServlet</servlet-name>
+        <servlet-class>servlets.DoctorServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>FinanceServlet</servlet-name>
+        <servlet-class>servlets.FinanceServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>InsertVisitationServlet</servlet-name>
+        <servlet-class>servlets.InsertVisitationServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>servlets.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AssignDoctorServlet</servlet-name>
+        <servlet-class>servlets.AssignDoctorServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>BookAppointmentServlet</servlet-name>
+        <servlet-class>servlets.BookAppointmentServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>NewPatientServlet</servlet-name>
+        <servlet-class>servlets.NewPatientServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>StaffServlet</servlet-name>
+        <servlet-class>servlets.StaffServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UpdatePatientInformationServlet</servlet-name>
+        <servlet-class>servlets.UpdatePatientInformationServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>EditAppointmentServlet</servlet-name>
+        <servlet-class>servlets.EditAppointmentServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>VisitHistoryServlet</servlet-name>
+        <servlet-class>servlets.VisitHistoryServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserLoginServlet</servlet-name>
         <url-pattern>/UserLoginServlet</url-pattern>
@@ -23,6 +67,50 @@
     <servlet-mapping>
         <servlet-name>UpdatePatientServlet</servlet-name>
         <url-pattern>/UpdatePatientServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DoctorServlet</servlet-name>
+        <url-pattern>/DoctorServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FinanceServlet</servlet-name>
+        <url-pattern>/FinanceServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>InsertVisitationServlet</servlet-name>
+        <url-pattern>/InsertVisitationServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/LogoutServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AssignDoctorServlet</servlet-name>
+        <url-pattern>/AssignDoctorServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>BookAppointmentServlet</servlet-name>
+        <url-pattern>/BookAppointmentServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>NewPatientServlet</servlet-name>
+        <url-pattern>/NewPatientServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StaffServlet</servlet-name>
+        <url-pattern>/StaffServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UpdatePatientInformationServlet</servlet-name>
+        <url-pattern>/UpdatePatientInformationServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>EditAppointmentServlet</servlet-name>
+        <url-pattern>/EditAppointmentServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>VisitHistoryServlet</servlet-name>
+        <url-pattern>/VisitHistoryServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

@@ -194,7 +194,7 @@ public class TestDataGenerator {
                     //required information for each visit 
 
                     //visit date
-                    int numberOfDaysOffset = (int)((Math.random()*-10)+(Math.random()*10));
+                    int numberOfDaysOffset = (int)((Math.random()*-10)+(Math.random()*5));
                     java.sql.Date date = getTodaysDateOffset(numberOfDaysOffset);
 
                     //visit start and end time
@@ -219,6 +219,10 @@ public class TestDataGenerator {
                     insertVisit.setInt(7, dId);
                     insertVisit.execute();
                     
+                    //dont generate details for visits in the future
+                    if(numberOfDaysOffset > 0){
+                        continue;
+                    }
                     
                     //generate procedure
                     String[] procedures = new String[]{
@@ -860,12 +864,13 @@ public class TestDataGenerator {
                 "INSERT INTO ece356.patient" +
                 " (password, fname, lname, is_enabled," +
                 " street_number, street, city, post_code," +
-                " sin, num_visits, current_health) VALUES "+
+                " sin, healthcard, num_visits, current_health) VALUES "+
                 " (?, ?, ?, 1, ?, ?, ?, ?, ?, 0, ?);";
         
         try{
             PreparedStatement ps = connection.prepareStatement(preparedStatement);
             int sin = 199289999;
+            int healthcard = 122222229;
             for(int i = 0; i < 150; i++){
                 ps = connection.prepareStatement(preparedStatement);
                 ps.setString(1, password);
@@ -876,8 +881,10 @@ public class TestDataGenerator {
                 ps.setString(6, cities[(int)(Math.random()*cities.length)]);
                 ps.setString(7, postcode[(int)(Math.random()*postcode.length)]);
                 ps.setInt(8, sin);
+                ps.setInt(9, healthcard);
                 ps.setString(9, chealth[(int)(Math.random()*chealth.length)]);
                 sin++;
+                healthcard++;
                 ps.execute();
             }
             //ps.executeBatch();
