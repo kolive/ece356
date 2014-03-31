@@ -56,6 +56,10 @@
         <servlet-name>VisitHistoryServlet</servlet-name>
         <servlet-class>servlets.VisitHistoryServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>UpdateVisitationServlet</servlet-name>
+        <servlet-class>servlets.UpdateVisitationServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserLoginServlet</servlet-name>
         <url-pattern>/UserLoginServlet</url-pattern>
@@ -111,6 +115,10 @@
     <servlet-mapping>
         <servlet-name>VisitHistoryServlet</servlet-name>
         <url-pattern>/VisitHistoryServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UpdateVisitationServlet</servlet-name>
+        <url-pattern>/UpdateVisitationServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

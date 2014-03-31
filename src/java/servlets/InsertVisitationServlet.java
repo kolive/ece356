@@ -163,10 +163,8 @@ public class InsertVisitationServlet extends HttpServlet {
                 visitParams.put("description", request.getParameter("description"));
                 visitParams.put("severity", request.getParameter("severity"));
                 visitParams.put("content", request.getParameter("content"));
-
             
                 JSONArray prescriptions = new JSONArray();
-
                 int prescriptionCount = Integer.parseInt(request.getParameter("prescriptioncount").trim());
 
                 for(int i = 0; i <= prescriptionCount; i++){
