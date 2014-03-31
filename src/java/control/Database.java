@@ -522,7 +522,7 @@ public class Database {
                 ps.setInt(1, doctorId);
                 ps.setDate(2, date1);
                 ps.setDate(3, date2);
-                System.out.println(ps);
+                 ;
                 rs = ps.executeQuery();
                
                 patients = convertToJson(rs);
@@ -622,6 +622,48 @@ public class Database {
         }
         return visit;
     }
+    /**
+     * Queries database for information about a particular visit and all attached records
+     * @param visitId
+     * @return A JSONObject describing a visit row
+     */
+    public static JSONArray getFullVisitRecord(int visitId){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray visit = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                ps = connection.prepareStatement(
+                        "SELECT ece356.visit.visit_id, ece356.visit.visit_date, ece356.visit.visit_start_time, ece356.visit.visit_end_time, ece356.visit.pid, ece356.visit.eid,\n" +
+                        "ece356.prescription.drug_name, ece356.prescription.expires, ece356.`procedure`.procedure_name as `procedure`, ece356.`procedure`.description as procedure_description,\n" +
+                        "ece356.diagnosis.severity as diagnosis, ece356.comment.content as comment\n" +
+                        "FROM ece356.visit \n" +
+                        "NATURAL JOIN ( SELECT visit_id, MAX(last_updated) last_updated FROM ece356.visit WHERE visit_id = ? GROUP BY visit_id ) last_record\n" +
+                        "LEFT OUTER JOIN ece356.`procedure` ON ece356.`procedure`.visit_id = ece356.visit.visit_id AND ece356.`procedure`.last_updated = ece356.visit.last_updated\n" +
+                        "LEFT OUTER JOIN ece356.diagnosis ON ece356.diagnosis.visit_id = ece356.visit.visit_id AND ece356.diagnosis.last_updated = ece356.visit.last_updated\n" +
+                        "LEFT OUTER JOIN ece356.prescription ON ece356.prescription.visit_id = ece356.visit.visit_id AND ece356.prescription.last_updated = ece356.visit.last_updated\n" +
+                        "LEFT OUTER JOIN ece356.comment ON ece356.comment.eid = ece356.visit.eid AND ece356.comment.visit_id = ece356.visit.visit_id AND ece356.comment.last_updated = ece356.visit.last_updated\n" +
+                        "WHERE ece356.visit.visit_id = last_record.visit_id AND ece356.visit.last_updated = last_record.last_updated;");
+                ps.setInt(1, visitId);
+                rs = ps.executeQuery();
+                
+                visit = convertToJson(rs);
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return visit;
+            }
+            
+        }
+        return visit;
+    }
     
     /**
      * Queries database for information about a particular visit
@@ -645,6 +687,42 @@ public class Database {
                        "SELECT visit_id, max(last_updated) last_updated, visit_date, visit_start_time, visit_end_time, pid, eid, is_valid"+
                        " FROM ece356.visit WHERE visit_id=? ");
                 ps.setInt(1, visitId);
+                rs = ps.executeQuery();
+               
+                visit = convertRowToJson(rs);
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return visit;
+            }
+            
+        }
+        return visit;
+    }
+    
+      /**
+     * Queries database for information about a particular visit
+     * @param visitId
+     * @return A JSONObject describing a visit row
+     */
+    public static JSONObject getVisit(int visitId, String lastUpdated){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONObject visit = new JSONObject();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                ps = connection.prepareStatement(
+                       "SELECT *"+
+                       " FROM ece356.visit WHERE visit_id=? and last_updated=?");
+                ps.setInt(1, visitId);
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(lastUpdated));
                 rs = ps.executeQuery();
                
                 visit = convertRowToJson(rs);
@@ -1484,6 +1562,141 @@ public class Database {
         return visits;
     }
     
+      public static boolean UpdateRecord(int doctorId, JSONObject params){
+        boolean status = true;
+        
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            
+            try{                
+                ps = connection.prepareStatement(
+                            "INSERT INTO ece356.visit " +
+                            "(visit_id, last_updated, visit_date, visit_start_time, visit_end_time, pid, eid, is_valid) " +
+                            "VALUES (?, NOW(), ?, ?, ?, ?, ?, '1')",
+                            Statement.RETURN_GENERATED_KEYS
+                        );
+                
+                // Required parameters
+                if(params.get("visit_date") == null || params.get("visit_date").toString().trim().equals("") ||
+                        params.get("visit_start_time") == null || params.get("visit_start_time").toString().trim().equals("") ||
+                        params.get("visit_end_time") == null || params.get("visit_end_time").toString().trim().equals("") ||
+                        params.get("vid") == null || params.get("vid").toString().trim().equals("")){
+                    return false;
+                }
+                
+                int visitId = Integer.parseInt(params.get("vid").toString().trim());
+                
+                ps.setInt(1, visitId);
+                ps.setDate(2, java.sql.Date.valueOf(params.get("visit_date").toString().trim()));
+                ps.setString(3, params.get("visit_start_time").toString().trim());
+                ps.setString(4, params.get("visit_end_time").toString().trim());
+                ps.setInt(5, Integer.parseInt(params.get("pid").toString().trim()));
+                ps.setInt(6, doctorId);
+                
+                 ;
+                
+                ps.executeUpdate();
+                
+                ps = connection.prepareStatement(
+                            "SELECT max(last_updated) as last_updated " +
+                            "FROM ece356.visit WHERE visit_id=?"
+                        );
+                
+                ps.setInt(1, visitId);
+                rs = ps.executeQuery();
+                
+                JSONObject insertedVisit = convertRowToJson(rs);
+                
+                
+                java.sql.Timestamp lastUpdated = java.sql.Timestamp.valueOf(insertedVisit.get("last_updated").toString().trim());
+                
+                // Insert procedure for new visit
+                if(params.get("procedure_name") != null && !params.get("procedure_name").toString().trim().equals("") &&
+                        params.get("description") != null && !params.get("description").toString().trim().equals("")){
+                    ps = connection.prepareStatement(
+                                "INSERT INTO ece356.procedure " +
+                                "(visit_id, last_updated, procedure_name, description) " +
+                                "VALUES (?, ?, ?, ?)"
+                            );
+
+                    ps.setInt(1, visitId);
+                    ps.setTimestamp(2, lastUpdated);
+                    ps.setString(3, params.get("procedure_name").toString().trim());
+                    ps.setString(4, params.get("description").toString().trim());
+                }
+                 ;
+                ps.executeUpdate();
+                
+                // Insert diagnosis for new visit
+                if(params.get("severity") != null && !params.get("severity").toString().trim().equals("")){
+                    ps = connection.prepareStatement(
+                            "INSERT INTO ece356.diagnosis " +
+                            "(visit_id, last_updated, severity) " +
+                            "VALUES (?, ?, ?)"
+                        );
+
+                    ps.setInt(1, visitId);
+                    ps.setTimestamp(2, lastUpdated);
+                    ps.setString(3, params.get("severity").toString().trim());
+                }
+                 ;
+                ps.executeUpdate();
+                
+                // Insert comment for new visit
+                if(params.get("content") != null && !params.get("content").toString().trim().equals("")){
+                    ps = connection.prepareStatement(
+                                "INSERT INTO ece356.comment " +
+                                "(visit_id, last_updated, eid, timestamp, content) " +
+                                "VALUES (?, ?, ?, ?, ?)"
+                            );
+
+                    ps.setInt(1, visitId);
+                    ps.setTimestamp(2, lastUpdated);
+                    ps.setInt(3, doctorId);
+                    ps.setTimestamp(4, lastUpdated);
+                    ps.setString(5, params.get("content").toString().trim());
+                     ;
+                    ps.executeUpdate();
+                }
+                
+                // Insert prescriptions
+                
+                if(params.get("prescriptions") != null){
+                    JSONArray prescriptions = (JSONArray) params.get("prescriptions");
+                    
+                    for(int i = 0; i < prescriptions.size(); i++){
+                        JSONObject prescription = (JSONObject) prescriptions.get(i);
+                        
+                        ps = connection.prepareStatement(
+                                    "INSERT INTo ece356.prescription " +
+                                    "(visit_id, last_updated, drug_name, expires) " +
+                                    "VALUES (?, ?, ?, ?)"        
+                                );
+                        
+                        ps.setInt(1, visitId);
+                        ps.setTimestamp(2, lastUpdated);
+                        ps.setString(3, prescription.get("drug_name").toString());
+                        ps.setDate(4, java.sql.Date.valueOf(prescription.get("expires").toString().trim()));
+                         ;
+                        ps.executeUpdate();
+                    }
+                }
+            }
+            catch(SQLException e){
+                e.printStackTrace();
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
     public static boolean InsertNewRecord(int doctorId, JSONObject params){
         boolean status = true;
         if(connection == null){
@@ -2039,4 +2252,218 @@ public class Database {
                             + params.get("endtime") + "\' and \'23:59:59\')) and is_valid = 1;";
     }
 
+    /**
+     * Queries database for historyTrail about a particular visit
+     * @param visitId
+     * @return A JSONObject describing a visit row
+     */
+    public static JSONArray getHistoryTrail(int visitId){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray history = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                ps = connection.prepareStatement(
+                       "SELECT visit_id, last_updated"+
+                       " FROM ece356.visit WHERE visit_id=? ");
+                ps.setInt(1, visitId);
+                rs = ps.executeQuery();
+               
+                history = convertToJson(rs);
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return history;
+            }
+            
+        }
+        return history;
+    }
+    
+    /**
+     * Queries the database to return a JSONArray of prescriptions perscribed for a given visit
+     * The query only considers the most up-to-date record of the visit.
+     * @param visitId
+     * @param lastUpdated
+     * @return a JSONArray describing prescription row(s)
+     */
+    public static JSONArray getPrescriptionsAudit(int visitId, String lastUpdated){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray prescriptions = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "SELECT * " +
+                "FROM ece356.prescription WHERE visit_id=? AND last_updated=?";
+                
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, visitId);
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(lastUpdated));
+                
+                
+                rs = ps.executeQuery();
+                prescriptions = convertToJson(rs);
+                
+                
+              return prescriptions;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return prescriptions;
+            }
+            
+        }
+        
+        return prescriptions;
+        
+    }
+    
+    /**
+     * Queries the database to return a JSONArray of comments for a given visit
+     * The query only considers the most up-to-date record of the visit.
+     * @param visitId
+     * @param lastUpdated
+     * @return a JSONArray describing prescription row(s)
+     */
+    public static JSONArray getCommentsAudit(int visitId, String lastUpdated){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray comments = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "SELECT * " +
+                "FROM ece356.comment WHERE visit_id=? AND last_updated=?";
+                
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, visitId);
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(lastUpdated));
+                
+                
+                rs = ps.executeQuery();
+                comments = convertToJson(rs);
+                
+                
+              return comments;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return comments;
+            }
+            
+        }
+        
+        return comments;
+        
+    }
+    
+        /**
+     * Queries the database to return a JSONArray of procedures for a given visit
+     * The query only considers the most up-to-date record of the visit.
+     * @param visitId
+     * @param lastUpdated
+     * @return a JSONArray describing prescription row(s)
+     */
+    public static JSONArray getProcedureAudit(int visitId, String lastUpdated){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray procedure = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "SELECT * " +
+                "FROM ece356.procedure WHERE visit_id=? AND last_updated=?";
+                
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, visitId);
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(lastUpdated));
+                
+                
+                rs = ps.executeQuery();
+                procedure = convertToJson(rs);
+                
+                
+              return procedure;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return procedure;
+            }
+            
+        }
+        
+        return procedure;
+        
+    }
+    
+    /**
+     * Queries the database to return a JSONArray of diagnostics for a given visit
+     * The query only considers the most up-to-date record of the visit.
+     * @param visitId
+     * @param lastUpdated
+     * @return a JSONArray describing prescription row(s)
+     */
+    public static JSONArray getDiagnosisAudit(int visitId, String lastUpdated){
+        
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray diagnostic = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "SELECT * " +
+                "FROM ece356.diagnosis WHERE visit_id=? AND last_updated=?";
+                
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, visitId);
+                ps.setTimestamp(2, java.sql.Timestamp.valueOf(lastUpdated));
+                
+                
+                rs = ps.executeQuery();
+                diagnostic = convertToJson(rs);
+                
+                
+              return diagnostic;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return diagnostic;
+            }
+            
+        }
+        
+        return diagnostic;
+        
+    }
 }

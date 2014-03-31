@@ -21,7 +21,12 @@
         <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/start/jquery-ui.css">
         <script type="text/javascript">
         $(function () {
-            $( document ).ready(function() { 
+            $( document ).ready(function() {
+                $('tr').click(function(){
+                    $('.dselected').removeClass('dselected');
+                    $(this).addClass('dselected');
+                
+                });
                 $('table').footable();
                 $('.patientrow').click(pClickHandler); 
                 $('.adviseerow').click(aClickHandler);
