@@ -864,8 +864,8 @@ public class TestDataGenerator {
                 "INSERT INTO ece356.patient" +
                 " (password, fname, lname, is_enabled," +
                 " street_number, street, city, post_code," +
-                " sin, healthcard, num_visits, current_health) VALUES "+
-                " (?, ?, ?, 1, ?, ?, ?, ?, ?, 0, ?);";
+                " sin, healthcard_number, num_visits, current_health) VALUES "+
+                " (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, 0, ?);";
         
         try{
             PreparedStatement ps = connection.prepareStatement(preparedStatement);
@@ -882,7 +882,7 @@ public class TestDataGenerator {
                 ps.setString(7, postcode[(int)(Math.random()*postcode.length)]);
                 ps.setInt(8, sin);
                 ps.setInt(9, healthcard);
-                ps.setString(9, chealth[(int)(Math.random()*chealth.length)]);
+                ps.setString(10, chealth[(int)(Math.random()*chealth.length)]);
                 sin++;
                 healthcard++;
                 ps.execute();
