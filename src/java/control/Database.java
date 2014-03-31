@@ -1482,11 +1482,10 @@ public class Database {
     
     public static boolean InsertNewRecord(int doctorId, JSONObject params){
         boolean status = true;
-        
         if(connection == null){
             status = openConnection();
         }
-        
+
         if(status){
             PreparedStatement ps;
             Statement s;
@@ -1612,4 +1611,306 @@ public class Database {
         
         return true;
     }
+
+    public static JSONArray getPatients()
+    {
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray users = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //get doctors that manages this staff
+                String preparedStatement = "select pid, fname, lname from ece356.patient where is_enabled = 1;";
+                ps = connection.prepareStatement(preparedStatement);
+                
+                rs = ps.executeQuery();
+                users = convertToJson(rs);
+                
+                
+              return users;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return users;
+            }
+            
+        }
+        
+        return users;
+    }
+    
+    public static JSONObject getPatientByStaff(int eid, int pid)
+    {
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONObject patient = new JSONObject();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //get doctors that manages this staff
+                String preparedStatement = "SELECT * FROM (SELECT patient_id FROM (SELECT * FROM (SELECT doctor_id as ID from ece356.`managed-by` where staff_id = ?) a join ece356.`patient-of` b on a.ID = b.doctor_id) as patients where patient_id = ?) c join ece356.patient d on c.patient_id = d.pid;";
+                ps = connection.prepareStatement(preparedStatement);
+                
+                ps.setInt(1, eid);
+                ps.setInt(2, pid);
+                
+                rs = ps.executeQuery();
+                patient = convertRowToJson(rs);
+                
+                
+              return patient;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return patient;
+            }
+            
+        }
+
+        return patient;
+    }
+    
+    public static JSONArray getAppointmentByPatient(int pid)
+    {
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray appointments = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //get doctors that manages this staff
+                String preparedStatement = "SELECT visit_id, visit_date, visit_start_time, visit_end_time, eid from ece356.visit where pid = ?;";
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, pid);
+                
+                rs = ps.executeQuery();
+                appointments = convertToJson(rs);
+                
+                
+              return appointments;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return appointments;
+            }
+            
+        }
+        
+        return appointments;
+    }
+    
+    public static JSONArray getAppointmentByDoctor(int eid)
+    {
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray appointments = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //get doctors that manages this staff
+                String preparedStatement = "SELECT visit_id, visit_date, visit_start_time, visit_end_time, pid from ece356.visit where eid = ?;";
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, eid);
+                
+                rs = ps.executeQuery();
+                appointments = convertToJson(rs);
+                
+                
+              return appointments;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return appointments;
+            }
+            
+        }
+        
+        return appointments;
+    }
+    
+    public static boolean assignPatientToDoctor(int patientId, int doctorId){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+         if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+
+                String preparedStatement = "INSERT ece356.`patient-of` (`doctor_id`, `patient_id`) VALUES ('?', '?');";
+                ps = connection.prepareStatement(preparedStatement);
+                
+                ps.setInt(1, doctorId);
+                ps.setInt(2, patientId);
+                if(ps.executeUpdate()== 1 ){
+                    //success
+                    return true;
+                }else if(ps.executeUpdate() > 1){
+                    //something went terribly wrong
+                }else{
+                    return false;
+                }
+               
+                
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return false;
+            }
+            
+        }
+        return false;
+    }
+    
+    public static boolean updatePatientInformation(int patientId, JSONObject params){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+         if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "UPDATE ece356.patient SET ";
+                Set keys = params.keySet();
+                for(int i = 0; i < params.size(); i++){
+                    if((keys.toArray()[i]).toString().equals("sin") || (keys.toArray()[i]).toString().equals("street_number")){
+                        preparedStatement += (keys.toArray()[i]).toString() + "=" + params.get((keys.toArray()[i]).toString()).toString();
+                    }else{
+                        preparedStatement += (keys.toArray()[i]).toString() + "='" + params.get((keys.toArray()[i]).toString()).toString() + "'";
+                    }
+                    
+                    if(i != params.size()-1){
+                        preparedStatement += ",";
+                    }
+                }
+                preparedStatement += " WHERE pid=? AND is_enabled=1";
+                ps = connection.prepareStatement(preparedStatement);
+                
+                ps.setInt(1, patientId);
+                if(ps.executeUpdate() == 1 ){
+                    //success
+                    return true;
+                }else if(ps.executeUpdate() > 1){
+                    //something went terribly wrong
+                }else{
+                    return false;
+                }
+               
+                
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return false;
+            }
+            
+        }
+        return false;
+    }
+    
+    public static boolean bookAppointment(JSONObject params){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+         if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                //check conflict
+                String preparedStatement = "INSERT INTO `ece356`.`visit` (`visit_date`, `visit_start_time`, `visit_end_time`, `pid`, `eid`, `is_valid`) VALUES "
+                        +"('"+ params.get("date") +"', '" +
+                        params.get("starttime") + "', '" +
+                        params.get("endtime") +"', '" +
+                        params.get("pid") +"', '"+
+                        params.get("eid") +"', '1');";
+                ps = connection.prepareStatement(preparedStatement);
+                
+                if(ps.executeUpdate() == 1 ){
+                    //success
+                    return true;
+                }else if(ps.executeUpdate() > 1){
+                    //something went terribly wrong
+                }else{
+                    return false;
+                }
+               
+            }catch(SQLException e){
+                e.printStackTrace();
+                return false;
+            }
+            
+        }
+        return false;
+    }
+    
+    public static boolean newPatient(int eid, JSONObject params){
+        boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+         if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+
+                String preparedStatement = "INSERT INTO `ece356`.`patient` (`password`, `fname`, `lname`, `is_enabled`, `street_number`, `street`, `city`, `post_code`, `sin`, `num_visits`, `current_health`) VALUES "
+                        +"('"+ params.get("password") +"', '" +
+                        params.get("fname") + "', '" +
+                        params.get("lname") +"', '1'," +
+                        params.get("street_number") +"', '"+
+                        params.get("street") +"', '"+
+                        params.get("city") +"', '"+
+                        params.get("post_code") +"', '"+
+                        params.get("sin") +"', '0', 'In Good Health');";
+                ps = connection.prepareStatement(preparedStatement);
+                
+                if(ps.executeUpdate() == 1 ){
+                    //success
+                    return true;
+                }else if(ps.executeUpdate() > 1){
+                    //something went terribly wrong
+                }else{
+                    return false;
+                }
+               
+            }catch(SQLException e){
+                e.printStackTrace();
+                return false;
+            }
+            
+        }
+        return false;
+    }
+
 }

@@ -71,6 +71,11 @@ public class UserLoginServlet extends HttpServlet {
                         request.getSession().setAttribute("user", p);
                         response.sendRedirect("/ece356/FinanceServlet");
                     }
+                    else if (userInfo.get("dept").equals("STAFF")) {
+	                    User p = new User(userInfo, User.UserType.STAFF);
+	                    request.getSession().setAttribute("user", p);
+	                    response.sendRedirect("/ece356/StaffServlet");
+                	}
                 }else{
                     //redirect to failed login page
                     response.sendRedirect("/ece356/error.jsp");

@@ -10,7 +10,7 @@
     </servlet>
     <servlet>
         <servlet-name>UpdatePatientServlet</servlet-name>
-        <servlet-class>servlets.UpdatePatientServlet</servlet-class>
+        <servlet-class>servlets.AssignDoctorServlet.java</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>DoctorServlet</servlet-name>
@@ -23,7 +23,7 @@
     <servlet>
         <servlet-name>InsertVisitationServlet</servlet-name>
         <servlet-class>servlets.InsertVisitationServlet</servlet-class>
-    </servlet>    
+    </servlet>
     <servlet>
         <servlet-name>LogoutServlet</servlet-name>
         <servlet-class>servlets.LogoutServlet</servlet-class>
@@ -43,7 +43,7 @@
     <servlet-mapping>
         <servlet-name>DoctorServlet</servlet-name>
         <url-pattern>/DoctorServlet</url-pattern>
-    </servlet-mapping>    
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>FinanceServlet</servlet-name>
         <url-pattern>/FinanceServlet</url-pattern>
@@ -51,7 +51,7 @@
     <servlet-mapping>
         <servlet-name>InsertVisitationServlet</servlet-name>
         <url-pattern>/InsertVisitationServlet</url-pattern>
-    </servlet-mapping>    
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>LogoutServlet</servlet-name>
         <url-pattern>/LogoutServlet</url-pattern>

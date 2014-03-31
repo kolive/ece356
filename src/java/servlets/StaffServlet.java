@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import models.PatientViewModel;
 import models.StaffViewModel;
 import models.User;
+import models.User.UserType;
 
 /**
  *
@@ -36,12 +37,13 @@ public class StaffServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         User staff = (User)request.getSession().getAttribute("user");
-        if(staff != null && staff.getUserType() == User.UserType.PATIENT){
+        if(staff != null && staff.getUserType() == User.UserType.STAFF){
            StaffViewModel staffVM = new StaffViewModel(staff);
            request.getSession().setAttribute("staffVM", staffVM);
-           response.sendRedirect("/356/staff.jsp");
+           response.sendRedirect("/ece356/staff.jsp");
         }else{
             //redirect to error page
+            response.sendRedirect("/ece356/error.jsp");
         }
     }
 
@@ -71,7 +73,46 @@ public class StaffServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        try {
+            User user = (User)request.getSession().getAttribute("user");
+            if(user.getUserType() == User.UserType.STAFF){
+                StaffViewModel vm = (StaffViewModel) request.getSession().getAttribute("staffVM");
+                if(request.getParameter("type").equals("UserRequest")){
+                    //
+                    out.println(vm.formatInfo(
+                            true,
+                            Integer.parseInt(user.getStringParam("eid")),
+                            Integer.parseInt(request.getParameter("dId")),
+                            request.getParameter("userType").equals("PATIENT") ? UserType.PATIENT : UserType.DOCTOR
+                            ));
+                }else if(request.getParameter("type").equals("AppointmentsRequest")){
+                    out.println(vm.formatAppointments(
+                            true,
+                            Integer.parseInt(user.getStringParam("eid")),
+                            Integer.parseInt(request.getParameter("dId")),
+                            request.getParameter("userType").equals("PATIENT") ? UserType.PATIENT : UserType.DOCTOR
+                            ));
+                }/*else if(request.getParameter("type").equals("DoctorDetailRequest")){
+                    out.println(vm.formatDoctorSummary(
+                        Integer.parseInt(request.getParameter("dId").trim())
+                    ));
+                }else if(request.getParameter("type").equals("PatientDetailRequest")){
+                    out.println(vm.formatPatientSummary(
+                        Integer.parseInt(request.getParameter("pId").trim())                       
+                    ));
+                }else if(request.getParameter("type").equals("VisitDetailRequest")){
+                    out.println(vm.formatVisitSummary(
+                        Integer.parseInt(request.getParameter("vId").trim())
+                    ));
+                }*/
+            }else{
+               out.println("User authentication error. Please log in.");
+            }
+        }finally{
+            out.close();
+        }
     }
 
     /**

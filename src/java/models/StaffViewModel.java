@@ -7,81 +7,148 @@
 package models;
 
 import control.Database;
+import models.User.UserType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
  *
- * @author Kyle
+ * @author Ling
  */
 public class StaffViewModel {
     
     User staff;
+    JSONArray patients;
+    JSONArray doctors;
     
     public StaffViewModel(User staff){
         this.staff = staff;
     }
     
-    /**
-     * Formats information about the staff info a helpful summary
-     * @return summary, an HTML formatted string
-     */
-    public String formatSummary(){
-        /**
+    public String formatUserList(){
+        patients = Database.getPatients();
+        doctors = Database.getDoctors();
+        
+        //init table, as per FooTable plugin with expandable rows
+        //details about a visit are hidden unless the row is expanded
+        String formattedList = "Search users : <input id='dfilter' type='text' />"+
+                                "<table class='footable vhalftable dlist'data-filter-minimum='1' data-filter='#dfilter' data-page-navigation='.pagination'>" 
+                +"<thead><tr><th data-toggle='true'> ID </th> <th> First Name </th> <th> Last Name </th> <th> Type </th> "
+                +"</tr></thead>";
+        String tmp;
+        
+        //iterate over all doctors and output rows
+        for(int i = 0; i < doctors.size();i++){
+            JSONObject p = (JSONObject)doctors.get(i);
             
-            h2 Welcome {fname}, /h2   
-            h2 Your summary: /h2
-            div class=staff_summary
-                p Last Visit: {lastVisitDate} /p
-                p Next Appointment: {nextVisitDate} /p
-                p Your Current Health: {currentHealth} /p
-                div class=prescriptionlist
-                  p Active Prescriptions: /p 
-                     {prescription list}
+            //formats the non-details data
+            tmp = "<tr class='userrow'><td class='doctor_id'>%s</td> <td> %s </td> <td> %s </td> <td>DOCTOR</td></tr>";
+            formattedList += String.format(tmp, 
+                    p.get("eid"),
+                    p.get("fname"), 
+                    p.get("lname"));
+
+        }
+        
+        //iterate over all patients and output rows
+        for(int i = 0; i < patients.size();i++){
+            JSONObject p = (JSONObject)patients.get(i);
+            
+            //formats the non-details data
+            tmp = "<tr class='userrow'><td class='patient_id'>%s</td> <td> %s </td> <td> %s </td> <td>PATIENT</td></tr>";
+            formattedList += String.format(tmp, 
+                    p.get("pid"),
+                    p.get("fname"), 
+                    p.get("lname"));
+
+        }
+        
+        formattedList += "<tfoot class='hide-if-no-paging'><tr><td colspan='4'>" +
+ 		"<div class='pagination pagination-centered'></div></td></tr></tfoot>";
+        
+        formattedList += "</table>";
+        return formattedList;
+    }
+    
+    public String formatInfo(boolean dynamic, int eid, int id, User.UserType type) {
+        if (!dynamic)
+        {
+            return "";
+        }
+        else
+        {
+            String summary = "";
+            if (type == User.UserType.DOCTOR)
+            {
+                //doctor summary
+                String tmp;
+                tmp = "<div class='patientList'> <p> Active patients: </p> %s </div>";
+                    summary += String.format(tmp, formatPatientsList(eid));
+                    summary += "</div>";
+            }
+            else if (type == User.UserType.PATIENT)
+            {
+                JSONObject patient = Database.getPatientByStaff(eid, id);
                 
-         **/
-         String summary = "";
-         String tmp;
-         
-         tmp = "<h2> Welcome %s, </h2>";
-         summary += String.format(tmp, staff.getStringParam("fname"));
-         summary += " <h2> Your summary: </h2> <div class='staff_summary'>";
-         
-         //Gets the next scheduled appointment, if it exists
-         tmp = "<p> Next Appointment: %s </p>";
-         JSONObject appt =  Database.getSeqPatientVisit(Integer.parseInt(staff.getStringParam("pid")), true);
-         if(appt.get("min(visit_date)") != null)
-            summary += String.format(tmp, appt.get("min(visit_date)").toString());
-         else
-            summary += String.format(tmp, "No scheduled appointments");
-         
-         //Gets the last scheduled appointment, if it exists
-         tmp = "<p> Last Visit: %s </p>";
-         appt =  Database.getSeqPatientVisit(Integer.parseInt(staff.getStringParam("pid")), false);
-         if(appt.get("max(visit_date)") != null)
-            summary += String.format(tmp, appt.get("max(visit_date)").toString());
-         else
-            summary += String.format(tmp, "No past appointments");
-         
-         tmp = "<p> Your current health: %s </p>";
-         summary += String.format(tmp, staff.getStringParam("current_health"));
-         
-         tmp = "<div class='prescriptionlist'> <p> Active prescriptions: </p> %s </div>";
-         summary += String.format(tmp, formatPrescriptionTable(true));
-         summary += "</div>";
-         return summary;
+                if (patient.isEmpty())
+                {
+                    //not patient related to superior
+                    summary += "<p><a href=\"#\" onclick=\"javascript:window.open('AssignDoctorServlet?patient=" + id + "', '_blank', 'scrollbars=0, resizeable=0, height=550, width=700', title='Doctor Assignment')\" title=\"Doctor Assignment\"> Assign Doctor </a></p>";
+                    summary += "<p><a href=\"#\">Book Appointment</a></p>";
+                }
+                else
+                {
+                    //patient summary
+                    String tmp;
+
+                    summary += " <h2> Patient summary: </h2> <div class='patient_summary'>";
+                    tmp = "<h2> %s %s </h2>";
+
+                    summary += String.format(tmp, patient.get("fname"), patient.get("lname"));
+
+                    //Gets the next scheduled appointment, if it exists
+                    tmp = "<p> Next Appointment: %s </p>";
+                    JSONObject appt =  Database.getSeqPatientVisit(id, true);
+                    if(appt.get("min(visit_date)") != null)
+                       summary += String.format(tmp, appt.get("min(visit_date)").toString());
+                    else
+                       summary += String.format(tmp, "No scheduled appointments");
+
+                    //Gets the last scheduled appointment, if it exists
+                    tmp = "<p> Last Visit: %s </p>";
+                    appt =  Database.getSeqPatientVisit(id, false);
+                    if(appt.get("max(visit_date)") != null)
+                       summary += String.format(tmp, appt.get("max(visit_date)").toString());
+                    else
+                       summary += String.format(tmp, "No past appointments");
+
+                    tmp = "<p> Current health: %s </p>";
+                    summary += String.format(tmp, patient.get("current_health"));
+
+                    tmp = "<div class='prescriptionlist'> <p> Active prescriptions: </p> %s </div>";
+                    summary += String.format(tmp, formatPrescriptionTable(id));
+                    summary += "</div>";
+                    
+                    summary += "<p><a href=\"#\" onclick=\"javascript:window.open('AssignDoctorServlet?patient=" + id + "', '_blank', 'scrollbars=0, resizeable=0, height=550, width=700', title='Doctor Assignment')\" title=\"Doctor Assignment\"> Assign Doctor </a></p>";
+                    summary += "<p><a href=\"#\" onclick=\"javascript:window.open('UpdatePatientInformationServlet?patient="+ id +"', '_blank', 'scrollbars=0, resizeable=0, height=550, width=700', title=' Update Patient Information ')\" title=\" Update Patient Information \"> Update Patient Information </a></p>";
+                    summary += "<p><a href=\"#\" onclick=\"javascript:window.open('BookAppointmentServlet?patient="+ id +"', '_blank', 'scrollbars=0, resizeable=0, height=550, width=700', title=' Book Appointmentn ')\" title=\" Book Appointment \">Book Appointment</a></p>";
+                }
+            }
+             
+             return summary;
+        }
     }
     
     /**
-     * Generates a table of prescriptions for this staff
+     * Generates a table of prescriptions for this patient
      * @param onlyValid , if true, will only include non-expired prescriptions
      * @return formattedList, a table of prescriptions and dates that they expire
      */
-    public String formatPrescriptionTable(boolean onlyValid){
-        //gets an array of all prescriptions for a given staff
+    public String formatPrescriptionTable(int pid){
+        //gets an array of all prescriptions for a given patient
         //if onlyValid == true, this list only contains non-expired prescriptions
-        JSONArray pl = Database.getPrescriptionsByPatient(Integer.parseInt(staff.getStringParam("pid")), onlyValid);
-        String formattedList = "<table><thead><tr> <th> Prescription </th> <th> Expires </th></td></tr></thead>";
+        JSONArray pl = Database.getPrescriptionsByPatient(pid, true);
+        String formattedList = "<table class='footable dynamicTable'><thead><tr> <th> Prescription </th> <th> Expires </th></td></tr></thead>";
         String tmp;
         
         //iterates over all prescriptions and adds rows for each one
@@ -98,150 +165,133 @@ public class StaffViewModel {
         return formattedList;
     }
     
-    /**
-     * Generates a table of past and future visits to be listed on the staff homepage
-     * Tables contain all information, javascript on client side should handle hiding details
-     * @return formattedList, a table of all visits and details
-     */
-    public String formatVisitHistoryTable(){
-        //TODO: Using the eid, get the actual doctor's name
+    public String formatPatientsList(int eid){        
+        String formattedList = "";
         
-        //get the most up-to-date records for all the visits of a particular staff
-        JSONArray vl = Database.getVisits(Integer.parseInt(staff.getStringParam("pid")));
+        formattedList += "<table id='patientslist' class='footable dynamicTable vhalftable dlist'data-filter-minimum='1' data-filter='#dfilter' data-page-navigation='.pagination'>";
         
-        //init table, as per FooTable plugin with expandable rows
-        //details about a visit are hidden unless the row is expanded
-        String formattedList = "<table id='visits' class='footable table-bordered toggle-circle toggle-small'>" 
-                +"<thead><tr><th data-toggle='true'> Visit #</th> <th> Appointment Date </th> <th> Assigned Physician </th> "
-                +"<th data-hide='all' > Start Time </th><th data-hide='all' > End Time </th>"
-                +"<th data-hide='all' > Procedure Performed </th><th data-hide='all' > Diagnosis </th><th data-hide='all' > Prescriptions Perscribed </th></tr></thead>";
-        String tmp;
+        formattedList += "<thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Last Visit</th></thead>";
         
-        //iterate over all visits and output rows
-        for(int i = 0; i < vl.size();i++){
-            JSONObject p = (JSONObject)vl.get(i);
-            
-            //formats the non-details data
-            tmp = "<tr><td class='visit_id'>%s</td> <td> %s </td> <td> %s </td>";
-            formattedList += String.format(tmp, 
-                    p.get("visit_id"),
-                    p.get("visit_date"), 
-                    p.get("eid"));
-            
-            //formats the details data
-            tmp ="<td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td></tr>";
-            String prescriptionSummary = formatPrescriptions(p.get("visit_id").toString());
-            String diagnosisSummary = formatDiagnoses(p.get("visit_id").toString());
-            String procedureSummary = formatProcedures(p.get("visit_id").toString());
-            formattedList += String.format(tmp,
-                    p.get("visit_start_time"),
-                    p.get("visit_end_time"),
-                    procedureSummary,
-                    diagnosisSummary,
-                    prescriptionSummary);
-
+        /*formattedList += formatPatientsListFilters(isPatientsList);*/
+        
+        JSONArray rows = buildPatientsListRows(new JSONObject(),  eid);
+        
+        for(int i = 0; i < rows.size(); i++){
+            formattedList += rows.get(i);
         }
+        
         formattedList += "</table>";
-        return formattedList;        
+        return formattedList;
     }
     
-    /**
-     * Gets any prescriptions prescribed in a given visit and outputs a list of them 
-     * @param visitId
-     * @return prescriptions, an HTML formatted unordered list
-     */
-    public String formatPrescriptions(String visitId){
-        String prescriptions = "<ul class='prescriptions'>";
-        String tmp = "";
-        JSONArray ps = Database.getPrescriptionsByVisit(Integer.parseInt(visitId));
-        for(int i = 0; i < ps.size();i++){
-            JSONObject p = (JSONObject)ps.get(i);
-            tmp = "<li> Drug: %s, Expires: %s </li>";
-            prescriptions += String.format(tmp, p.get("drug_name").toString(), p.get("expires").toString());
+    public JSONArray buildPatientsListRows(JSONObject filters, int eid){
+        JSONArray patients = new JSONArray();
+        
+        patients = Database.getDoctorPatients(eid, filters);
+        
+        JSONArray formattedRows = new JSONArray();
+        
+        for(int i = 0; i < patients.size(); i++){
+            JSONObject p = (JSONObject) patients.get(i); 
+            
+            String formattedRow = "";
+            
+            formattedRow += "<tr>";
+            
+            formattedRow += String.format("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+                                p.get("pid"),
+                                p.get("fname"),
+                                p.get("lname"),
+                                p.get("current_health"),
+                                p.get("last_visit"));
+                    
+            formattedRows.add(formattedRow);
         }
-        if(prescriptions.equals("<ul class='prescriptions'>")) prescriptions = "<p>No prescriptions prescribed during this visit.</p>";
-        else prescriptions += "</ul>";
-        return prescriptions;
+        
+        return formattedRows;
     }
     
-    /**
-     * Gets the procedure(s) preformed during a visit and outputs a list of them
-     * @param visitId
-     * @return procedures, an HTML formatted paragraph
-     */
-    public String formatProcedures(String visitId){
-        String procedures = "<div class='procedures'>";
-        String tmp = "";
-        JSONArray ps = Database.getProcedureByVisit(Integer.parseInt(visitId));
-        for(int i = 0; i < ps.size();i++){
-            JSONObject p = (JSONObject)ps.get(i);
-            tmp = "<p> %s : %s </p>";
-            procedures += String.format(tmp, p.get("procedure_name").toString(), p.get("description").toString());
+    public String formatAppointments(boolean dynamic, int eid, int id, User.UserType type) {
+        if (!dynamic)
+        {
+            return "";
         }
-        if(procedures.equals("<div class='procedures'>")) procedures = "<p>No procedure performed during this visit. </p>";
-        else procedures += "</div>";
-        return procedures;
-    }
-    
-    /**
-     * Gets the diagnosis(es) given during a visit and outputs a list of them
-     * @param visitId
-     * @return diagnoses, an HTML formatted paragraph
-     */
-    public String formatDiagnoses(String visitId){
-        String procedures = "<div class='diagnoses'>";
-        String tmp = "";
-        JSONArray ps = Database.getDiagnosisByVisit(Integer.parseInt(visitId));
-        for(int i = 0; i < ps.size();i++){
-            JSONObject p = (JSONObject)ps.get(i);
-            tmp = "<p> %s </p>";
-            procedures += String.format(tmp, p.get("severity").toString());
+        else
+        {
+            String summary = "";
+            if (type == User.UserType.DOCTOR)
+            {
+                //doctor summary
+                String tmp;
+
+                tmp = "<div class='appointmentlist'> <p> Appointments: </p> %s </div>";
+                summary += String.format(tmp, formatAppointmentTable(id, type));
+                summary += "</div>";
+            }
+            else if (type == User.UserType.PATIENT)
+            {
+                JSONObject patient = Database.getPatientByStaff(eid, id);
+                
+                if (patient.isEmpty())
+                {
+                    //not patient related to superior
+                }
+                else
+                {
+                    //patient summary
+                    String tmp;
+
+                    tmp = "<div class='appointmentlist'> <p> Appointments: </p> %s </div>";
+                    summary += String.format(tmp, formatAppointmentTable(id, type));
+                    summary += "</div>";
+                }
+            }
+             
+             return summary;
         }
-        if(procedures.equals("<div class='diagnoses'>")) procedures = "<p>No diagnosis given during this visit. </p>";
-        else procedures += "</div>";
-        return procedures;
     }
     
-    /**
-     * Formats the personal details of a staff and outputs them
-     * @return personal, an HTML formatted summary of personal information
-     */
-    public String formatPersonalDetails(){
-         String tmp;
-         String personal = "";
-         
-         tmp = "<h2> Personal Details: </h2> <p> Your name: %s %s, </p>";
-         personal += String.format(tmp, staff.getStringParam("fname"), staff.getStringParam("lname"));
-         
-         tmp = "<p> SIN: %s </p>";
-         personal += String.format(tmp, staff.getStringParam("sin"));
-         
-         tmp = "<p> ID Number: %s </p>";
-         personal += String.format(tmp, staff.getStringParam("pid"));
-         
-         tmp = "<p>  </p>";
-         tmp += "<table class='address'><thead><tr> <th> Address: </th></tr> </thead><tr><td> %s  %s </td></tr> ";
-         tmp += "<tr><td> %s </td></tr> ";
-         tmp += "<tr><td> %s </td></tr></table>";
-         
-         personal += String.format(tmp,
-                 staff.getStringParam("street_number"),
-                 staff.getStringParam("street"),
-                 staff.getStringParam("city"),
-                 staff.getStringParam("post_code"));
-         return personal;
-    }
-    
-    /**
-     * Updates the staff info, in case the info has been updated after the session started
-     * (for example, if the staff changes their account details)
-     * @return null string, to satisfy JSP's complaining
-     */
-    public String updatePatientInfo(){     
-        //refresh user
-        JSONObject userInfo = Database.userLogin(staff.getStringParam("pid"), staff.getStringParam("password"), true);
-        staff.info = userInfo;
-        return "";
+    public String formatAppointmentTable(int id, UserType type){
+        
+        JSONArray appointments;
+        
+        if (type == UserType.DOCTOR){
+            appointments = Database.getAppointmentByDoctor(id);
+            String formattedList = "<table class='footable dynamicTable'><thead><tr> <th> Appointment ID </th> <th> Appointment Date </th> <th> Appointment Start Time </th> <th> Appointment End Time </th><th> Patient </th> <th> Action </th></td></tr></thead>";
+            String tmp;
+
+            //iterates over all prescriptions and adds rows for each one
+            for(int i = 0; i < appointments.size();i++){
+                tmp = "<tr><td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td> <td> <a href=\"#\">Edit</a> </td></tr>";
+                formattedList += String.format(tmp, i+1, 
+                        ((JSONObject)appointments.get(i)).get("visit_date"), 
+                        ((JSONObject)appointments.get(i)).get("visit_start_time"),
+                        ((JSONObject)appointments.get(i)).get("visit_end_time"),
+                        ((JSONObject)appointments.get(i)).get("pid")
+                        );
+            }
+            formattedList += "</table>";
+            return formattedList;
+        }
+        else
+        {
+            appointments = Database.getAppointmentByPatient(id);
+            String formattedList = "<table class='footable dynamicTable'><thead><tr> <th> Appointment ID </th> <th> Appointment Date </th> <th> Appointment Start Time </th> <th> Appointment End Time </th><th> Assigned Physician </th> <th> Action </th></td></tr></thead>";
+            String tmp;
+
+            //iterates over all prescriptions and adds rows for each one
+            for(int i = 0; i < appointments.size();i++){
+                tmp = "<tr><td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td> <td> <a href=\"#\">Edit</a> </td></tr>";
+                formattedList += String.format(tmp, i+1, 
+                        ((JSONObject)appointments.get(i)).get("visit_date"), 
+                        ((JSONObject)appointments.get(i)).get("visit_start_time"),
+                        ((JSONObject)appointments.get(i)).get("visit_end_time"),
+                        ((JSONObject)appointments.get(i)).get("eid")
+                        );
+            }
+            formattedList += "</table>";
+            return formattedList;
+        }
     }
     
     
