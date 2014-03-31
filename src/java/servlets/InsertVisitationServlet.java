@@ -51,7 +51,15 @@ public class InsertVisitationServlet extends HttpServlet {
             out.println("$(function () {");
             out.println("   $(document).ready(function () {");
             out.println("       $('.date').datepicker({dateFormat: 'yy-mm-dd', changeYear: true});");
+            out.println("       $('.add-prescription').click(addPrescriptionHandler);");
             out.println("   });");
+            out.println("   var addPrescriptionHandler = function() {");
+            out.println("       var prescriptionCount = $('#prescription-count').val();");
+            out.println("       prescriptionCount++;");
+            out.println("       $('.prescription:last').after('<p class=\"prescription\">Drug Name: <input type=\"text\" name=\"drug_name'+prescriptionCount+'\"> Expires: <input type=\"text\" class=\"date\" name=\"expires'+prescriptionCount+'\"></p>');");
+            out.println("       $('#prescription-count').val(prescriptionCount);");
+            out.println("       $('.date:not(.hasDatepicker)').datepicker({dateFormat: 'yy-mm-dd', changeYear: true});");
+            out.println("   };");
             out.println("});");
             out.println("</script>");
                     
@@ -67,7 +75,8 @@ public class InsertVisitationServlet extends HttpServlet {
             String form = "<form action='InsertVisitationServlet' method='POST'>";
             
             form += String.format("<input type='hidden' name='eid' value='%s'>", doctor.getStringParam("eid"));
-            form += String.format("<input type='hidden' name='pid', value='%s'>", patientId); 
+            form += String.format("<input type='hidden' name='pid' value='%s'>", patientId); 
+            form += String.format("<input type='hidden' id='prescription-count' name='prescriptioncount' value='0'");
             
             // Pass as parameter and make it a header
             form += String.format("<h3>Patient ID: %s </h3> </br>", patientId);
@@ -80,11 +89,8 @@ public class InsertVisitationServlet extends HttpServlet {
             form += "<h3>Procedure Performed:</h3> <p>Name: <input type='text' name='procedure_name'> Description: <input type='text' name='description'></p></br>";
             form += "<h3>Diagnosis:</h3> <input type='text' name='severity'></br>";
             form += "<h3>Prescriptions Prescribed:</h3> <div>";
-            form += "<p>Drug Name: <input type='text' name='drug_name1'> Expires: <input type='text' class='date' name='expires1'></p>";
-            form += "<p>Drug Name: <input type='text' name='drug_name2'> Expires: <input type='text' class='date' name='expires2'></p>";
-            form += "<p>Drug Name: <input type='text' name='drug_name3'> Expires: <input type='text' class='date' name='expires3'></p>";
-            form += "<p>Drug Name: <input type='text' name='drug_name4'> Expires: <input type='text' class='date' name='expires4'></p>";
-            form += "<p>Drug Name: <input type='text' name='drug_name5'> Expires: <input type='text' class='date' name='expires5'></p>";
+            form += "<p class='prescription'>Drug Name: <input type='text' name='drug_name0'> Expires: <input type='text' class='date' name='expires0'></p>";
+            form += "<p><input type='button' class='add-prescription' value='Add Prescription'>";
             
             form += "</div></br>";
             form += "<h3>Comments:</h3> <input type='text' name='content'></br>";
@@ -148,7 +154,6 @@ public class InsertVisitationServlet extends HttpServlet {
                     request.getParameter("visit_date") != null && !request.getParameter("visit_date").trim().equals("") &&
                     request.getParameter("visit_start_time") != null && !request.getParameter("visit_start_time").trim().equals("") &&
                     request.getParameter("visit_end_time") != null && !request.getParameter("visit_end_time").trim().equals("")){
-                
                 visitParams.put("pid", request.getParameter("pid"));
                 visitParams.put("visit_date", request.getParameter("visit_date"));
                 visitParams.put("visit_start_time", request.getParameter("visit_start_time"));
@@ -162,7 +167,9 @@ public class InsertVisitationServlet extends HttpServlet {
             
                 JSONArray prescriptions = new JSONArray();
 
-                for(int i = 1; i <= 5; i++){
+                int prescriptionCount = Integer.parseInt(request.getParameter("prescriptioncount").trim());
+
+                for(int i = 0; i <= prescriptionCount; i++){
                     JSONObject prescription = new JSONObject();
 
                     if(request.getParameter("drug_name" + i) != null && !request.getParameter("drug_name" + i).trim().equals("") &&
