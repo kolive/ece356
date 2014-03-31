@@ -197,6 +197,7 @@ public class DoctorViewModel {
                 "<th data-hide='all'>Diagnosis</th>" +
                 "<th data-hide='all'>Prescriptions Prescribed</th>" +
                 "<th data-hide='all'>Comments</th>" +
+                "<th data-hide='all'> Edit Visit Record </th>" +
                 "</tr></thead>"; 
         
         JSONArray rows = buildPatientVisitsRows(patientId, isPatient, new JSONObject());
@@ -267,6 +268,7 @@ public class DoctorViewModel {
                                             : ""   
                                     )
                                 );
+                formattedRow += String.format("<td><a href='#' onclick=\"javascript:window.open('UpdateVisitationServlet?vid=%s&pid=%s', '_blank', 'scrollbars=1, resizable=1, height=550, width=700', title='Edit Visitation Record')\"> Edit Visit Record </a></td>", visitId, patientId);
                 formattedRow += "</tr>";
                 
                 formattedRows.add(formattedRow);
