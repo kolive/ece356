@@ -76,6 +76,11 @@ public class UserLoginServlet extends HttpServlet {
 	                    request.getSession().setAttribute("user", p);
 	                    response.sendRedirect("/ece356/StaffServlet");
                 	}
+                    else if(userInfo.get("dept").equals("LEGAL")) {
+                        User p = new User(userInfo, User.UserType.LAUDITOR);
+                        request.getSession().setAttribute("user", p);
+                        response.sendRedirect("LegalServlet");
+                    }
                 }else{
                     //redirect to failed login page
                     response.sendRedirect("/ece356/error.jsp");
