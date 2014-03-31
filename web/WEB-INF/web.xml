@@ -29,8 +29,28 @@
         <servlet-class>servlets.LogoutServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>UpdateVisitationServlet</servlet-name>
-        <servlet-class>servlets.UpdateVisitationServlet</servlet-class>
+        <servlet-name>AssignDoctorServlet</servlet-name>
+        <servlet-class>servlets.AssignDoctorServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>BookAppointmentServlet</servlet-name>
+        <servlet-class>servlets.BookAppointmentServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>NewPatientServlet</servlet-name>
+        <servlet-class>servlets.NewPatientServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>StaffServlet</servlet-name>
+        <servlet-class>servlets.StaffServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UpdatePatientInformationServlet</servlet-name>
+        <servlet-class>servlets.UpdatePatientInformationServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>EditAppointmentServlet</servlet-name>
+        <servlet-class>servlets.EditAppointmentServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>UserLoginServlet</servlet-name>
@@ -61,8 +81,28 @@
         <url-pattern>/LogoutServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>UpdateVisitationServlet</servlet-name>
-        <url-pattern>/UpdateVisitationServlet</url-pattern>
+        <servlet-name>AssignDoctorServlet</servlet-name>
+        <url-pattern>/AssignDoctorServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>BookAppointmentServlet</servlet-name>
+        <url-pattern>/BookAppointmentServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>NewPatientServlet</servlet-name>
+        <url-pattern>/NewPatientServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StaffServlet</servlet-name>
+        <url-pattern>/StaffServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UpdatePatientInformationServlet</servlet-name>
+        <url-pattern>/UpdatePatientInformationServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>EditAppointmentServlet</servlet-name>
+        <url-pattern>/EditAppointmentServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
