@@ -49,7 +49,15 @@ public class UpdateVisitationServlet extends HttpServlet {
             out.println("$(function () {");
             out.println("   $(document).ready(function () {");
             out.println("       $('.date').datepicker({dateFormat: 'yy-mm-dd', changeYear: true});");
+            out.println("       $('.add-prescription').click(addPrescriptionHandler);");
             out.println("   });");
+            out.println("   var addPrescriptionHandler = function() {");
+            out.println("       var prescriptionCount = $('#prescription-count').val();");
+            out.println("       prescriptionCount++;");
+            out.println("       $('.prescription:last').after('<p class=\"prescription\">Drug Name: <input type=\"text\" name=\"drug_name'+prescriptionCount+'\"> Expires: <input type=\"text\" class=\"date\" name=\"expires'+prescriptionCount+'\"></p>');");
+            out.println("       $('#prescription-count').val(prescriptionCount);");
+            out.println("       $('.date:not(.hasDatepicker)').datepicker({dateFormat: 'yy-mm-dd', changeYear: true});");
+            out.println("   };");
             out.println("});");
             out.println("</script>");
                     
@@ -91,12 +99,18 @@ public class UpdateVisitationServlet extends HttpServlet {
             form += String.format("<h3>Diagnosis:</h3> <input type='text' name='severity' value='%s'></br>",
                     ((JSONObject)visitInfo.get(0)).get("severity"));
             form += "<h3>Prescriptions Prescribed:</h3> <div>";
-            for(int i = 0; i < visitInfo.size() && ((JSONObject)visitInfo.get(i)).get("drug_name") != null ; i++){
-                form += String.format("<p>Drug Name: <input type='text' name='drug_name%s' value='%s'> Expires: <input type='text' class='date' name='expires%s' value='%s'></p>",
-                        Integer.toString(i), ((JSONObject)visitInfo.get(i)).get("drug_name"),
-                        Integer.toString(i), ((JSONObject)visitInfo.get(0)).get("expires"));
+            
+            int prescriptionCount = 0;
+            
+            for(prescriptionCount = 0; prescriptionCount < visitInfo.size() && ((JSONObject)visitInfo.get(prescriptionCount)).get("drug_name") != null ; prescriptionCount++){
+                form += String.format("<p class='prescription'>Drug Name: <input type='text' name='drug_name%s' value='%s'> Expires: <input type='text' class='date' name='expires%s' value='%s'></p>",
+                        Integer.toString(prescriptionCount), ((JSONObject)visitInfo.get(prescriptionCount)).get("drug_name"),
+                        Integer.toString(prescriptionCount), ((JSONObject)visitInfo.get(0)).get("expires"));
             
             }
+            form += "<p><input type='button' class='add-prescription' value='Add Prescription'>";
+            
+            form += String.format("<input type='hidden' id='prescription-count' name='prescriptioncount' value='%s'", prescriptionCount);
             
             form += "</div></br>"; 
             String comment = "";
@@ -108,6 +122,9 @@ public class UpdateVisitationServlet extends HttpServlet {
                         comment);
             
             form += "<input type='submit' value='Submit'>";
+            
+            
+            
             form += "</form>";
             
             out.println(form);
@@ -184,10 +201,10 @@ public class UpdateVisitationServlet extends HttpServlet {
 
                 visitParams.put("pid", request.getParameter("pid"));
 
-
                 JSONArray prescriptions = new JSONArray();
+                int prescriptionCount = Integer.parseInt(request.getParameter("prescriptioncount").trim());
 
-                for(int i = 1; i <= 5; i++){
+                for(int i = 0; i <= prescriptionCount; i++){
                     JSONObject prescription = new JSONObject();
 
                     if(request.getParameter("drug_name" + i) != null && !request.getParameter("drug_name" + i).trim().equals("") &&
