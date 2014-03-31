@@ -57,10 +57,10 @@ public class EditAppointmentServlet extends HttpServlet {
 
             updateForm += "<form action='EditAppointmentServlet' method='post'>";
 
-            tmp = "Appointment ID : <input type'text' name='vid' value='%s'> </br>";
+            tmp = "Appointment ID : <input type'text' name='vid' value='%s' readonly> </br>";
             updateForm += String.format(tmp, Integer.parseInt(request.getParameter("visit_id")));
             
-            tmp = "Patient ID : <input type'text' name='pid' value='%s'> </br>";
+            tmp = "Patient ID : <input type'text' name='pid' value='%s' readonly> </br>";
             updateForm += String.format(tmp, pid);
             
             tmp = "Doctor ID : <input type='text' name='eid' value='%s'> </br>";

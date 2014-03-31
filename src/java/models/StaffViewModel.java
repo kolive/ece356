@@ -83,7 +83,7 @@ public class StaffViewModel {
                 //doctor summary
                 String tmp;
                 tmp = "<div class='patientList'> <p> Active patients: </p> %s </div>";
-                    summary += String.format(tmp, formatPatientsList(eid));
+                    summary += String.format(tmp, formatPatientsList(id));
                     summary += "</div>";
             }
             else if (type == User.UserType.PATIENT)
@@ -170,7 +170,7 @@ public class StaffViewModel {
         
         formattedList += "<table id='patientslist' class='footable dynamicTable vhalftable dlist'data-filter-minimum='1' data-filter='#dfilter' data-page-navigation='.pagination'>";
         
-        formattedList += "<thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Current Health</th><th>Last Visit</th></thead>";
+        formattedList += "<thead><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Current Health</th></thead>";
         
         /*formattedList += formatPatientsListFilters(isPatientsList);*/
         
@@ -187,7 +187,7 @@ public class StaffViewModel {
     public JSONArray buildPatientsListRows(JSONObject filters, int eid){
         JSONArray patients = new JSONArray();
         
-        patients = Database.getDoctorPatients(eid, filters);
+        patients = Database.getPatients(eid);
         
         JSONArray formattedRows = new JSONArray();
         
@@ -198,12 +198,11 @@ public class StaffViewModel {
             
             formattedRow += "<tr>";
             
-            formattedRow += String.format("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+            formattedRow += String.format("<td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
                                 p.get("pid"),
                                 p.get("fname"),
                                 p.get("lname"),
-                                p.get("current_health"),
-                                p.get("last_visit"));
+                                p.get("current_health"));
                     
             formattedRows.add(formattedRow);
         }
@@ -262,12 +261,19 @@ public class StaffViewModel {
 
             //iterates over all prescriptions and adds rows for each one
             for(int i = 0; i < appointments.size();i++){
-                tmp = "<tr><td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td> <td> <a href=\"#\">Edit</a> </td></tr>";
-                formattedList += String.format(tmp, i+1, 
+                tmp = "<tr><td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td> <td> %s </td> <td> <a href=\"#\" onclick=\"javascript:window.open('EditAppointmentServlet?patient=%s&visit_id=%s&visit_date=%s&visit_start_time=%s&visit_end_time=%s&eid=%s', '_blank', 'scrollbars=0, resizeable=0, height=550, width=700', title=' Edit Appointment ')\" title=\" Edit Appointment \">Edit Appointment</a> </td></tr>";
+                formattedList += String.format(tmp,
+                        ((JSONObject)appointments.get(i)).get("visit_id"), 
                         ((JSONObject)appointments.get(i)).get("visit_date"), 
                         ((JSONObject)appointments.get(i)).get("visit_start_time"),
                         ((JSONObject)appointments.get(i)).get("visit_end_time"),
-                        ((JSONObject)appointments.get(i)).get("pid")
+                        ((JSONObject)appointments.get(i)).get("pid"),
+                        ((JSONObject)appointments.get(i)).get("pid"),
+                        ((JSONObject)appointments.get(i)).get("visit_id"), 
+                        ((JSONObject)appointments.get(i)).get("visit_date"), 
+                        ((JSONObject)appointments.get(i)).get("visit_start_time"),
+                        ((JSONObject)appointments.get(i)).get("visit_end_time"),
+                        id
                         );
             }
             formattedList += "</table>";

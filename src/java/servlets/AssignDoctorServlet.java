@@ -55,7 +55,7 @@ public class AssignDoctorServlet extends HttpServlet {
             
             updateForm += "<form action='AssignDoctorServlet' method='post'>";
             
-            tmp = "Patient ID : <input type='text' name='pid' value='%s'> </br>";
+            tmp = "Patient ID : <input type='text' name='pid' value='%s' readonly> </br>";
             updateForm += String.format(tmp, request.getParameter("patient"));
             
             updateForm += "New Doctor ID : <input type='text' name='eid'> </br>";
@@ -119,8 +119,8 @@ public class AssignDoctorServlet extends HttpServlet {
             out.println("<div class='update rounded backteal'>");
             
             boolean success = Database.assignPatientToDoctor(
-                    Integer.parseInt(request.getParameter("pid").toString()),
-                    Integer.parseInt(request.getParameter("eid").toString()));
+                    Integer.parseInt(request.getParameter("eid").toString()),
+                    Integer.parseInt(request.getParameter("pid").toString()));
             if(success){
                 out.println("<p class='status'> New Doctor Assigned </p>");
             }else{

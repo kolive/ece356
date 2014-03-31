@@ -7,9 +7,13 @@
 package control;
 
 import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import java.util.Set;
+import java.util.Date;
+import java.util.Locale;
 /**
  *
  * @author Kyle
@@ -492,7 +496,7 @@ public class Database {
      * @param doctorId
      * @return A JSONArray with all the patient records
      */
-    public static JSONArray getPatientsWithVisitsInRange(int doctorId, Date date1, Date date2){
+    public static JSONArray getPatientsWithVisitsInRange(int doctorId, java.sql.Date date1, java.sql.Date date2){
         
         boolean status = true;
         if(connection == null){
@@ -1422,7 +1426,7 @@ public class Database {
      * @param date2 end date of range
      * @return a JSONArray describing all patient visits
      */
-    public static JSONArray getVisitsInRange(int patientId, int doctorId, Date date1, Date date2){
+    public static JSONArray getVisitsInRange(int patientId, int doctorId, java.sql.Date date1, java.sql.Date date2){
         boolean status = true;
         
         if(connection == null){
@@ -1695,9 +1699,12 @@ public class Database {
             Statement s;
             ResultSet rs;
             try{
+                //get current date and time
+                String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+                String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
                 //get doctors that manages this staff
-                String preparedStatement = "SELECT visit_id, visit_date, visit_start_time, visit_end_time, eid from ece356.visit where pid = ?;";
-                ps = connection.prepareStatement(preparedStatement);
+                String preparedStatement = "SELECT visit_id, visit_date, visit_start_time, visit_end_time, eid from ece356.visit where pid = ? and is_valid = 1 and (visit_date between \'%s\' and \'9999-12-31\' or (visit_date = \'%s\' and visit_start_time between \'%s\' and \'23:59:59\'));";
+                ps = connection.prepareStatement(String.format(preparedStatement, date, date, time));
                 ps.setInt(1, pid);
                 
                 rs = ps.executeQuery();
@@ -1729,9 +1736,13 @@ public class Database {
             Statement s;
             ResultSet rs;
             try{
+                //get current date and time
+                String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+                String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
+                
                 //get doctors that manages this staff
-                String preparedStatement = "SELECT visit_id, visit_date, visit_start_time, visit_end_time, pid from ece356.visit where eid = ?;";
-                ps = connection.prepareStatement(preparedStatement);
+                String preparedStatement = "SELECT visit_id, visit_date, visit_start_time, visit_end_time, pid from ece356.visit where eid = ? and is_valid = 1 and (visit_date between \'%s\' and \'9999-12-31\' or (visit_date = \'%s\' and visit_start_time between \'%s\' and \'23:59:59\'));";
+                ps = connection.prepareStatement(String.format(preparedStatement, date, date, time));
                 ps.setInt(1, eid);
                 
                 rs = ps.executeQuery();
@@ -1749,7 +1760,7 @@ public class Database {
         return appointments;
     }
     
-    public static boolean assignPatientToDoctor(int patientId, int doctorId){
+    public static boolean assignPatientToDoctor(int doctorId, int patientId){
         boolean status = true;
         if(connection == null){
             status = openConnection();
@@ -1846,21 +1857,35 @@ public class Database {
             ResultSet rs;
             try{
                 //check conflict
-                String preparedStatement = "INSERT INTO `ece356`.`visit` (`visit_date`, `visit_start_time`, `visit_end_time`, `pid`, `eid`, `is_valid`) VALUES "
-                        +"('"+ params.get("date") +"', '" +
-                        params.get("starttime") + "', '" +
-                        params.get("endtime") +"', '" +
-                        params.get("pid") +"', '"+
-                        params.get("eid") +"', '1');";
-                ps = connection.prepareStatement(preparedStatement);
+                if (checkValidAppointmentTime(params.get("date").toString() + " " + params.get("starttime").toString(), 
+                        params.get("date").toString() + " " + params.get("endtime").toString())){
                 
-                if(ps.executeUpdate() == 1 ){
-                    //success
-                    return true;
-                }else if(ps.executeUpdate() > 1){
-                    //something went terribly wrong
-                }else{
-                    return false;
+                    //check conflict
+                    String preparedStatement = getConflictCheckingStatement(params);
+                    ps = connection.prepareStatement(preparedStatement);
+                    ps.setInt(1, Integer.parseInt(params.get("eid").toString()));
+                    rs = ps.executeQuery();
+                    if (!convertToJson(rs).isEmpty())
+                    {
+                        //conflict
+                        return false;
+                    }
+                    preparedStatement = "INSERT INTO `ece356`.`visit` (`visit_date`, `visit_start_time`, `visit_end_time`, `pid`, `eid`, `is_valid`) VALUES "
+                            +"('"+ params.get("date") +"', '" +
+                            params.get("starttime") + "', '" +
+                            params.get("endtime") +"', '" +
+                            params.get("pid") +"', '"+
+                            params.get("eid") +"', '1');";
+                    ps = connection.prepareStatement(preparedStatement);
+
+                    if(ps.executeUpdate() == 1 ){
+                        //success
+                        return true;
+                    }else if(ps.executeUpdate() > 1){
+                        //something went terribly wrong
+                    }else{
+                        return false;
+                    }
                 }
                
             }catch(SQLException e){
@@ -1936,20 +1961,46 @@ public class Database {
             Statement s;
             ResultSet rs;
             try{
-                //check conflict
-
-                String preparedStatement = "UPDATE `ece356`.`visit` SET" +
-                        "`is_valid`=\'0\' WHERE `visit_id`=\'" + params.get("vid") +
-                        "\' AND `pid`=\'" + params.get("pid") + "\' AND `eid`=\'" + params.get("eid") + "\';";
-                ps = connection.prepareStatement(preparedStatement);
                 
-                if(ps.executeUpdate() == 1 ){
-                    //success
-                    
-                    return bookAppointment(params);
-                }else if(ps.executeUpdate() > 1){
-                    //something went terribly wrong
-                }else{
+                //check validity of data
+                if (checkValidAppointmentTime(params.get("date").toString() + " " + params.get("starttime").toString(), 
+                        params.get("date").toString() + " " + params.get("endtime").toString())){
+                
+                    //check conflict
+                    String preparedStatement = getConflictCheckingStatement(params);
+                    ps = connection.prepareStatement(preparedStatement);
+                    ps.setInt(1, Integer.parseInt(params.get("eid").toString()));
+                    rs = ps.executeQuery();
+                    JSONArray apps = convertToJson(rs);
+                    if (!apps.isEmpty())
+                    {
+                        if (apps.size() == 1 && ((JSONObject)apps.get(0)).get("visit_id").equals(params.get("vid")))
+                        {
+                            //conflict with itself, ignore
+                        }
+                        else
+                        {
+                            //conflict
+                            return false;
+                        }
+                    }
+
+                    preparedStatement = "UPDATE `ece356`.`visit` SET " +
+                            "`is_valid`=\'0\' WHERE `visit_id`=\'" + params.get("vid") + "\';";
+                    ps = connection.prepareStatement(preparedStatement);
+
+                    if(ps.executeUpdate() == 1 ){
+                        //success
+
+                        return bookAppointment(params);
+                    }else if(ps.executeUpdate() > 1){
+                        //something went terribly wrong
+                    }else{
+                        return false;
+                    }
+                }
+                else
+                {
                     return false;
                 }
                
@@ -1960,6 +2011,32 @@ public class Database {
             
         }
         return false;
+    }
+    
+    private static boolean checkValidAppointmentTime(String starttime, String endtime)
+    {
+        try
+        {
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+            return df.parse(starttime).after(new Date()) && df.parse(starttime).before(df.parse(endtime));
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    private static String getConflictCheckingStatement(JSONObject params)
+    {
+        return "SELECT * FROM ece356.visit where `visit_date`=\'"
+                            + params.get("date") + "\' and eid=? and (visit_start_time between \'"
+                            + params.get("starttime") + "\' and \'"
+                            + params.get("endtime") + "\' or visit_end_time between \'"
+                            + params.get("starttime") + "\' and \'"
+                            + params.get("endtime") + "\' or (visit_start_time between \'00:00:00\' and \'"
+                            + params.get("starttime") + "\' and visit_end_time between \'"
+                            + params.get("endtime") + "\' and \'23:59:59\')) and is_valid = 1;";
     }
 
 }

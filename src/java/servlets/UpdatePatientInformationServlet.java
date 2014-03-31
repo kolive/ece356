@@ -58,7 +58,7 @@ public class UpdatePatientInformationServlet extends HttpServlet {
 
             updateForm += "<form action='UpdatePatientInformationServlet' method='post'>";
 
-            tmp = "Patient ID : <input type'text' name='pid' value='%s'> </br>";
+            tmp = "Patient ID : <input type'text' name='pid' value='%s' readonly> </br>";
             updateForm += String.format(tmp, pid);
             
             tmp = "First Name : <input type='text' name='fname' value='%s'> </br>";
