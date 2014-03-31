@@ -54,9 +54,6 @@ public class AssignDoctorServlet extends HttpServlet {
             String tmp="";
             
             updateForm += "<form action='AssignDoctorServlet' method='post'>";
-
-            updateForm += "Staff Id*: <input type='text' name='id'> </br>";
-            updateForm += "Password*: <input type='password' name='password'> </br>";
             
             tmp = "Patient ID : <input type='text' name='pid' value='%s'> </br>";
             updateForm += String.format(tmp, request.getParameter("patient"));

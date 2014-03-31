@@ -17,7 +17,7 @@ import control.Database;
 import org.json.simple.JSONObject;
 /**
  *
- * @author Kyle
+ * @author Ling
  */
 public class BookAppointmentServlet extends HttpServlet {
 
