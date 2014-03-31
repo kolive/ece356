@@ -518,7 +518,7 @@ public class Database {
                 ps.setInt(1, doctorId);
                 ps.setDate(2, date1);
                 ps.setDate(3, date2);
-                System.out.println(ps);
+                 ;
                 rs = ps.executeQuery();
                
                 patients = convertToJson(rs);
@@ -1559,7 +1559,7 @@ public class Database {
                 ps.setInt(5, Integer.parseInt(params.get("pid").toString().trim()));
                 ps.setInt(6, doctorId);
                 
-                System.out.println(ps);
+                 ;
                 
                 ps.executeUpdate();
                 
@@ -1590,7 +1590,7 @@ public class Database {
                     ps.setString(3, params.get("procedure_name").toString().trim());
                     ps.setString(4, params.get("description").toString().trim());
                 }
-                System.out.println(ps);
+                 ;
                 ps.executeUpdate();
                 
                 // Insert diagnosis for new visit
@@ -1605,7 +1605,7 @@ public class Database {
                     ps.setTimestamp(2, lastUpdated);
                     ps.setString(3, params.get("severity").toString().trim());
                 }
-                System.out.println(ps);
+                 ;
                 ps.executeUpdate();
                 
                 // Insert comment for new visit
@@ -1621,7 +1621,7 @@ public class Database {
                     ps.setInt(3, doctorId);
                     ps.setTimestamp(4, lastUpdated);
                     ps.setString(5, params.get("content").toString().trim());
-                    System.out.println(ps);
+                     ;
                     ps.executeUpdate();
                 }
                 
@@ -1643,7 +1643,7 @@ public class Database {
                         ps.setTimestamp(2, lastUpdated);
                         ps.setString(3, prescription.get("drug_name").toString());
                         ps.setDate(4, java.sql.Date.valueOf(prescription.get("expires").toString().trim()));
-                        System.out.println(ps);
+                         ;
                         ps.executeUpdate();
                     }
                 }

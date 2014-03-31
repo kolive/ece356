@@ -150,53 +150,78 @@ public class UpdateVisitationServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        JSONObject visitParams = new JSONObject();
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        
+        try{
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>New Visitation Record</title>"); 
+            out.println(" <link rel=\"stylesheet\" type=\"text/css\" href=\"css/style.css\">");
+            out.println("</head>");
+            out.println("<body class='backgreen'>");
+            out.println("<div class='update rounded backteal'>");
+            
+            JSONObject visitParams = new JSONObject();
             
             
-        if(request.getParameter("vid") != null && !request.getParameter("vid").trim().equals("") &&
-            request.getParameter("visit_date") != null && !request.getParameter("visit_date").trim().equals("") &&
-            request.getParameter("visit_start_time") != null && !request.getParameter("visit_start_time").trim().equals("") &&
-            request.getParameter("visit_end_time") != null && !request.getParameter("visit_end_time").trim().equals("")){
 
-            visitParams.put("vid", request.getParameter("vid"));
-            visitParams.put("visit_date", request.getParameter("visit_date"));
-            visitParams.put("visit_start_time", request.getParameter("visit_start_time"));
-            visitParams.put("visit_end_time", request.getParameter("visit_end_time"));
+            if(request.getParameter("vid") != null && !request.getParameter("vid").trim().equals("") &&
+                request.getParameter("visit_date") != null && !request.getParameter("visit_date").trim().equals("") &&
+                request.getParameter("visit_start_time") != null && !request.getParameter("visit_start_time").trim().equals("") &&
+                request.getParameter("visit_end_time") != null && !request.getParameter("visit_end_time").trim().equals("")){
 
-            visitParams.put("procedure_name", request.getParameter("procedure_name"));
-            visitParams.put("description", request.getParameter("description"));
-            visitParams.put("severity", request.getParameter("severity"));
-            visitParams.put("content", request.getParameter("content"));
-            
-            visitParams.put("pid", request.getParameter("pid"));
+                visitParams.put("vid", request.getParameter("vid"));
+                visitParams.put("visit_date", request.getParameter("visit_date"));
+                visitParams.put("visit_start_time", request.getParameter("visit_start_time"));
+                visitParams.put("visit_end_time", request.getParameter("visit_end_time"));
+
+                visitParams.put("procedure_name", request.getParameter("procedure_name"));
+                visitParams.put("description", request.getParameter("description"));
+                visitParams.put("severity", request.getParameter("severity"));
+                visitParams.put("content", request.getParameter("content"));
+
+                visitParams.put("pid", request.getParameter("pid"));
 
 
-            JSONArray prescriptions = new JSONArray();
+                JSONArray prescriptions = new JSONArray();
 
-            for(int i = 1; i <= 5; i++){
-                JSONObject prescription = new JSONObject();
+                for(int i = 1; i <= 5; i++){
+                    JSONObject prescription = new JSONObject();
 
-                if(request.getParameter("drug_name" + i) != null && !request.getParameter("drug_name" + i).trim().equals("") &&
-                        request.getParameter("expires" + i) != null && !request.getParameter("expires" + i).trim().equals("")){
-                    prescription.put("drug_name", request.getParameter("drug_name" + i).trim());
-                    prescription.put("expires", request.getParameter("expires" + i).trim());
+                    if(request.getParameter("drug_name" + i) != null && !request.getParameter("drug_name" + i).trim().equals("") &&
+                            request.getParameter("expires" + i) != null && !request.getParameter("expires" + i).trim().equals("")){
+                        prescription.put("drug_name", request.getParameter("drug_name" + i).trim());
+                        prescription.put("expires", request.getParameter("expires" + i).trim());
 
-                    prescriptions.add(prescription);
-                }   
-            }
+                        prescriptions.add(prescription);
+                    }   
+                }
 
-            visitParams.put("prescriptions", prescriptions);
-            
-            System.out.println(visitParams);
-            
-            boolean success = Database.UpdateRecord(Integer.parseInt(request.getParameter("eid")), visitParams);
+                visitParams.put("prescriptions", prescriptions);
 
-            if(success){
-                System.out.println("<p class='status'>Update visitation record submission successful!</p>");
-            }
-            else{
-                System.out.println("<p class='status'>Update visitation record submission failed. Please try again, or contact your system admin.</p>");
-            }
+                System.out.println(visitParams);
+
+                boolean success = Database.UpdateRecord(Integer.parseInt(request.getParameter("eid")), visitParams);
+
+                if(success){
+                    out.println("<p class='status'>Update visitation record submission successful!</p>");
+                }
+                else{
+                    out.println("<p class='status'>Update visitation record submission failed. Please try again, or contact your system admin.</p>");
+                }
+            }else{
+                out.println("<p class='status'>Missing required fields. Please try again.</p>");
+            } 
+            out.println("<button class='close' type=\"button\" onclick=\"window.open('', '_self', ''); window.close();\">Close Window</button>");
+            out.println("</div>");
+            out.println("</body>");
+            out.println("</html>");
+        }catch(Exception e){
+            response.sendRedirect("/ece356/error.jsp");
+        }finally{
+            out.close();
         }
     }
 
