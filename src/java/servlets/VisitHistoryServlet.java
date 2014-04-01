@@ -57,7 +57,7 @@ public class VisitHistoryServlet extends HttpServlet {
             out.println("</head>");
             out.println("<body class=\"backgreen\"><div class='container backteal'>");
             out.println("<h1> Visit Audit Trail for Visit ID: " + request.getParameter("vid") + "</h1>");
-            out.println(models.Helpers.FormatHelper.generateVisitAuditTable(Integer.parseInt(request.getParameter("vid"))));
+            out.println(models.Helpers.FormatHelper.generateVisitAuditTable(Integer.parseInt(request.getParameter("vid").replaceAll("\\s+", ""))));
             out.println("</div></body>");
             out.println("</html>");
             
