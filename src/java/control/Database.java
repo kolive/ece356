@@ -1048,26 +1048,26 @@ public class Database {
                 if(onlyValid){
                     //selects the prescription with the biggest last_updated time
                     //and that hasn't yet expired
-                    preparedStatement = "select * " +
+                    preparedStatement = "select p.visit_id, p.last_updated, p.drug_name, p.expires " +
                     "from ece356.prescription p " +
                     "inner join( " +
                     "select visit_id,drug_name, max(last_updated) last_updated " +
                     "from ece356.prescription where visit_id=? and expires > NOW() " +
-                    "group by visit_id, drug_name" +
-                    " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.drug_name = p.drug_name;";
+                    "group by visit_id" +
+                    " ) mp on p.last_updated = mp.last_updated and p.visit_id = mp.visit_id;";
 
                 }else{
                     //selects the prescription with the biggest last_updated time
-                     preparedStatement = "select * " +
+                     preparedStatement = "select  p.visit_id, p.last_updated, p.drug_name, p.expires " +
                     "from ece356.prescription p " +
                     "inner join( " +
                     "select visit_id,drug_name, max(last_updated) last_updated " +
                     "from ece356.prescription where visit_id=? " +
-                    "group by visit_id, drug_name" +
-                    " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.drug_name = p.drug_name;";
+                    "group by visit_id" +
+                    " ) mp on p.last_updated = mp.last_updated and p.visit_id = mp.visit_id;";
                 }
                 ps = connection.prepareStatement(preparedStatement);
-                
+                System.out.println(ps);
                 visits = getVisits(patientId);
                 if(!visits.isEmpty()){
                     for(int i = 0; i < visits.size(); i++){
@@ -1111,24 +1111,23 @@ public class Database {
             Statement s;
             ResultSet rs;
             try{
-                String preparedStatement = "select * " +
+                String preparedStatement = "select  p.visit_id, p.last_updated, p.drug_name, p.expires " +
                 "from ece356.prescription p " +
                 "inner join( " +
                 "select visit_id, drug_name, max(last_updated) last_updated " +
                 "from ece356.prescription where visit_id=? " +
-                "group by visit_id, drug_name" +
-                " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.drug_name = p.drug_name " +
+                " ) mp on p.last_updated = mp.last_updated and p.visit_id = mp.visit_id " +
                 "WHERE p.drug_name LIKE ?";
                 
                 ps = connection.prepareStatement(preparedStatement);
                 ps.setInt(1, visitId);
-                
                 ps.setString(
                     2,
                     !filter.equals("")
                     ? "%" + filter + "%"
                     : "%"
                 );
+                System.out.println(ps);
                 
                 rs = ps.executeQuery();
                 prescriptions = convertToJson(rs);
@@ -1172,7 +1171,7 @@ public class Database {
                 "inner join( " +
                 "select visit_id, procedure_name, max(last_updated) last_updated " +
                 "from ece356.procedure where visit_id=? " +
-                "group by visit_id, procedure_name" +
+                "group by visit_id" +
                 " ) mp on mp.visit_id = p.visit_id and mp.last_updated = p.last_updated and mp.procedure_name = p.procedure_name " +
                 "WHERE p.procedure_name LIKE ? OR p.description LIKE ?";
                 
@@ -1235,7 +1234,7 @@ public class Database {
                 "inner join( " +
                 "select visit_id, max(last_updated) last_updated " +
                 "from ece356.diagnosis where visit_id=? " +
-                "group by visit_id, last_updated" +
+                "group by visit_id" +
                 " ) dd on dd.visit_id = d.visit_id and dd.last_updated = d.last_updated " +
                 "WHERE d.severity LIKE ?";
                 
@@ -1290,10 +1289,9 @@ public class Database {
                             "SELECT * " +
                             "FROM ece356.comment AS c " +
                             "INNER JOIN ( " +
-                            "SELECT visit_id, timestamp, content, MAX(last_updated) AS last_updated " +
-                                "FROM ece356.comment WHERE visit_id=? " +
-                                "GROUP BY visit_id, timestamp " +
-                            ") mc on mc.visit_id=c.visit_id AND mc.last_updated=c.last_updated AND mc.timestamp=c.timestamp " +
+                            "SELECT visit_id, MAX(last_updated) AS last_updated " +
+                                "FROM ece356.comment WHERE visit_id=? "+
+                            ") mc on mc.visit_id=c.visit_id AND mc.last_updated=c.last_updated " +
                             "WHERE c.content LIKE ?"
                         );
                 
@@ -1305,7 +1303,7 @@ public class Database {
                     ? "%" + filter + "%"
                     : "%"
                 );
-                
+                System.out.println(ps);
                 rs = ps.executeQuery();
                 comments = convertToJson(rs);
             }
@@ -2481,7 +2479,7 @@ public class Database {
             Statement s;
             ResultSet rs;
             try{
-                String preparedStatement = "SELECT * " +
+                String preparedStatement = "SELECT DISTINCT ece356.advises.doctor_id, ece356.advises.visit_id, ece356.employee.fname, ece356.employee.lname " +
                 "FROM ece356.advises INNER JOIN ece356.employee ON ece356.advises.doctor_id = ece356.employee.eid WHERE visit_id=?";
                 
                 ps = connection.prepareStatement(preparedStatement);

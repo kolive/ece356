@@ -80,7 +80,9 @@ public class AdvisorsListServlet extends HttpServlet {
             out.println("</div></body>");
             out.println("</html>");
             
-        } finally {
+        }catch (Exception e){
+            response.sendRedirect("error.jsp");
+        }finally {
             out.close();
         }
     }

@@ -37,7 +37,7 @@ public class VisitHistoryServlet extends HttpServlet {
         
         //check the user, make sure that the user which is logged in is a doctor or legal officer
         if(((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.LAUDITOR
-                || ((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.DOCTOR){
+                && ((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.DOCTOR){
             response.sendRedirect("/ece356/error.jsp");
         }
         

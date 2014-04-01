@@ -42,7 +42,7 @@ public class NewPatientServlet extends HttpServlet {
             
             //check the user, make sure that the user which is logged in is a staff member or doctor
             if(((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.STAFF
-                    || ((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.DOCTOR){
+                    && ((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.DOCTOR){
                 response.sendRedirect("/ece356/error.jsp");
             }
             
@@ -133,7 +133,7 @@ public class NewPatientServlet extends HttpServlet {
          */
         //check the user, make sure that the user which is logged in is a staff member or doctor
         if(((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.STAFF
-                || ((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.DOCTOR){
+                && ((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.DOCTOR){
             response.sendRedirect("/ece356/error.jsp");
         }
         
