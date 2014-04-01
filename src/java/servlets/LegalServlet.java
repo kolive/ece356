@@ -35,8 +35,7 @@ public class LegalServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-    
-        // TODO: Type check before casting?
+
         User user = (User) request.getSession().getAttribute("user");
         
         if(user != null && user.getUserType() == User.UserType.LAUDITOR){
@@ -46,7 +45,7 @@ public class LegalServlet extends HttpServlet {
             response.sendRedirect("/ece356/legal.jsp");
         }
         else{
-            // Error page
+            response.sendRedirect("/ece356/error.jsp");
         }
     }
     
