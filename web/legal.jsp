@@ -31,7 +31,7 @@
                 });
                 
                 var dClickHandler = function() {
-                    $('.doctorrow').remove('dselected');
+                    $('.doctorrow').removeClass('dselected');
                     $(this).addClass('dselected');
                     $.ajax({
                             type : 'POST',
