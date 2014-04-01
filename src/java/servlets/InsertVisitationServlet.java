@@ -36,6 +36,13 @@ public class InsertVisitationServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        //check the user, make sure that the user which is logged in is a staff member or doctor
+        if(((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.STAFF
+                || ((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.DOCTOR){
+            response.sendRedirect("/ece356/error.jsp");
+        }
+            
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         try {
@@ -103,7 +110,9 @@ public class InsertVisitationServlet extends HttpServlet {
             out.println("</div>");
             out.println("</body>");
             out.println("</html>");
-        } finally {
+        }catch(Exception e){
+            response.sendRedirect("/ece356/error.jsp");
+        }finally {
             out.close();
         }
     }

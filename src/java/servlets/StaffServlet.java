@@ -110,6 +110,8 @@ public class StaffServlet extends HttpServlet {
             }else{
                out.println("User authentication error. Please log in.");
             }
+        }catch(Exception e){
+            response.sendRedirect("/ece356/error.jsp");
         }finally{
             out.close();
         }

@@ -182,6 +182,8 @@ public class UpdatePatientServlet extends HttpServlet {
             out.println("</body>");
             out.println("</html>");
 
+        }catch(Exception e){
+            response.sendRedirect("/ece356/error.jsp");
         } finally {
             out.close();
         }

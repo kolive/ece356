@@ -86,8 +86,6 @@ public class UserLoginServlet extends HttpServlet {
                     response.sendRedirect("/ece356/error.jsp");
                 }
             }
-
-            System.out.println(request.getParameter("type"));
        }catch(Exception e){
            //redirect to failed login page
             response.sendRedirect("/ece356/error.jsp");

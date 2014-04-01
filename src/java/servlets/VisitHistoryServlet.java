@@ -13,6 +13,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import models.User;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -33,6 +34,13 @@ public class VisitHistoryServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        //check the user, make sure that the user which is logged in is a doctor or legal officer
+        if(((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.LAUDITOR
+                || ((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.DOCTOR){
+            response.sendRedirect("/ece356/error.jsp");
+        }
+        
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         try {
@@ -61,6 +69,8 @@ public class VisitHistoryServlet extends HttpServlet {
             out.println("</div></body>");
             out.println("</html>");
             
+        }catch(Exception e){
+            response.sendRedirect("/ece356/error.jsp");
         } finally {
             out.close();
         }

@@ -39,7 +39,10 @@ public class UpdatePatientInformationServlet extends HttpServlet {
              * Depending on the GET parameter, will generate a password change form or user update form
              * Form will contain defaults from the user model stored in the HTTP session
              */
-            
+            //check the user, make sure that the user which is logged in is a staff member
+            if(((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.STAFF){
+                response.sendRedirect("/ece356/error.jsp");
+            }
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
@@ -92,6 +95,8 @@ public class UpdatePatientInformationServlet extends HttpServlet {
             out.println("</div>");
             out.println("</body>");
             out.println("</html>");
+        }catch(Exception e){
+            response.sendRedirect("/ece356/error.jsp");
         } finally {
             out.close();
         }

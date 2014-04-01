@@ -47,7 +47,8 @@ public class DoctorServlet extends HttpServlet {
             response.sendRedirect("/ece356/doctor.jsp");
         }
         else{
-            // Error page
+            response.sendRedirect("/ece356/error.jsp");
+          
         }
     }
 

@@ -40,6 +40,12 @@ public class NewPatientServlet extends HttpServlet {
              * Form will contain defaults from the user model stored in the HTTP session
              */
             
+            //check the user, make sure that the user which is logged in is a staff member or doctor
+            if(((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.STAFF
+                    || ((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.DOCTOR){
+                response.sendRedirect("/ece356/error.jsp");
+            }
+            
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
@@ -87,6 +93,8 @@ public class NewPatientServlet extends HttpServlet {
             out.println("</div>");
             out.println("</body>");
             out.println("</html>");
+        }catch(Exception e){
+            response.sendRedirect("/ece356/error.jsp");
         } finally {
             out.close();
         }
@@ -123,6 +131,11 @@ public class NewPatientServlet extends HttpServlet {
          * Calls the correct Database function with the correct parameters
          * Generates a success or failure page. 
          */
+        //check the user, make sure that the user which is logged in is a staff member or doctor
+        if(((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.STAFF
+                || ((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.DOCTOR){
+            response.sendRedirect("/ece356/error.jsp");
+        }
         
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
@@ -160,6 +173,8 @@ public class NewPatientServlet extends HttpServlet {
             out.println("</body>");
             out.println("</html>");
 
+        }catch(Exception e){
+            response.sendRedirect("/ece356/error.jsp");
         } finally {
             out.close();
         }

@@ -35,6 +35,12 @@ public class UpdateVisitationServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
                 response.setContentType("text/html;charset=UTF-8");
+                
+        //check the user, make sure that the user which is logged in is a staff member
+        if(((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.STAFF
+                || ((User)request.getSession().getAttribute("user")).getUserType() != User.UserType.DOCTOR){
+            response.sendRedirect("/ece356/error.jsp");
+        }
         PrintWriter out = response.getWriter();
         try {
             out.println("<!DOCTYPE html>");

@@ -111,9 +111,7 @@ public class AdvisorsListServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println(request.getParameter("type") + " " + request.getParameter("vid") + " " + request.getParameter("eid"));
-        
-        //check the user, make sure that the user which is logged in is the right doctor
+       //check the user, make sure that the user which is logged in is the right doctor
         if(!((User)request.getSession().getAttribute("user")).getStringParam("eid").equals(request.getParameter("owner"))){
             response.sendRedirect("/ece356/error.jsp");
         }else if(request.getParameter("type").equals("delete")){

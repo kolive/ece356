@@ -33,6 +33,8 @@ public class LogoutServlet extends HttpServlet {
         
         try{
             request.getSession().invalidate();
+        }catch(Exception e){
+            response.sendRedirect("/ece356/error.jsp");
         }finally{
             response.sendRedirect("/ece356/");
         }
