@@ -2466,4 +2466,120 @@ public class Database {
         return diagnostic;
         
     }
+    
+    
+    public static JSONArray getAdivsorsOf(int doctorId, int visitId){
+         boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray advisors = new JSONArray();
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            ResultSet rs;
+            try{
+                String preparedStatement = "SELECT * " +
+                "FROM ece356.advises WHERE doctor_id=? AND visit_id=?";
+                
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, doctorId);
+                ps.setInt(2, visitId);  
+                
+                
+                rs = ps.executeQuery();
+                advisors = convertToJson(rs);
+                
+                
+              return advisors;
+            }catch(SQLException e){
+                e.printStackTrace();
+                return advisors;
+            }
+            
+        }
+        
+        return advisors;
+    }
+    
+    public static boolean removeAdvisorsOf(int doctorId, int visitId){
+         boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        
+        if(status){
+            PreparedStatement ps;
+            Statement s;
+            try{
+                String preparedStatement = "DELETE " +
+                "FROM ece356.advises WHERE doctor_id=? AND visit_id=?";
+                
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, doctorId);
+                ps.setInt(2, visitId);  
+                
+                
+                
+                if(ps.executeUpdate() >= 0){
+                    return true;
+                }
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return false;
+            }
+            
+        }
+        
+        return false;
+    }
+    
+        public static boolean addAdvisorsFor(int doctorId, int visitId){
+         boolean status = true;
+        if(connection == null){
+            status = openConnection();
+        }
+        
+        JSONArray revisions;
+        
+        if(status){
+            PreparedStatement ps;
+            ResultSet rs;
+            Statement s;
+            try{
+                String preparedStatement = "SELECT last_updated " +
+                "FROM ece356.visit WHERE visit_id=?";
+                
+                ps = connection.prepareStatement(preparedStatement);
+                ps.setInt(1, visitId);  
+                
+                rs = ps.executeQuery();
+                
+                revisions = convertToJson(rs);
+                
+                for(int i = 0; i < revisions.size(); i++){
+                    preparedStatement = "INSERT INTO ece356.advises" +
+                        " VALUES (?, ?, ?)";
+                
+                    ps = connection.prepareStatement(preparedStatement);
+                    ps.setInt(1, doctorId);
+                    ps.setInt(2, visitId);
+                    String lastUpdated = ((JSONObject)revisions.get(i)).get("last_updated").toString();
+                    ps.setTimestamp(3, java.sql.Timestamp.valueOf(lastUpdated));
+                    ps.executeUpdate();
+                }
+                
+            }catch(SQLException e){
+                e.printStackTrace();
+                return false;
+            }
+            
+        }
+        
+        return false;
+    }
 }
