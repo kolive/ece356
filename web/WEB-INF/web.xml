@@ -60,6 +60,10 @@
         <servlet-name>UpdateVisitationServlet</servlet-name>
         <servlet-class>servlets.UpdateVisitationServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AdvisorsListServlet</servlet-name>
+        <servlet-class>servlets.AdvisorsListServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>UserLoginServlet</servlet-name>
         <url-pattern>/UserLoginServlet</url-pattern>
@@ -119,6 +123,10 @@
     <servlet-mapping>
         <servlet-name>UpdateVisitationServlet</servlet-name>
         <url-pattern>/UpdateVisitationServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdvisorsListServlet</servlet-name>
+        <url-pattern>/AdvisorsListServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

@@ -199,7 +199,8 @@ public class DoctorViewModel {
                 "<th data-hide='all'>Prescriptions Prescribed</th>" +
                 "<th data-hide='all'>Comments</th>" +
                 "<th data-hide='all'> Edit Visit Record </th>" +
-                "<th data-hide='all'> View Record Audit Trail</th>" +
+                "<th data-hide='all'> View Record Audit Trail</th>"+
+                "<th data-hide='all'> View/Edit Advisors </th>"+
                 "</tr></thead>"; 
         
         JSONArray rows = buildPatientVisitsRows(patientId, isPatient, new JSONObject());
@@ -272,6 +273,11 @@ public class DoctorViewModel {
                                 );
                 formattedRow += String.format("<td><a href='#' onclick=\"javascript:window.open('UpdateVisitationServlet?vid=%s&pid=%s', '_blank', 'scrollbars=1, resizable=1, height=550, width=700', title='Edit Visitation Record')\"> Edit Visit Record </a></td>", visitId, patientId);
                 formattedRow += String.format("<td><a href='#' onclick=\"javascript:window.open('VisitHistoryServlet?vid=%s', '_blank', 'scrollbars=1, resizable=1, height=550, width=700', title='View Record Audit Trail')\"> View Record Audit Trail </a></td>", visitId);
+                if(isPatient){
+                    formattedRow += String.format("<td><a href='#' onclick=\"javascript:window.open('AdvisorsListServlet?vid=%s&eid=%s', '_blank', 'scrollbars=1, resizable=1, height=550, width=700', title='View/Edit Advisors')\"> View/Edit Advisors </a></td>", visitId, getDoctorId());
+                }else{
+                    formattedRow += "<td> You are Not Primary Physician </td>";
+                }
                 formattedRow += "</tr>";
                 
                 formattedRows.add(formattedRow);

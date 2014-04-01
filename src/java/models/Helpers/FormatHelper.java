@@ -285,4 +285,36 @@ public class FormatHelper {
         
         return formatted;
     }
+    
+    
+     public static String generateAdvisorsTable(int visitId){
+        //get the most up-to-date records for all the visits of a particular patient
+        JSONArray advisors = Database.getAdivsorsOf(visitId);
+        
+        //init table, as per FooTable plugin with expandable rows
+        //details about a visit are hidden unless the row is expanded
+        String formattedList = "<table id='advisors' class='footable table-bordered toggle-circle toggle-small'>" 
+                +"<thead><tr><th data-toggle='true'> Advisor ID </th> <th> Advisor Name </th> <th> Remove Advisor </th>"
+                +"</tr></thead>";
+        String tmp;
+        for(int i = 0; i < advisors.size(); i++){
+            JSONObject a = (JSONObject)advisors.get(i);
+           
+            
+            //formats the non-details data
+            tmp = "<tr><td>%s</td> <td> %s %s </td>";
+            formattedList += String.format(tmp, 
+                    a.get("doctor_id"),
+                    a.get("fname"),
+                    a.get("lname"));
+            formattedList += String.format("<td><a href='#' onclick='javascript:removeAdvisor(%s, %s)'> Remove Advisor </a></td></tr>",
+                    visitId,
+                    a.get("doctor_id"));
+            
+           
+        }
+        formattedList += "</table>";
+        formattedList +=  String.format("<input type='text' id='advisorid'><a href='#' onclick='javascript:addAdvisor(%s)'> Add Advisor </a>", visitId);
+        return formattedList;        
+    }
 }

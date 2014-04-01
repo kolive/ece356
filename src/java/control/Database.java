@@ -2468,7 +2468,7 @@ public class Database {
     }
     
     
-    public static JSONArray getAdivsorsOf(int doctorId, int visitId){
+    public static JSONArray getAdivsorsOf(int visitId){
          boolean status = true;
         if(connection == null){
             status = openConnection();
@@ -2482,11 +2482,10 @@ public class Database {
             ResultSet rs;
             try{
                 String preparedStatement = "SELECT * " +
-                "FROM ece356.advises WHERE doctor_id=? AND visit_id=?";
+                "FROM ece356.advises INNER JOIN ece356.employee ON ece356.advises.doctor_id = ece356.employee.eid WHERE visit_id=?";
                 
                 ps = connection.prepareStatement(preparedStatement);
-                ps.setInt(1, doctorId);
-                ps.setInt(2, visitId);  
+                ps.setInt(1, visitId);  
                 
                 
                 rs = ps.executeQuery();
@@ -2504,7 +2503,7 @@ public class Database {
         return advisors;
     }
     
-    public static boolean removeAdvisorsOf(int doctorId, int visitId){
+    public static boolean removeAdvisor(int doctorId, int visitId){
          boolean status = true;
         if(connection == null){
             status = openConnection();
@@ -2538,7 +2537,7 @@ public class Database {
         return false;
     }
     
-        public static boolean addAdvisorsFor(int doctorId, int visitId){
+        public static boolean addAdvisorFor(int doctorId, int visitId){
          boolean status = true;
         if(connection == null){
             status = openConnection();
