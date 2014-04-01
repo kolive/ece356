@@ -28,6 +28,10 @@
                 $.ajaxSetup({ cache: false });
                 $('table').footable();
                 $('.userrow').on('click.getData', clickHandler);
+                $('.prow').click(function(){
+                    $('.prow').removeClass('dselected');
+                    $(this).addClass('dselected');
+                });
             });
             var clickHandler = function(){
                 $('.userrow').off('click.getData', clickHandler);
@@ -48,6 +52,10 @@
                 }).done(function(msg){
                     $('.info').html(msg);
                     $('.dynamicTable').footable();
+                    $('.prow').click(function(){
+                        $('.prow').removeClass('dselected');
+                    $(this).addClass('dselected');
+                    });
                     $.ajax({
                             type : 'POST',
                             url : '/ece356/StaffServlet',

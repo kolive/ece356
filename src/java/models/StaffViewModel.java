@@ -196,7 +196,7 @@ public class StaffViewModel {
             
             String formattedRow = "";
             
-            formattedRow += "<tr>";
+            formattedRow += "<tr class='prow'>";
             
             formattedRow += String.format("<td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
                                 p.get("pid"),

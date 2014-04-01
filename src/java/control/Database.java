@@ -1067,7 +1067,6 @@ public class Database {
                     " ) mp on p.last_updated = mp.last_updated and p.visit_id = mp.visit_id;";
                 }
                 ps = connection.prepareStatement(preparedStatement);
-                System.out.println(ps);
                 visits = getVisits(patientId);
                 if(!visits.isEmpty()){
                     for(int i = 0; i < visits.size(); i++){
@@ -1127,7 +1126,6 @@ public class Database {
                     ? "%" + filter + "%"
                     : "%"
                 );
-                System.out.println(ps);
                 
                 rs = ps.executeQuery();
                 prescriptions = convertToJson(rs);
@@ -1303,7 +1301,6 @@ public class Database {
                     ? "%" + filter + "%"
                     : "%"
                 );
-                System.out.println(ps);
                 rs = ps.executeQuery();
                 comments = convertToJson(rs);
             }
