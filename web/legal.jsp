@@ -44,6 +44,7 @@
                     }).done(function(msg) {
                         $('.patlist tbody').html(msg).trigger('footable_initialize');
                         $('.vlist tbody').html('');
+                        $('.audit-trail').html('<h1> Visit Audit Trail for Visit ID:  </h1>');
                         $('.patientrow').click(pClickHandler);
                     });
                 };
@@ -62,6 +63,7 @@
                             }
                     }).done(function(msg){
                         $('.vlist tbody').html(msg).trigger('footable_initialize');
+                        $('.audit-trail').html('<h1> Visit Audit Trail for Visit ID:  </h1>');
                         $('.visitrow').click(vClickHandler);
                     });
                 
@@ -121,7 +123,7 @@
                 </div>
                 <div class="vhalf">
                     <div class="audit-trail">
-                        <h2> Audit Trail </h2>
+                        <h1> Visit Audit Trail for Visit ID:  </h1>
                     </div>
                 </div>
             </div> 
