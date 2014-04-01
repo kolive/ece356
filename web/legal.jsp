@@ -15,6 +15,7 @@
         <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>
         <script src="js/footable.js" type="text/javascript"></script>
         <script src="js/footable.paginate.js" type="text/javascript"></script>
+        <script src="js/footable.filter.js" type="text/javascript"></script>
         <link href="css/footable.core.css" rel="stylesheet" type="text/css" />
         <link href="css/footable.metro.css" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" type="text/css" href="css/style.css">
