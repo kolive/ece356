@@ -75,7 +75,6 @@
                             url: '/ece356/VisitHistoryServlet',
                             data: { vid: $(this).find('.vid').text() }
                     }).done(function(msg){
-                        console.log(msg);
                         $('.audit-trail').html(msg);
                     });
                 };
