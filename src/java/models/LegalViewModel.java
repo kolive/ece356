@@ -84,8 +84,8 @@ public class LegalViewModel {
             tmp = "<tr class='patientrow'><td> %s </td> <td> %s </td> <td> %s </td></tr>";
             formattedList += String.format(tmp, 
                     patient.get("pid"), 
-                    "NOT VISIBLE",
-                    "NOT VISIBLE");
+                    patient.get("fname"),
+                    patient.get("lname"));
             
         }
         if(!onlyRows){
