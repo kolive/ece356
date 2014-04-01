@@ -314,7 +314,7 @@ public class FormatHelper {
            
         }
         formattedList += "</table>";
-        formattedList +=  String.format("<input type='text' id='advisorid'><a href='#' onclick='javascript:addAdvisor(%s)'> Add Advisor </a>", visitId);
+        formattedList +=  String.format("<p><input type='text' id='advisorid'><a href='#' onclick='javascript:addAdvisor(%s)'> Add Advisor </a></br></br></p>", visitId);
         return formattedList;        
     }
 }
