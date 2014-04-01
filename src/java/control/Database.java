@@ -887,7 +887,12 @@ public class Database {
                         : "23:59:59"
                 );
                 
-                ps.setInt(10, doctorId);
+                if(filters.get("eid") != null && !filters.get("eid").toString().trim().equals("")){
+                    ps.setString(10, filters.get("eid").toString().trim());
+                }
+                else{
+                    ps.setInt(10, doctorId);
+                }                
                 
                 rs = ps.executeQuery();
                
