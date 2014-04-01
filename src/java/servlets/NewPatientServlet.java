@@ -72,6 +72,9 @@ public class NewPatientServlet extends HttpServlet {
             tmp = "SIN : <input type='text' name='sin'> </br>";
             updateForm += tmp;
             
+            tmp = "Healthcard Number: <input type='text' name='healthcard_number'> </br>";
+            updateForm += tmp;
+            
             tmp = "Password : <input type='text' name='password'> </br>";
             updateForm += tmp;
 
@@ -154,6 +157,7 @@ public class NewPatientServlet extends HttpServlet {
             params.put("fname", request.getParameter("fname"));
             params.put("lname", request.getParameter("lname"));
             params.put("sin", request.getParameter("sin"));
+            params.put("healthcard_number", request.getParameter("healthcard_number"));
             params.put("password", request.getParameter("password"));
             params.put("street_number", request.getParameter("street_number"));
             params.put("street", request.getParameter("street"));

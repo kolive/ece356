@@ -2122,7 +2122,7 @@ public class Database {
             ResultSet rs;
             try{
 
-                String preparedStatement = "INSERT INTO `ece356`.`patient` (`password`, `fname`, `lname`, `is_enabled`, `street_number`, `street`, `city`, `post_code`, `sin`, `num_visits`, `current_health`) VALUES "
+                String preparedStatement = "INSERT INTO `ece356`.`patient` (`password`, `fname`, `lname`, `is_enabled`, `street_number`, `street`, `city`, `post_code`, `sin`, `healthcard_number`, `num_visits`, `current_health`) VALUES "
                         +"('"+ params.get("password") +"', '" +
                         params.get("fname") + "', '" +
                         params.get("lname") +"', '1', '" +
@@ -2130,14 +2130,15 @@ public class Database {
                         params.get("street") +"', '"+
                         params.get("city") +"', '"+
                         params.get("post_code") +"', '"+
-                        params.get("sin") +"', '0', 'In Good Health');";
+                        params.get("sin") +"', '"+
+                        params.get("healthcard_number") + "', '0', 'In Good Health');";
                 ps = connection.prepareStatement(preparedStatement);
                 
                 if(ps.executeUpdate() == 1 ){
                     //success
                     preparedStatement = "SELECT pid FROM `ece356`.`patient` where `password`=\'"+params.get("password")+"\' AND `fname`=\'"+params.get("fname")+"\' AND `lname`=\'"+params.get("lname")
                             +"\' AND `street_number`=\'"+params.get("street_number")+"\' AND `street`=\'"+params.get("street")+"\' AND `city`=\'"+params.get("city")+"\' AND `post_code`=\'"+params.get("post_code")
-                                    +"\' AND `sin`=\'"+params.get("sin")+"\';";
+                                    +"\' AND `sin`=\'"+params.get("sin")+"\' AND `healthcard_number`=\'"+params.get("healthcard_number")+"\';";
                     ps = connection.prepareStatement(preparedStatement);
                     rs = ps.executeQuery();
                     JSONObject value = convertRowToJson(rs);
