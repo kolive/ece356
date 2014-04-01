@@ -131,6 +131,7 @@ public class DoctorViewModel {
             patient.put("fname", "");
             patient.put("lname", "");
             patient.put("sin", "");
+            patient.put("healthcard_number", "");
             patient.put("pid", "");
         }
         
